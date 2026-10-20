@@ -28,8 +28,9 @@ jobs:
           set -euo pipefail
           mkdir -p dist
           for name in Folha.apk Folha.zip SHA256SUMS.txt; do
-            gh api -H 'Accept: application/vnd.github.raw+json' "repos/$REPO/contents/dist/$name?ref=$REF" > "dist/$name"
+            gh api "repos/$REPO/contents/dist/$name?ref=$REF" --jq '.content' | base64 --decode > "dist/$name"
           done
+          sed -i 's/\r$//' dist/SHA256SUMS.txt
           (cd dist && sha256sum --check SHA256SUMS.txt)
       - name: Anexar arquivos à versão
         shell: bash
