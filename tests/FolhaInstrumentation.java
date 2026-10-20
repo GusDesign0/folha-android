@@ -69,8 +69,33 @@ public class FolhaInstrumentation extends Instrumentation {
             try(OutputStream out=new FileOutputStream(annotated)){PdfFiles.export(imported,activity.store.pdf(imported),out);}check(PdfFiles.count(annotated)==1,"Annotated imported PDF exports");results.add("PDF import, annotation and re-export");
             qualityArtifacts();results.add("Smooth ink and PDF-path example generated");
             featureChecks();
+            updaterChecks();
             ui(()->{activity.leaveEditor();activity.home();});report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);
         }catch(Throwable e){report.putString("stream","\nFAIL: "+e+"\n"+android.util.Log.getStackTraceString(e));finish(0,report);}
+    }
+    void updaterChecks() throws Exception {
+        check(UpdateChecker.compare("0.10.0","0.9.9")>0&&UpdateChecker.compare("1.0.0","0.99.9")>0,"Semantic version ordering");
+        String digest="sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+        org.json.JSONObject release=new org.json.JSONObject().put("tag_name","v9.0.0").put("assets",new org.json.JSONArray().put(new org.json.JSONObject().put("name","Folha.apk").put("state","uploaded").put("size",3).put("digest",digest).put("browser_download_url",UpdateChecker.DOWNLOADS+"v9.0.0/Folha.apk")));
+        check(UpdateChecker.parse(release,"0.4.0").newer,"Published APK with digest is offered");
+        release.getJSONArray("assets").getJSONObject(0).remove("digest");boolean rejected=false;try{UpdateChecker.parse(release,"0.4.0");}catch(IOException expected){rejected=true;}check(rejected,"Unfinished release without digest is rejected");
+        release.getJSONArray("assets").getJSONObject(0).put("digest",digest).put("browser_download_url","https://example.com/Folha.apk");rejected=false;try{UpdateChecker.parse(release,"0.4.0");}catch(IOException expected){rejected=true;}check(rejected,"APK outside the repository is rejected");
+        File sample=new File(activity.getCacheDir(),"update-copy-test");byte[] abc="abc".getBytes("UTF-8");final int[] progress={0};
+        UpdateChecker.copyVerified(new ByteArrayInputStream(abc),sample,3,digest,new UpdateChecker.Session(),(n,total)->progress[0]++);check(sample.length()==3&&progress[0]>0,"Verified streaming download reports progress");
+        rejected=false;try{UpdateChecker.copyVerified(new ByteArrayInputStream(abc),sample,3,"sha256:"+String.join("",Collections.nCopies(64,"0")),new UpdateChecker.Session(),(n,total)->{});}catch(IOException expected){rejected=true;}check(rejected,"Corrupted download is rejected");
+        rejected=false;try{UpdateChecker.copyVerified(new ByteArrayInputStream(abc),sample,4,digest,new UpdateChecker.Session(),(n,total)->{});}catch(IOException expected){rejected=true;}check(rejected,"Truncated download is rejected");
+        UpdateChecker.Session canceled=new UpdateChecker.Session();canceled.cancel();rejected=false;try{UpdateChecker.copyVerified(new ByteArrayInputStream(abc),sample,3,digest,canceled,(n,total)->{});}catch(InterruptedIOException expected){rejected=true;}check(rejected,"Cancellation stops download");sample.delete();
+        android.content.pm.Signature a=new android.content.pm.Signature(new byte[]{1,2}),b=new android.content.pm.Signature(new byte[]{3,4});
+        check(UpdateChecker.sameSigners(new android.content.pm.Signature[]{a},new android.content.pm.Signature[]{a})&&!UpdateChecker.sameSigners(new android.content.pm.Signature[]{a},new android.content.pm.Signature[]{b}),"Mismatched signing certificates are rejected");
+        UpdateChecker.Result latest=UpdateChecker.check("0.0.0");boolean shouldDownload=UpdateChecker.compare(latest.version,activity.appVersion())>0;boolean downloaded=false;
+        try{UpdateChecker.download(activity,latest,new UpdateChecker.Session(),(n,total)->{});downloaded=true;}catch(IOException e){if(shouldDownload)throw e;check(e.getMessage().contains("atualização válida"),"Old APK reaches native version validation after successful network/hash verification");}
+        check(downloaded==shouldDownload,"Real GitHub APK is accepted only when newer than installed");check(!new File(activity.getFilesDir(),"updates/Folha.part").exists(),"Partial APK cleaned after success or failure");
+        File ready=UpdateProvider.apk(activity);ready.getParentFile().mkdirs();try(InputStream in=new FileInputStream(activity.getApplicationInfo().sourceDir);OutputStream out=new FileOutputStream(ready)){Documents.copy(in,out);}
+        try(InputStream in=activity.getContentResolver().openInputStream(UpdateProvider.URI)){check(in.read()=='P'&&in.read()=='K',"Private APK URI can be read by installer");}
+        rejected=false;try{activity.getContentResolver().openFileDescriptor(UpdateProvider.URI,"w");}catch(SecurityException expected){rejected=true;}check(rejected,"Update provider is read-only");
+        rejected=false;try{UpdateProvider.requireUri(android.net.Uri.parse("content://br.com.folha.notes.updates/../document.json"));}catch(IllegalArgumentException expected){rejected=true;}check(rejected,"Update provider exposes only the single APK");
+        Intent install=AppUpdater.installIntent();check(UpdateProvider.URI.equals(install.getData())&&(install.getFlags()&Intent.FLAG_GRANT_READ_URI_PERMISSION)!=0&&install.getClipData()!=null,"Installer receives content URI and read grant");ready.delete();
+        results.add("Updater: real GitHub APK download and checksum, version/signature checks, cancel, truncated/corrupted downloads, read-only content URI");
     }
     void qualityArtifacts() throws Exception {
         Documents.Doc demo=new Documents.Doc();demo.name="Escrita em caminhos";demo.paper="dots";

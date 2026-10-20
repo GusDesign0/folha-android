@@ -10,7 +10,7 @@ A interface de escrita usa Canvas e APIs nativas do Android. PdfBox-Android é c
 - Importação real do fluxo de imagem, normalização, texto/imagem/traço no JSON e backup editável com restauração em cópia.
 - Rejeição de caminhos maliciosos em ZIP e preservação dos traços quando metadados e conteúdo são salvos em sequência.
 - Exportação de PDF misto e preservação do texto e links originais em três páginas: rotação 0, rotação 90 e rotação 270 com CropBox deslocado.
-- Consulta manual das versões publicadas no GitHub.
+- Atualizador: consulta e download reais do GitHub, tamanho e SHA-256, rejeição de versão antiga, assinatura diferente, arquivo truncado/corrompido e cancelamento. URI privada do APK aceita somente leitura e não expõe os cadernos.
 - Cena com 250 traços de 40 pontos cada: CPU de desenho p50 = 1,882 ms; p95 = 2,491 ms em 100 amostras no emulador. Este número não mede latência da S Pen física, taxa de quadros ou garantia de desempenho em outro aparelho.
 
 A resposta física da S Pen não foi testada.
@@ -35,3 +35,7 @@ A resposta física da S Pen não foi testada.
 - Imagens importadas são normalizadas até 2048 px; não substituem um fluxo de fotografia em resolução original.
 - PDFs com senha não são suportados.
 - Conta, sincronização, Windows e OCR são etapas futuras.
+
+## Atualizador 0.4.0
+
+A consulta, o download em blocos de 32 KB, o hash e a leitura do pacote usam uma fila exclusiva com prioridade de segundo plano. O progresso visual é limitado a cerca de 7 atualizações por segundo. Não há serviço em segundo plano nem verificações periódicas. Requer confirmação de instalação pelo Android e, na primeira vez, permissão para instalar apps pelo Folha. A versão 0.3.0 precisa receber esta atualização pelo APK; as próximas podem usar o botão. O aparelho pode impor políticas adicionais de instalação.

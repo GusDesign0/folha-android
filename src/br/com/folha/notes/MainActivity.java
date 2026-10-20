@@ -24,6 +24,7 @@ public class MainActivity extends Activity {
     final Handler main=new Handler(Looper.getMainLooper());
     final ArrayList<Documents.Doc> library=new ArrayList<>();
     Documents store;
+    AppUpdater updater;
     Documents.Doc current;
     Documents.Doc exportSnapshot;
     LinearLayout root;
@@ -41,7 +42,7 @@ public class MainActivity extends Activity {
     final Runnable delayedSave=()->saveCurrent();
 
     @Override public void onCreate(Bundle state) {
-        super.onCreate(state);store=new Documents(this);
+        super.onCreate(state);store=new Documents(this);updater=new AppUpdater(this);
         PdfFiles.init(this);
         SharedPreferences prefs=getSharedPreferences("pens",0);width=prefs.getFloat("width",2.2f);pen=prefs.getString("pen","fountain");smoothing=prefs.getFloat("smoothing",1);sensitivity=prefs.getFloat("sensitivity",1);partialEraser=prefs.getBoolean("partial",true);
         if(Build.VERSION.SDK_INT>=33)getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,()->navigateBack());
@@ -56,7 +57,7 @@ public class MainActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state){saveCurrent();if(current!=null)state.putString("document",current.id);super.onSaveInstanceState(state);}
     @Override protected void onPause(){super.onPause();if(canvas!=null)canvas.finishInput();saveCurrent();}
     @Override public void onConfigurationChanged(android.content.res.Configuration config){super.onConfigurationChanged(config);if(current==null&&!loading)home();}
-    @Override protected void onDestroy(){main.removeCallbacks(delayedSave);if(canvas!=null)canvas.dispose();worker.shutdown();renderWorker.shutdown();fileWorker.shutdown();super.onDestroy();}
+    @Override protected void onDestroy(){main.removeCallbacks(delayedSave);if(updater!=null)updater.close();if(canvas!=null)canvas.dispose();worker.shutdown();renderWorker.shutdown();fileWorker.shutdown();super.onDestroy();}
     void navigateBack(){if(loading){generation++;loading=false;home();}else if(current!=null){leaveEditor();home();}else finish();}
     @Override public void onBackPressed(){navigateBack();}
     int dp(float v){return Math.round(v*getResources().getDisplayMetrics().density);}
@@ -78,7 +79,7 @@ public class MainActivity extends Activity {
         LinearLayout header=row();header.setPadding(dp(28),dp(22),dp(28),dp(18));
         Icon logo=new Icon("leaf");logo.setBackground(shape(GREEN,13));header.addView(logo,new LinearLayout.LayoutParams(dp(48),dp(48)));gap(header,12);
         LinearLayout brand=column();brand.addView(text("folha",28,INK,true));brand.addView(text("Espaço para pensar.",12,MUTED,false));header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
-        header.addView(icon("update","Verificar atualizações",()->checkUpdates()));TextView version=text("PRÉVIA  0.3",11,MUTED,true);header.addView(version);root.addView(header);line(root);
+        header.addView(button("Atualizar app",false,()->checkUpdates()));TextView version=text("  v"+appVersion(),11,MUTED,true);header.addView(version);root.addView(header);line(root);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);LinearLayout body=column();body.setPadding(dp(28),dp(28),dp(28),dp(28));scroll.addView(body);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         body.addView(text("Sua biblioteca",30,INK,true));gap(body,6);body.addView(text("Ideias à mão. Tudo no seu tablet.",15,MUTED,false));gap(body,24);
         HorizontalScrollView actionScroll=new HorizontalScrollView(this);actionScroll.setHorizontalScrollBarEnabled(false);LinearLayout actions=row();actions.addView(button("+ Novo caderno",true,()->createNotebook()));gap(actions,10);actions.addView(button("Importar PDF",false,()->importPdf()));gap(actions,10);actions.addView(button("Restaurar backup",false,()->restoreBackup()));actionScroll.addView(actions);body.addView(actionScroll);gap(body,24);
@@ -212,8 +213,8 @@ public class MainActivity extends Activity {
     void backup(){canvas.finishInput();saveCurrent();exportSnapshot=current.copy();Intent i=new Intent(Intent.ACTION_CREATE_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);i.setType("application/octet-stream");i.putExtra(Intent.EXTRA_TITLE,current.name.replaceAll("[\\\\/:*?\"<>|]","_")+".folha");startActivityForResult(i,103);}
     void restoreBackup(){Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);i.setType("*/*");startActivityForResult(i,104);}
     void receiveBackup(Uri uri){loading=true;showLoading("Restaurando caderno…");fileWorker.execute(()->{try(InputStream in=getContentResolver().openInputStream(uri)){if(in==null)throw new IOException("Arquivo indisponível");Documents.Doc doc=Backups.restore(store,getCacheDir(),in);main.post(()->{if(isDestroyed())return;loading=false;library.add(0,doc);open(doc);toast("Backup restaurado com anotações editáveis.");});}catch(Exception|OutOfMemoryError e){main.post(()->{loading=false;home();error("Não foi possível restaurar. Escolha um backup .folha válido.",e);});}});}
-    void checkUpdates(){toast("Consultando atualizações…");final String version=appVersion();fileWorker.execute(()->{try{UpdateChecker.Result r=UpdateChecker.check(version);main.post(()->{if(isDestroyed())return;new AlertDialog.Builder(this).setTitle(r.newer?"Folha "+r.version+" disponível":"Você está atualizado").setMessage(r.newer?"Baixe a nova versão e instale por cima da atual para manter seus cadernos.":"Sua versão: "+version+". Última publicada: "+r.version+".").setPositiveButton(r.newer?"Baixar APK":"Ver versões",(d,w)->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(r.url)))).setNegativeButton("Agora não",null).show();});}catch(Exception e){main.post(()->error("Não foi possível consultar o GitHub. Verifique sua conexão e tente novamente.",e));}});}
-    String appVersion(){try{return getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(Exception e){return "0.3.0";}}
+    void checkUpdates(){updater.check();}
+    String appVersion(){try{return getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(Exception e){return "0.4.0";}}
     void changePage(int delta){int next=page+delta;if(next<0||next>=current.count)return;canvas.finishInput();saveCurrent();canvas.dispose();generation++;page=next;current.lastPage=page;editor();saveCurrent();}
     void jump(){EditText input=new EditText(this);input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);input.setHint("1 a "+current.count);new AlertDialog.Builder(this).setTitle("Ir para a página").setView(input).setNegativeButton("Cancelar",null).setPositiveButton("Ir",(d,w)->{try{int n=Integer.parseInt(input.getText().toString());if(n>=1&&n<=current.count)changePage(n-1-page);else toast("Informe uma página entre 1 e "+current.count);}catch(Exception e){toast("Informe o número da página.");}}).show();}
     void scheduleSave(){if(saveLabel!=null)saveLabel.setText("Salvando…");main.removeCallbacks(delayedSave);main.postDelayed(delayedSave,450);}
@@ -226,7 +227,7 @@ public class MainActivity extends Activity {
             store.write(snapshot);final String revision=snapshot.revision;main.post(()->{if(current!=null&&current.id.equals(id)&&current.revision.equals(revision)&&saveLabel!=null)saveLabel.setText("Salvo no tablet");});
         }catch(Exception|OutOfMemoryError e){main.post(()->{if(current!=null&&current.id.equals(id)&&saveLabel!=null)saveLabel.setText("Falha ao salvar");error("Não foi possível salvar. Libere espaço no tablet e tente novamente.",e);});}});
     }
-    void options(){String[] choices={"Nome e pasta",touchInk?"Desativar escrita com o dedo":"Ativar escrita com o dedo","Backup editável (.folha)","Verificar atualizações","Como usar","Sobre esta versão"};
+    void options(){String[] choices={"Nome e pasta",touchInk?"Desativar escrita com o dedo":"Ativar escrita com o dedo","Backup editável (.folha)","Atualizar app","Como usar","Sobre esta versão"};
         new AlertDialog.Builder(this).setTitle("Seu caderno").setItems(choices,(d,w)->{if(w==0)editDetails(current);if(w==1){touchInk=!touchInk;canvas.touchInk=touchInk;toast(touchInk?"Escrita com o dedo ativada":"Somente a S Pen escreve");}if(w==2)backup();if(w==3)checkUpdates();if(w==4)help();if(w==5)new AlertDialog.Builder(this).setTitle("Folha · versão "+appVersion()).setMessage("App independente de cadernos e anotações.\n\nUse o backup .folha para guardar anotações editáveis, textos, imagens e o PDF original. O PDF exportado preserva o conteúdo original e acrescenta a escrita como caminhos.\n\nOs arquivos ficam neste tablet. Conta, sincronização e aplicativo para Windows estão planejados. OCR e reconhecimento de escrita ainda não estão incluídos.\n\nPDF: PdfBox-Android / Apache License 2.0. Criptografia: Bouncy Castle / licença MIT.").setPositiveButton("Entendi",null).show();}).show();
     }
     void help(){new AlertDialog.Builder(this).setTitle("Feito para escrever").setMessage("• A S Pen escreve. Dedos movem e ampliam.\n\n• Segure o ícone da caneta para escolher esferográfica, tinteiro ou pincel e ajustar a pressão e a suavização.\n\n• Segure a borracha para alternar entre apagar uma parte ou o traço inteiro. O botão lateral da S Pen também apaga.\n\n• Com o laço, contorne o que deseja selecionar. Arraste a seleção para mover e a bolinha do canto para redimensionar. As cores recolorem a seleção.\n\n• Use o ícone de folhas sobrepostas para copiar, colar, duplicar, apagar ou editar uma caixa de texto selecionada. As cópias podem ser coladas em outra página do mesmo caderno.\n\n• Use T para inserir texto e o ícone de paisagem para inserir imagem.\n\n• Exporte um PDF pelo ícone no alto. Para preservar a edição e transferir o caderno, use Backup editável nas opções. Restaure pela biblioteca.").setPositiveButton("Vamos lá",null).show();}
@@ -234,7 +235,7 @@ public class MainActivity extends Activity {
         if(current==null)return;canvas.finishInput();saveCurrent();
         try{exportSnapshot=current.copy();Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType("application/pdf");intent.putExtra(Intent.EXTRA_TITLE,current.name.replaceAll("[\\\\/:*?\"<>|]","_")+" - anotado.pdf");startActivityForResult(intent,101);}catch(Exception e){error("Não foi possível iniciar a exportação.",e);}
     }
-    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(result!=RESULT_OK||data==null||data.getData()==null){if(request==101||request==103)exportSnapshot=null;return;}Uri uri=data.getData();
+    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==AppUpdater.INSTALL_PERMISSION){updater.permissionResult();return;}if(result!=RESULT_OK||data==null||data.getData()==null){if(request==101||request==103)exportSnapshot=null;return;}Uri uri=data.getData();
         if(request==102){receiveImage(uri);return;}if(request==104){receiveBackup(uri);return;}
         if(request==103&&exportSnapshot!=null){final Documents.Doc snapshot=exportSnapshot;exportSnapshot=null;toast("Criando backup editável…");fileWorker.execute(()->{try(OutputStream out=getContentResolver().openOutputStream(uri,"wt")){if(out==null)throw new IOException("Destino indisponível");Backups.export(snapshot,store.dir(snapshot.id),out);main.post(()->toast("Backup salvo. Guarde este arquivo para restaurar em outro aparelho."));}catch(Exception|OutOfMemoryError e){main.post(()->error("Não foi possível criar o backup.",e));}});return;}
         if(request==100){

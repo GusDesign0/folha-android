@@ -8,9 +8,11 @@ Cadernos e anotações em PDF, com foco em tablets Samsung e S Pen.
 
 No tablet, abra o APK pelo **Meus Arquivos** e escolha **Instalar** ou **Atualizar**. Instale por cima da versão anterior, sem desinstalar, para manter os cadernos.
 
+A partir da 0.4.0, use **Atualizar app** para as próximas versões. Na primeira vez, o Android poderá pedir que você permita instalar apps pelo Folha. Volte ao app após permitir e confirme a instalação. A confirmação do Android continua necessária. Não há serviço ou consulta periódica: só verifica quando você tocar no botão.
+
 Requer Android 10 ou superior. Alvo Android 16. APK independente, fora da Play Store.
 
-## Versão 0.3.0
+## Versão 0.4.0
 
 - **Escrita:** esferográfica, tinteiro, pincel e marca-texto, com cores, espessura, pressão e suavização ajustáveis.
 - **Borracha:** apaga uma parte ou o traço inteiro.
@@ -19,7 +21,7 @@ Requer Android 10 ou superior. Alvo Android 16. APK independente, fora da Play S
 - **Cadernos:** páginas pautadas, quadriculadas, pontilhadas ou em branco, nomes e pastas.
 - **PDF:** leitura, anotação e exportação que preserva o documento original, incluindo texto selecionável e links. Escrita e marca-texto são acrescentados como caminhos.
 - **Backup editável .folha:** guarda pontos, textos, imagens e PDF original; restaura em outro aparelho e cria uma cópia quando o caderno já existe.
-- **Atualizações:** consulta manual pelo próprio app, com download da versão mais recente no GitHub.
+- **Atualizações:** botão **Atualizar app** na biblioteca ou nas opções do caderno. Consulta o GitHub e baixa o APK com progresso e cancelamento. Confere tamanho, SHA-256, versão, pacote e assinatura antes de abrir o instalador do Android.
 - **Offline:** criação, escrita, organização e leitura funcionam sem rede.
 
 Para escolher o tipo da caneta, segure seu ícone. Segure a borracha para trocar o modo. Com o laço, contorne os objetos e arraste a seleção ou a bolinha do canto. O ícone de folhas sobrepostas abre copiar/colar e edição de texto.
