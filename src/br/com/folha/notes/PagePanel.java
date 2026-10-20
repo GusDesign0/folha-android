@@ -19,6 +19,7 @@ final class PagePanel {
     final Set<Integer> failed=new HashSet<>();
     final List<Integer> visible=new ArrayList<>();
     final GridView grid;
+    final LinearLayout body;
     final TextView allFilter,markedFilter;
     final BaseAdapter adapter;
     AlertDialog dialog;
@@ -26,7 +27,7 @@ final class PagePanel {
     volatile boolean closed;
     PagePanel(MainActivity activity){
         a=activity;a.canvas.finishInput();a.saveCurrent();doc=a.current;snapshot=doc.copy();
-        LinearLayout body=a.column();body.setMinimumHeight((int)(a.getResources().getDisplayMetrics().heightPixels*0.88f)-a.dp(128));body.setPadding(a.dp(16),a.dp(4),a.dp(16),a.dp(8));LinearLayout actions=a.row();
+        body=a.column();body.setMinimumHeight((int)(a.getResources().getDisplayMetrics().heightPixels*0.88f)-a.dp(128));body.setPadding(a.dp(16),a.dp(4),a.dp(16),a.dp(8));LinearLayout actions=a.row();
         allFilter=a.button("Todas",true,()->filter(false));markedFilter=a.button("Marcadas",false,()->filter(true));actions.addView(allFilter);a.gap(actions,8);actions.addView(markedFilter);a.gap(actions,8);actions.addView(a.button("Ir ao número",false,()->{dialog.dismiss();a.jump();}));body.addView(actions);
         TextView hint=a.text(doc.pdf?"Toque para abrir · segure para marcar uma página do PDF":"Toque para abrir · segure para marcar, mover, duplicar ou excluir",12,MainActivity.MUTED,false);hint.setPadding(0,a.dp(8),0,a.dp(8));body.addView(hint);
         grid=new GridView(a);grid.setNumColumns(Math.max(2,Math.min(4,(a.getResources().getConfiguration().screenWidthDp-80)/175)));grid.setHorizontalSpacing(a.dp(12));grid.setVerticalSpacing(a.dp(12));grid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
@@ -40,7 +41,8 @@ final class PagePanel {
         TextView empty=a.text("Nenhuma página marcada. Segure uma miniatura para marcar.",15,MainActivity.MUTED,false);empty.setGravity(Gravity.CENTER);body.addView(empty,new LinearLayout.LayoutParams(-1,0,1));grid.setEmptyView(empty);body.addView(grid,new LinearLayout.LayoutParams(-1,0,1));
         dialog=new AlertDialog.Builder(a).setTitle("Páginas · "+doc.count).setView(body).setNegativeButton("Fechar",null).create();dialog.setOnDismissListener(d->close());filter(false);
     }
-    void show(){dialog.show();Window w=dialog.getWindow();if(w!=null)w.setLayout((int)(a.getResources().getDisplayMetrics().widthPixels*0.94f),(int)(a.getResources().getDisplayMetrics().heightPixels*0.88f));}
+    void show(){dialog.show();resize();}
+    void resize(){if(closed)return;int anchor=grid.getFirstVisiblePosition();grid.setNumColumns(Math.max(2,Math.min(4,(a.getResources().getConfiguration().screenWidthDp-80)/175)));body.setMinimumHeight((int)(a.getResources().getDisplayMetrics().heightPixels*0.88f)-a.dp(128));Window w=dialog.getWindow();if(w!=null)w.setLayout((int)(a.getResources().getDisplayMetrics().widthPixels*0.94f),(int)(a.getResources().getDisplayMetrics().heightPixels*0.88f));grid.post(()->{if(!closed)grid.setSelection(anchor);});}
     void filter(boolean marked){markedOnly=marked;allFilter.setBackground(a.shape(marked?0xFFE8EDE7:MainActivity.GREEN,12));allFilter.setTextColor(marked?MainActivity.INK:Color.WHITE);markedFilter.setBackground(a.shape(marked?MainActivity.GREEN:0xFFE8EDE7,12));markedFilter.setTextColor(marked?Color.WHITE:MainActivity.INK);visible.clear();for(int i=0;i<doc.count;i++)if(!marked||doc.bookmarks.contains(i))visible.add(i);adapter.notifyDataSetChanged();}
     void menu(int index){String label=doc.bookmarks.contains(index)?"Remover marcador":"Marcar página";String[] actions=doc.pdf?new String[]{"Abrir página",label}:new String[]{"Abrir página",label,"Mover para…","Duplicar página","Excluir página"};
         new AlertDialog.Builder(a).setTitle("Página "+(index+1)).setItems(actions,(d,which)->{

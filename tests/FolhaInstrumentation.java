@@ -70,6 +70,7 @@ public class FolhaInstrumentation extends Instrumentation {
             qualityArtifacts();results.add("Smooth ink and PDF-path example generated");
             featureChecks();
             newToolsChecks();
+            rotationChecks();
             updaterChecks();
             ui(()->{activity.leaveEditor();activity.home();});report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);
         }catch(Throwable e){report.putString("stream","\nFAIL: "+e+"\n"+android.util.Log.getStackTraceString(e));finish(0,report);}
@@ -101,6 +102,21 @@ public class FolhaInstrumentation extends Instrumentation {
         SystemClock.sleep(250);Bitmap proof=getUiAutomation().takeScreenshot();if(proof!=null){try(OutputStream out=new FileOutputStream(new File(activity.getExternalFilesDir(null),"folha-v05-pages.png"))){proof.compress(Bitmap.CompressFormat.PNG,100,out);}proof.recycle();}
         final PagePanel closing=activity.pagePanel;ui(()->{closing.filter(true);check(closing.adapter.getCount()==restored.bookmarks.size(),"Bookmarks filter shows marked pages only");closing.dialog.dismiss();});ui(()->check(closing.worker.isShutdown()&&activity.pagePanel==null,"Closing thumbnails stops the worker and releases the full notebook snapshot"));
         results.add("Held line/oval, rotated ruler, page move/duplicate/delete, persistent bookmarks, backup and bounded lazy thumbnails (PDF included)");
+    }
+    String shell(String command) throws Exception {try(InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(getUiAutomation().executeShellCommand(command));ByteArrayOutputStream bytes=new ByteArrayOutputStream()){Documents.copy(in,bytes);return bytes.toString("UTF-8").trim();}}
+    void awaitOrientation(int expected) throws Exception {long until=SystemClock.uptimeMillis()+6000;while(SystemClock.uptimeMillis()<until){if(activity.getResources().getConfiguration().orientation==expected&&((activity.root.getWidth()>activity.root.getHeight())==(expected==android.content.res.Configuration.ORIENTATION_LANDSCAPE))){waitForIdleSync();return;}SystemClock.sleep(100);}throw new AssertionError("Physical display rotation did not resize the app");}
+    void rotationChecks() throws Exception {
+        // Rotate only the named development emulator; never alter a physical user's settings.
+        if(!Build.HARDWARE.contains("ranchu")&&!Build.HARDWARE.contains("goldfish")){results.add("Physical rotation test skipped outside emulator");return;}
+        String sensor=shell("settings get system accelerometer_rotation"),rotation=shell("settings get system user_rotation");int original=activity.getWindowManager().getDefaultDisplay().getRotation(),orientation=activity.getResources().getConfiguration().orientation;
+        final Documents.Doc doc=activity.current;final NotebookView view=activity.canvas;final int page=activity.page,before=view.strokes.size();
+        ui(()->{Ink.Stroke test=new Ink.Stroke(0xFFB9564A,3,false);test.points.add(new Ink.Point(70,70,1));test.points.add(new Ink.Point(220,100,1));view.addObject(test);view.zoom=2;view.panX=60;view.panY=30;view.invalidate();});
+        try{shell("settings put system accelerometer_rotation 0");shell("settings put system user_rotation "+((original+1)%4));awaitOrientation(orientation==2?1:2);
+            ui(()->{check(activity.current==doc&&activity.canvas==view&&activity.page==page&&view.strokes.size()==before+1,"Rotating keeps the open page and ink without recreating the editor");view.undo();check(view.strokes.size()==before,"Undo history survives rotation");view.redo();check(Float.isFinite(view.panX)&&Float.isFinite(view.panY)&&view.zoom==2,"Viewport remains finite and keeps zoom");activity.showPages();});activity.pagePanel.worker.submit(()->{}).get();waitForIdleSync();SystemClock.sleep(250);
+            Bitmap portrait=getUiAutomation().takeScreenshot();if(portrait!=null){try(OutputStream out=new FileOutputStream(new File(activity.getExternalFilesDir(null),"folha-v05-retrato.png"))){portrait.compress(Bitmap.CompressFormat.PNG,100,out);}portrait.recycle();}
+            final PagePanel panel=activity.pagePanel;shell("settings put system user_rotation "+original);awaitOrientation(orientation);ui(()->{check(activity.pagePanel==panel&&panel.dialog.isShowing(),"Open thumbnails survive rotation");check(panel.grid.getNumColumns()==Math.max(2,Math.min(4,(activity.getResources().getConfiguration().screenWidthDp-80)/175)),"Thumbnail columns adapt to the new width");check(panel.dialog.getWindow().getDecorView().getWidth()<=activity.getResources().getDisplayMetrics().widthPixels,"Thumbnail dialog fits the rotated window");panel.dialog.dismiss();activity.canvas.fit();activity.saveCurrent();});
+        }finally{if(activity.pagePanel!=null)ui(()->activity.pagePanel.dialog.dismiss());shell(rotation.matches("[0-3]")?"settings put system user_rotation "+rotation:"settings delete system user_rotation");shell(sensor.matches("[01]")?"settings put system accelerometer_rotation "+sensor:"settings delete system accelerometer_rotation");}
+        results.add("Physical emulator rotation: portrait/landscape, same page and ink, undo/redo, zoom and responsive open thumbnails");
     }
     void updaterChecks() throws Exception {
         check(UpdateChecker.compare("0.10.0","0.9.9")>0&&UpdateChecker.compare("1.0.0","0.99.9")>0,"Semantic version ordering");

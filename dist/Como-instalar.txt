@@ -2,6 +2,7 @@ FOLHA 0.5.0 — FORMAS, RÉGUA, PÁGINAS E DOIS DEDOS PARA DESFAZER
 
 Se já estiver na 0.4.0, toque em Atualizar app e baixe esta versão. Também é possível abrir Folha.apk pelo Meus Arquivos e escolher Atualizar. Não desinstale a versão anterior.
 
+- Rotação: ative Rotação automática no Android e gire o tablet. Página, tinta, histórico e zoom são mantidos; as miniaturas se reorganizam.
 - Um toque curto e parado com dois dedos desfaz. A pinça continua ampliando; Refazer fica na barra.
 - Desenhe uma linha, círculo/elipse ou retângulo e segure a ponta por cerca de 0,6 segundo antes de levantar. O ícone de formas liga/desliga o ajuste.
 - Ligue a régua. Arraste as pontas com um dedo para girar ou o corpo para mover. A S Pen traça sobre a linha. Números em centímetros da página.

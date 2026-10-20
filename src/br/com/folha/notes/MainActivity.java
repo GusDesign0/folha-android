@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
     }
     @Override protected void onSaveInstanceState(Bundle state){saveCurrent();if(current!=null)state.putString("document",current.id);super.onSaveInstanceState(state);}
     @Override protected void onPause(){super.onPause();if(canvas!=null)canvas.finishInput();saveCurrent();}
-    @Override public void onConfigurationChanged(android.content.res.Configuration config){super.onConfigurationChanged(config);if(current==null&&!loading)home();}
+    @Override public void onConfigurationChanged(android.content.res.Configuration config){super.onConfigurationChanged(config);if(current==null&&!loading)home();else if(pagePanel!=null)pagePanel.resize();}
     @Override protected void onDestroy(){main.removeCallbacks(delayedSave);PagePanel panel=pagePanel;if(panel!=null){panel.dialog.dismiss();panel.close();}if(updater!=null)updater.close();if(canvas!=null)canvas.dispose();worker.shutdown();renderWorker.shutdown();fileWorker.shutdown();super.onDestroy();}
     void navigateBack(){if(loading){generation++;loading=false;home();}else if(current!=null){leaveEditor();home();}else finish();}
     @Override public void onBackPressed(){navigateBack();}

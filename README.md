@@ -14,6 +14,7 @@ Requer Android 10 ou superior. Alvo Android 16. APK independente, fora da Play S
 
 ## Versão 0.5.0
 
+- **Rotação automática:** acompanha retrato/paisagem do Android, mantendo a página, a tinta, o histórico e o zoom. O painel de miniaturas adapta largura, altura e número de colunas. Ative a rotação automática no sistema.
 - **Dois dedos para desfazer:** um toque curto e parado desfaz uma edição. Pinça, arraste, terceiro dedo e toques cancelados não acionam o atalho. Refazer continua na barra.
 - **Formas ao segurar:** linhas, círculos/elipses e retângulos são ajustados quando você segura a ponta por cerca de 0,6 s antes de levantar. Pode ser desligado na barra.
 - **Régua:** arraste o corpo ou as pontas com um dedo para mover/girar. A S Pen traça sobre a linha. Escala em centímetros da página, não do tamanho físico da tela.
@@ -38,7 +39,7 @@ Para escolher o tipo da caneta, segure seu ícone. Segure a borracha para trocar
 
 A caneta trabalha com a página aberta, reutiliza a geometria pronta e acrescenta traços ao cache sem redesenhar toda a página. Leitura de arquivo, JSON, PDF e backup usam filas de segundo plano. A biblioteca carrega metadados leves e as imagens possuem limites de resolução e memória.
 
-Foram executados 41 cenários de lógica e testes de integração no Android 16, incluindo gesto de desfazer sem conflito com zoom/palma, formas ao segurar, régua girada, operações de página/marcadores, miniaturas, atualização, pressão, laço, borracha parcial, texto/imagem, backup e PDFs girados/recortados. Em uma cena sintética com 250 traços, a CPU de desenho teve p50 de 1,746 ms e p95 de 2,103 ms no emulador. Isso não mede latência física da S Pen nem garante taxa de quadros no aparelho.
+Foram executados 41 cenários de lógica e testes de integração no Android 16, incluindo gesto de desfazer sem conflito com zoom/palma, formas ao segurar, régua girada, operações de página/marcadores, miniaturas, atualização, pressão, laço, borracha parcial, texto/imagem, backup e PDFs girados/recortados. Em uma cena sintética com 250 traços, a CPU de desenho teve p50 de 1,753 ms e p95 de 2,391 ms no emulador. Isso não mede latência física da S Pen nem garante taxa de quadros no aparelho.
 
 [Validação e limites](docs/VALIDACAO.md).
 

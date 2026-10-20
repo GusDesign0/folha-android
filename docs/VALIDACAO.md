@@ -52,3 +52,7 @@ A consulta, o download em blocos de 32 KB, o hash e a leitura do pacote usam uma
 - O script de testes agora falha explicitamente em crash ou ausência de PASS e usa um dispositivo ADB nomeado.
 
 Não foram testados Apple Pencil/iPadOS nem a S Pen física. iPadOS, Windows, conta e sincronização continuam como plataformas/etapas futuras.
+
+## Rotação no tablet
+
+Testada rotação física simulada do emulador de paisagem para retrato e de volta, com o editor e o painel de miniaturas abertos. Mantém a mesma página, tinta, instância do editor, desfazer/refazer e zoom. A régua continua em coordenadas da página, e o enquadramento é limitado ao novo tamanho da área visível. O painel recalcula o tamanho e suas colunas. O teste restaura as configurações de rotação do emulador e não altera dispositivos físicos. O comportamento respeita a rotação automática/bloqueio do Android.

@@ -69,6 +69,13 @@ final class NotebookView extends View {
         });
     }
     private float density(){return getResources().getDisplayMetrics().density;}
+    @Override protected void onSizeChanged(int w,int h,int oldW,int oldH){
+        super.onSizeChanged(w,h,oldW,oldH);if(oldW>0&&oldH>0){
+            finishInput();cancelInput();twoTap.cancel();rulerDrag=-1;dragging=false;wasScaling=false;
+            MotionEvent cancel=MotionEvent.obtain(android.os.SystemClock.uptimeMillis(),android.os.SystemClock.uptimeMillis(),MotionEvent.ACTION_CANCEL,0,0,0);scaler.onTouchEvent(cancel);cancel.recycle();
+            float margin=18*density(),oldBase=Math.max(0.01f,Math.min((oldW-margin*2)/pageW,(oldH-margin*2)/pageH));geometry();panX*=base/oldBase;panY*=base/oldBase;constrain();
+        }cacheDirty=true;
+    }
     void setPdf(PdfFiles.Rendered image){pdf=image.bitmap;pageW=image.width;pageH=image.height;ruler.reset(pageW,pageH);ready=true;cacheDirty=true;invalidate();}
     void fit(){zoom=1;panX=panY=0;listener.zoom(zoom);invalidate();}
     void dispose(){removeCallbacks(shapeHold);twoTap.cancel();if(pdf!=null){pdf.recycle();pdf=null;}if(inkCache!=null){inkCache.recycle();inkCache=null;}MediaFiles.recycle(images);}
