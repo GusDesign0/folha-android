@@ -1,16 +1,17 @@
-FOLHA 0.2.0 — ATUALIZAÇÃO
+FOLHA 0.3.0 — COMO ATUALIZAR
 
-1. Baixe e extraia Folha-0.2.0-para-tablet.zip.
-2. Abra Folha-0.2.0.apk no tablet e escolha Atualizar.
-3. Instale por cima da versão anterior. Não desinstale: a atualização preserva os cadernos.
+Baixe Folha.apk pelo GitHub e abra pelo aplicativo Meus Arquivos.
+Escolha Atualizar e instale por cima da versão anterior, sem desinstalar.
 
-O pincel agora tem curvas suaves, pressão contínua e melhor definição no zoom.
-Use o ícone de exportação no canto superior direito para salvar o PDF.
-A escrita e o marca-texto são exportados como caminhos, sem virar imagem.
-Nas páginas de PDFs importados, o conteúdo original ainda é rasterizado na exportação;
-as anotações feitas no Folha permanecem em caminhos. Não há reconhecimento de escrita.
+NOVIDADES
 
-Validação: testes de escrita e preservação dos cadernos na atualização em emulador
-Android 16. PDF de exemplo inspecionado com pypdf: nenhum objeto de imagem e
-presença de operadores de caminhos e preenchimentos. A sensação com S Pen física
-precisa ser avaliada no tablet.
+- Laço: contorne uma seleção com a S Pen. Arraste para mover e use a bolinha do canto para redimensionar. Cores recolorem o que foi selecionado.
+- Ícone de folhas sobrepostas: copiar, colar em outra página do mesmo caderno, duplicar, apagar e editar texto selecionado.
+- Borracha parcial: segure o ícone da borracha para escolher parcial ou traço inteiro.
+- Canetas: segure a caneta para escolher esferográfica, tinteiro ou pincel e ajustar espessura, pressão e suavização.
+- T insere uma caixa de texto; o ícone de paisagem insere uma imagem. Use o laço para mover e redimensionar.
+- Backup editável: nas opções do caderno, escolha Backup editável (.folha). Na biblioteca, use Restaurar backup. Se o caderno já existir, será criada uma cópia.
+- Exportação de PDF preserva o conteúdo original e adiciona a escrita como caminhos.
+- Verificar atualizações: ícone de atualização na biblioteca ou opção dentro do caderno. A consulta ocorre apenas quando você pedir.
+
+Os arquivos continuam locais e funcionam offline. Conta, sincronização e Windows ainda estão planejados. A escrita com S Pen física precisa ser validada no tablet.

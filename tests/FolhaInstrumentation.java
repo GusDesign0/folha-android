@@ -30,7 +30,7 @@ public class FolhaInstrumentation extends Instrumentation {
             // Drain initial asynchronous library loading before starting interaction.
             activity.worker.submit(()->{}).get();waitForIdleSync();
             if("true".equals(options.getString("requireLegacy"))){
-                int preserved=0;for(Documents.Doc d:activity.library)if(d.name.equals("Caderno de teste")&&d.strokes(0).size()>=2)preserved++;
+                int preserved=0;for(Documents.Doc meta:activity.library){Documents.Doc d=activity.store.read(meta.id);if(d.name.equals("Caderno de teste")&&d.strokes(0).size()>=2)preserved++;}
                 check(preserved>0,"Updating the APK must preserve notebooks and raw strokes created by version 0.1.0");results.add("In-place 0.1.0 upgrade preserves notebooks");
             }
             notebook=new Documents.Doc();notebook.name="Caderno de teste";notebook.folder="Integração";
@@ -55,19 +55,20 @@ public class FolhaInstrumentation extends Instrumentation {
                 activity.saveCurrent();
             });
             activity.worker.submit(()->{}).get();
-            List<Documents.Doc> docs=activity.store.load();Documents.Doc loaded=null;for(Documents.Doc d:docs)if(d.id.equals(notebook.id))loaded=d;
+            Documents.Doc loaded=activity.store.read(notebook.id);
             check(loaded!=null&&loaded.strokes(0).size()==2,"Persisted strokes survive reopening");results.add("Atomic local save and JSON reload");
             File pdf=new File(getTargetContext().getCacheDir(),"integration.pdf");
             try(OutputStream out=new FileOutputStream(pdf)){PdfFiles.export(loaded,activity.store.pdf(loaded),out);}
             check(PdfFiles.count(pdf)==1,"Notebook PDF export has one page");PdfFiles.Rendered rendered=PdfFiles.render(pdf,0,1200);check(rendered.bitmap.getWidth()>0,"Exported PDF renders");rendered.bitmap.recycle();results.add("Notebook PDF export and render");
             Documents.Doc imported=new Documents.Doc();imported.name="PDF de teste";imported.pdf=true;imported.count=1;
             try(InputStream in=new FileInputStream(pdf);OutputStream out=new FileOutputStream(activity.store.pdf(imported))){Documents.copy(in,out);}
-            ui(()->{activity.library.add(imported);activity.open(imported);});activity.worker.submit(()->{}).get();waitForIdleSync();
+            ui(()->{activity.library.add(imported);activity.open(imported);});activity.renderWorker.submit(()->{}).get();waitForIdleSync();
             ui(()->check(activity.canvas.ready&&activity.canvas.pdf!=null,"Imported PDF opens in editor"));
             File annotated=new File(getTargetContext().getCacheDir(),"annotated.pdf");
             Ink.Stroke mark=new Ink.Stroke(0xFF3562B7,3,false);mark.points.add(new Ink.Point(40,40,1));mark.points.add(new Ink.Point(180,90,1));imported.strokes(0).add(mark);
             try(OutputStream out=new FileOutputStream(annotated)){PdfFiles.export(imported,activity.store.pdf(imported),out);}check(PdfFiles.count(annotated)==1,"Annotated imported PDF exports");results.add("PDF import, annotation and re-export");
             qualityArtifacts();results.add("Smooth ink and PDF-path example generated");
+            featureChecks();
             ui(()->{activity.leaveEditor();activity.home();});report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);
         }catch(Throwable e){report.putString("stream","\nFAIL: "+e+"\n"+android.util.Log.getStackTraceString(e));finish(0,report);}
     }
@@ -109,5 +110,53 @@ public class FolhaInstrumentation extends Instrumentation {
         Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setColor(s.color);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);
         if(s.marker){Path path=new Path();Ink.Point a=s.points.get(0);path.moveTo(a.x,a.y);for(int j=1;j<s.points.size();j++)path.lineTo(s.points.get(j).x,s.points.get(j).y);p.setAlpha(76);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(s.width);c.drawPath(path,p);}
         else{Ink.Point a=s.points.get(0);c.drawCircle(a.x,a.y,PageArt.width(s,a)/2,p);for(int j=1;j<s.points.size();j++){Ink.Point b=s.points.get(j);p.setStrokeWidth((PageArt.width(s,a)+PageArt.width(s,b))/2);c.drawLine(a.x,a.y,b.x,b.y,p);a=b;}}
+    }
+    void featureChecks() throws Exception {
+        Documents.Doc doc=new Documents.Doc();doc.name="Edição e backup";doc.count=2;
+        Ink.Stroke original=new Ink.Stroke(0xFF263C32,3,false);for(int x=90;x<=310;x+=3)original.points.add(new Ink.Point(x,200,0.8f));doc.strokes(0).add(original);
+        ui(()->{activity.library.add(doc);activity.open(doc);});
+        ui(()->{
+            NotebookView v=activity.canvas;v.partialEraser=true;activity.selectTool(2);float sx=v.left+200*v.base,sy=v.top+200*v.base;pen(v,MotionEvent.ACTION_DOWN,sx,sy,1);pen(v,MotionEvent.ACTION_UP,sx,sy,1);
+            check(v.strokes.size()==2,"Partial eraser must keep two fragments");v.undo();check(v.strokes.size()==1,"Undo partial erasure restores the original stroke");
+            v.partialEraser=false;pen(v,MotionEvent.ACTION_DOWN,sx,sy,1);pen(v,MotionEvent.ACTION_UP,sx,sy,1);check(v.strokes.isEmpty(),"Whole-stroke eraser");v.undo();
+            activity.selectTool(4);v.selection.begin(60,170);v.selection.move(340,170);v.selection.move(340,230);v.selection.move(60,230);v.selection.move(60,170);v.selection.end();check(v.selection.selected.size()==1,"Lasso selects visible ink");
+            v.selection.begin(160,200);v.selection.move(190,230);check(v.strokes.get(0).points.get(0).x==90,"Dragging must not rewrite raw points per motion event");v.selection.end();check(Math.abs(v.strokes.get(0).points.get(0).x-120)<0.1f,"Move selection");
+            float oldWidth=v.strokes.get(0).width;v.selection.bounds();float right=v.selection.box.right,bottom=v.selection.box.bottom;v.selection.begin(right,bottom);v.selection.move(right+40,bottom+10);v.selection.end();check(v.strokes.get(0).width>oldWidth,"Resize selection scales handwriting");v.selection.recolor(0xFF3562B7);check(v.strokes.get(0).color==0xFF3562B7,"Selection recolor");
+            check(v.selection.copy(doc.id),"Copy selection");activity.changePage(1);
+        });
+        ui(()->{check(activity.canvas.selection.paste(doc.id),"Paste selection on another page of the same notebook");check(doc.strokes(1).size()==1,"Cross-page paste adds one object");activity.changePage(-1);});
+        File imageFile=new File(activity.store.assets(doc),"qa.png");Bitmap image=Bitmap.createBitmap(120,80,Bitmap.Config.ARGB_8888);image.eraseColor(0xFF4B85D1);try(OutputStream out=new FileOutputStream(imageFile)){image.compress(Bitmap.CompressFormat.PNG,100,out);}image.recycle();
+        ui(()->{Ink.Stroke text=new Ink.Stroke(0xFF263C32,2,false);text.kind="text";text.text="Texto editável no Folha";text.x=60;text.y=300;text.boxW=400;text.boxH=80;text.fontSize=22;activity.canvas.addObject(text);
+            Ink.Stroke pic=new Ink.Stroke(0xFF263C32,1,false);pic.kind="image";pic.asset="qa.png";pic.x=60;pic.y=420;pic.boxW=180;pic.boxH=120;activity.canvas.addObject(pic);activity.loadImages();activity.saveCurrent();});
+        activity.renderWorker.submit(()->{}).get();activity.worker.submit(()->{}).get();waitForIdleSync();
+        ui(()->check(activity.canvas.images.containsKey("qa.png"),"Images load off the UI thread"));
+        ui(()->{activity.imageTarget=doc.id;activity.imagePage=0;activity.receiveImage(android.net.Uri.fromFile(imageFile));});activity.fileWorker.submit(()->{}).get();waitForIdleSync();activity.renderWorker.submit(()->{}).get();waitForIdleSync();
+        ui(()->{check(activity.canvas.strokes.size()==4,"Image import normalizes a selected image and adds a movable object");activity.saveCurrent();});activity.worker.submit(()->{}).get();
+        Documents.Doc race=new Documents.Doc();race.name="Save coalescing";race.strokes(0).add(original.copy(true));java.util.concurrent.CountDownLatch release=new java.util.concurrent.CountDownLatch(1);
+        activity.worker.execute(()->{try{release.await(5,java.util.concurrent.TimeUnit.SECONDS);}catch(InterruptedException e){Thread.currentThread().interrupt();}});
+        ui(()->{activity.persist(race);Documents.Doc metadata=race.light();metadata.name="Renamed safely";activity.persist(metadata);});release.countDown();activity.worker.submit(()->{}).get();check(activity.store.read(race.id).strokes(0).size()==1,"Coalesced metadata edits must never replace a pending full notebook with empty pages");
+        Documents.Doc disk=activity.store.read(doc.id);check(disk.strokes(0).size()==4&&disk.strokes(0).get(1).text.contains("editável"),"Texts, image metadata and strokes persist together");
+        ByteArrayOutputStream archive=new ByteArrayOutputStream();Backups.export(disk,activity.store.dir(doc.id),archive);Documents.Doc restored=Backups.restore(activity.store,activity.getCacheDir(),new ByteArrayInputStream(archive.toByteArray()));
+        check(!restored.id.equals(doc.id)&&restored.originId.equals(doc.id),"Restoring an existing notebook must make a copy");check(restored.strokes(0).size()==4&&MediaFiles.asset(activity.store.dir(restored.id),"qa.png").exists(),"Editable backup preserves all object types and image bytes");
+        ByteArrayOutputStream evil=new ByteArrayOutputStream();try(java.util.zip.ZipOutputStream z=new java.util.zip.ZipOutputStream(evil)){z.putNextEntry(new java.util.zip.ZipEntry("../escape.txt"));z.write(1);z.closeEntry();}
+        boolean rejected=false;try{Backups.restore(activity.store,activity.getCacheDir(),new ByteArrayInputStream(evil.toByteArray()));}catch(IOException expected){rejected=true;}check(rejected,"Backup extraction rejects path traversal");
+        results.add("Partial eraser, lasso, move, resize, copy/paste, recolor, text/image persistence and editable backup");
+        Bitmap proof=getUiAutomation().takeScreenshot();if(proof!=null){try(OutputStream out=new FileOutputStream(new File(getTargetContext().getExternalFilesDir(null),"folha-v03-editor.png"))){proof.compress(Bitmap.CompressFormat.PNG,100,out);}proof.recycle();}
+        check(UpdateChecker.compare("0.3.0","0.2.0")>0&&UpdateChecker.compare("0.3.0","0.3.0")==0,"Update version ordering");UpdateChecker.Result latest=UpdateChecker.check("0.0.0");check(latest.newer&&latest.url.startsWith("https://github.com/GusDesign0/folha-android/"),"Manual GitHub update lookup");results.add("GitHub update lookup");
+        File folder=getTargetContext().getExternalFilesDir(null);File exported=new File(folder,"folha-objetos.pdf");try(OutputStream out=new FileOutputStream(exported)){PdfFiles.export(disk,activity.store.pdf(disk),out);}check(PdfFiles.count(exported)==2,"Mixed notebook PDF export");
+        File fixture=new File(folder,"fixture-preservar.pdf");check(fixture.isFile(),"PDF preservation fixture must be present");Documents.Doc imported=new Documents.Doc();imported.pdf=true;imported.name="PDF preservado";imported.count=PdfFiles.count(fixture);try(InputStream in=new FileInputStream(fixture);OutputStream out=new FileOutputStream(activity.store.pdf(imported))){Documents.copy(in,out);}
+        for(int p=0;p<imported.count;p++){Ink.Stroke mark=new Ink.Stroke(0xFFE32E2E,8,false);mark.pen="ballpoint";mark.points.add(new Ink.Point(40,40,1));mark.points.add(new Ink.Point(90,40,1));imported.strokes(p).add(mark);}
+        File preserved=new File(folder,"folha-pdf-preservado.pdf");try(OutputStream out=new FileOutputStream(preserved)){PdfFiles.export(imported,activity.store.pdf(imported),out);}
+        for(int p=0;p<imported.count;p++){PdfFiles.Rendered rendered=PdfFiles.render(preserved,p,1200);int found=0;float scale=(float)rendered.bitmap.getWidth()/rendered.width;
+            for(int y=Math.max(0,(int)(25*scale));y<Math.min(rendered.bitmap.getHeight(),(int)(55*scale));y++)for(int x=Math.max(0,(int)(25*scale));x<Math.min(rendered.bitmap.getWidth(),(int)(105*scale));x++){int c=rendered.bitmap.getPixel(x,y);if(Color.red(c)>160&&Color.green(c)<110&&Color.blue(c)<110)found++;}
+            rendered.bitmap.recycle();check(found>10,"Overlay position on rotated/cropped PDF page "+p);}
+        results.add("Preserved source PDF with rotated/cropped-page annotation alignment");
+        ui(()->{activity.open(doc);});ui(()->{
+            NotebookView v=activity.canvas;activity.selectTool(0);v.selection.clear();
+            for(int j=0;j<250;j++){Ink.Stroke s=new Ink.Stroke(0xFF263C32,1.5f,false);for(int k=0;k<40;k++)s.points.add(new Ink.Point(25+k*12,60+j%28*24+3*(float)Math.sin(k),0.7f));v.strokes.add(s);}v.refreshLayer();Bitmap screen=Bitmap.createBitmap(v.getWidth(),v.getHeight(),Bitmap.Config.ARGB_8888);Canvas c=new Canvas(screen);v.draw(c);
+            long[] times=new long[100];float x=v.getWidth()/2f,y=v.getHeight()/2f;pen(v,MotionEvent.ACTION_DOWN,x-100,y,0.7f);
+            for(int k=0;k<times.length;k++){long start=System.nanoTime();pen(v,MotionEvent.ACTION_MOVE,x-100+k*2,y+10*(float)Math.sin(k/8f),0.7f);v.draw(c);times[k]=(System.nanoTime()-start)/1000;}
+            pen(v,MotionEvent.ACTION_UP,x+100,y,0.7f);v.draw(c);screen.recycle();Arrays.sort(times);results.add("250-stroke page, draw CPU p50="+times[50]+"us p95="+times[95]+"us (emulator, not physical latency)");
+        });
     }
 }

@@ -7,7 +7,7 @@ on:
       tag:
         description: Tag da versão existente
         required: true
-        default: v0.2.0
+        default: v0.3.0
 permissions:
   contents: write
 concurrency:
@@ -28,7 +28,8 @@ jobs:
           set -euo pipefail
           mkdir -p dist
           for name in Folha.apk Folha.zip SHA256SUMS.txt; do
-            gh api "repos/$REPO/contents/dist/$name?ref=$REF" --jq '.content' | base64 --decode > "dist/$name"
+            blob=$(gh api -H 'Accept: application/vnd.github.object+json' "repos/$REPO/contents/dist/$name?ref=$REF" --jq '.sha')
+            gh api "repos/$REPO/git/blobs/$blob" --jq '.content' | base64 --decode > "dist/$name"
           done
           sed -i 's/\r$//' dist/SHA256SUMS.txt
           (cd dist && sha256sum --check SHA256SUMS.txt)
@@ -37,3 +38,4 @@ jobs:
         run: |
           set -euo pipefail
           gh release upload "$TAG" dist/Folha.apk dist/Folha.zip dist/SHA256SUMS.txt --repo "$REPO" --clobber
+

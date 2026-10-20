@@ -9,7 +9,7 @@ $platform="$ToolchainRoot\platform\android-36\android.jar"
 $build="$PSScriptRoot\build\integration"
 New-Item -ItemType Directory -Force "$build\classes","$build\dex" | Out-Null
 function Assert-Exit {if($LASTEXITCODE -ne 0){throw "Command failed: $LASTEXITCODE"}}
-& "$($jdk.FullName)\bin\javac.exe" --release 8 -encoding UTF-8 -cp "$platform;$PSScriptRoot\build\classes" -d "$build\classes" "$PSScriptRoot\tests\FolhaInstrumentation.java"
+& "$($jdk.FullName)\bin\javac.exe" --release 8 -encoding UTF-8 -cp "$platform;$PSScriptRoot\build\classes;$PSScriptRoot\libs\*" -d "$build\classes" "$PSScriptRoot\tests\FolhaInstrumentation.java"
 Assert-Exit
 & "$($jdk.FullName)\bin\jar.exe" cf "$build\classes.jar" -C "$build\classes" .
 Assert-Exit
@@ -26,6 +26,11 @@ Assert-Exit
 Assert-Exit
 & "$ToolchainRoot\platform-tools\adb.exe" install -r "$build\tests.apk"
 Assert-Exit
+if(Test-Path -LiteralPath "$PSScriptRoot\tests\fixtures\fixture-preservar.pdf"){
+    & "$ToolchainRoot\platform-tools\adb.exe" shell mkdir -p /sdcard/Android/data/br.com.folha.notes/files
+    & "$ToolchainRoot\platform-tools\adb.exe" push "$PSScriptRoot\tests\fixtures\fixture-preservar.pdf" /sdcard/Android/data/br.com.folha.notes/files/fixture-preservar.pdf
+    Assert-Exit
+}
 if($RequireLegacy){& "$ToolchainRoot\platform-tools\adb.exe" shell am instrument -w -e requireLegacy true br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
 else{& "$ToolchainRoot\platform-tools\adb.exe" shell am instrument -w br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
 Assert-Exit

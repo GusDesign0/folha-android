@@ -1,11 +1,14 @@
-Folha 0.2.0
+Folha 0.3.0
 
-- Traço com curvas mais suaves e pressão contínua.
-- Melhor definição da tinta ao ampliar a página.
-- Escrita e marca-texto em caminhos no PDF exportado.
-- Atualização testada sobre a versão 0.1.0, preservando os cadernos.
+- Laço para selecionar, mover, redimensionar, copiar e recolorir.
+- Borracha parcial e de traços inteiros.
+- Canetas esferográfica, tinteiro e pincel com ajustes de pressão e suavização.
+- Texto e imagens nas páginas.
+- Backup editável .folha, com PDF original e imagens.
+- Exportação preservando texto e links do PDF original e acrescentando escrita como caminhos.
+- Consulta manual de atualizações dentro do app.
 
-Baixe Folha.apk para instalar diretamente ou Folha.zip para transferir.
-Instale por cima da versão anterior, sem desinstalar.
+O salvamento, o processamento de PDF e os backups funcionam em segundo plano.
+Instale por cima da versão anterior, sem desinstalar, para preservar os cadernos.
 
-Versão inicial validada em emulador Android 16. A S Pen física ainda precisa ser avaliada no tablet.
+Conta, sincronização e a versão Windows são etapas futuras. A resposta da S Pen física ainda precisa ser avaliada no tablet.

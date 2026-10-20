@@ -3,6 +3,7 @@ param(
     [string]$OutputApk = (Join-Path $PSScriptRoot 'Folha.apk')
 )
 $ErrorActionPreference = 'Stop'
+& "$PSScriptRoot\fetch-deps.ps1"
 $ToolchainRoot = (Resolve-Path -LiteralPath $ToolchainRoot).Path
 $jdk = Get-ChildItem -LiteralPath (Join-Path $ToolchainRoot 'jdk') -Directory | Select-Object -First 1
 $javaBin = Join-Path $jdk.FullName 'bin'
@@ -14,7 +15,7 @@ $build = Join-Path $PSScriptRoot 'build'
 New-Item -ItemType Directory -Force "$build\classes", "$build\dex", "$build\tests", "$ToolchainRoot\private" | Out-Null
 function Check-Exit([string]$step) { if ($LASTEXITCODE -ne 0) { throw "$step failed with exit code $LASTEXITCODE" } }
 $sources = Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'src') -Filter '*.java' -Recurse | ForEach-Object FullName
-& "$javaBin\javac.exe" -encoding UTF-8 --release 8 -classpath $platform -d "$build\classes" @sources
+& "$javaBin\javac.exe" -encoding UTF-8 --release 8 -classpath "$platform;$PSScriptRoot\libs\*" -d "$build\classes" @sources
 Check-Exit 'Java compilation'
 & "$javaBin\javac.exe" -encoding UTF-8 -d "$build\tests" (Join-Path $PSScriptRoot 'src\br\com\folha\notes\Ink.java') (Join-Path $PSScriptRoot 'tests\InkTest.java')
 Check-Exit 'Test compilation'
@@ -22,11 +23,12 @@ Check-Exit 'Test compilation'
 Check-Exit 'Ink scenarios'
 & "$tools\aapt2.exe" compile --dir (Join-Path $PSScriptRoot 'res') -o "$build\resources.zip"
 Check-Exit 'Resource compilation'
-& "$tools\aapt2.exe" link -o "$build\base.apk" -I $platform --manifest (Join-Path $PSScriptRoot 'AndroidManifest.xml') --min-sdk-version 29 --target-sdk-version 36 --version-code 2 --version-name 0.2.0 --auto-add-overlay "$build\resources.zip"
+& "$tools\aapt2.exe" link -o "$build\base.apk" -I $platform -A (Join-Path $PSScriptRoot 'assets') --manifest (Join-Path $PSScriptRoot 'AndroidManifest.xml') --min-sdk-version 29 --target-sdk-version 36 --auto-add-overlay "$build\resources.zip"
 Check-Exit 'Resource linking'
 & "$javaBin\jar.exe" cf "$build\classes.jar" -C "$build\classes" .
 Check-Exit 'Class archive'
-& "$tools\d8.bat" --release --min-api 29 --lib $platform --output "$build\dex" "$build\classes.jar"
+$dependencies=Get-ChildItem -LiteralPath "$PSScriptRoot\libs" -Filter '*.jar' | ForEach-Object FullName
+& "$tools\d8.bat" --release --min-api 29 --lib $platform --output "$build\dex" "$build\classes.jar" @dependencies
 Check-Exit 'DEX compilation'
 Copy-Item -LiteralPath "$build\base.apk" -Destination "$build\unsigned.apk" -Force
 Add-Type -AssemblyName System.IO.Compression.FileSystem

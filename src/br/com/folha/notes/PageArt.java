@@ -4,6 +4,7 @@ import android.graphics.*;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.Collections;
 
 final class PageArt {
     private static final Map<Ink.Stroke,Outline> outlines=new WeakHashMap<>();
@@ -14,8 +15,17 @@ final class PageArt {
         else if(type.equals("grid")){for(float y=24;y<h;y+=20)c.drawLine(0,y,w,y,p);for(float x=24;x<w;x+=20)c.drawLine(x,0,x,h,p);}
         else if(type.equals("dots")){for(float y=32;y<h;y+=18)for(float x=32;x<w;x+=18)c.drawCircle(x,y,0.7f,p);}
     }
-    static void ink(Canvas c,List<Ink.Stroke> strokes) {for(Ink.Stroke s:strokes)stroke(c,s);}
+    static void ink(Canvas c,List<Ink.Stroke> strokes) {ink(c,strokes,Collections.emptyMap());}
+    static void ink(Canvas c,List<Ink.Stroke> strokes,Map<String,Bitmap> images){for(Ink.Stroke s:strokes)stroke(c,s,images);}
     static void stroke(Canvas c,Ink.Stroke s) {
+        stroke(c,s,Collections.emptyMap());
+    }
+    static void stroke(Canvas c,Ink.Stroke s,Map<String,Bitmap> images){
+        if(s.kind.equals("text")){Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setColor(s.color);p.setTextSize(s.fontSize);p.setTypeface(Typeface.DEFAULT);int saved=c.save();c.clipRect(s.x,s.y,s.x+s.boxW,s.y+s.boxH);float baseline=s.y-p.ascent(),line=p.getFontSpacing()*1.1f;
+            for(String paragraph:s.text.split("\\n",-1)){String remaining=paragraph;if(remaining.isEmpty()){baseline+=line;continue;}while(!remaining.isEmpty()&&baseline<s.y+s.boxH){int n=p.breakText(remaining,true,Math.max(1,s.boxW),null);if(n==0)n=1;c.drawText(remaining.substring(0,n),s.x,baseline,p);remaining=remaining.substring(n);baseline+=line;}}
+            c.restoreToCount(saved);return;
+        }
+        if(s.kind.equals("image")){Bitmap image=images.get(s.asset);Paint p=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.FILTER_BITMAP_FLAG);if(image!=null&&!image.isRecycled())c.drawBitmap(image,null,new RectF(s.x,s.y,s.x+s.boxW,s.y+s.boxH),p);else{p.setColor(0xFFE3EAE4);c.drawRect(s.x,s.y,s.x+s.boxW,s.y+s.boxH,p);}return;}
         List<Ink.Point> points=s.samples();if(points.isEmpty())return;
         Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setColor(s.color);p.setStrokeCap(Paint.Cap.ROUND);p.setStrokeJoin(Paint.Join.ROUND);
         if(s.marker){
@@ -47,5 +57,5 @@ final class PageArt {
         }
         Outline fresh=new Outline();fresh.samples=points;fresh.path=path;outlines.put(stroke,fresh);return path;
     }
-    static float width(Ink.Stroke s,Ink.Point p){return s.width*(0.45f+0.65f*p.pressure);}
+    static float width(Ink.Stroke s,Ink.Point p){return Ink.penWidth(s,p);}
 }

@@ -1,78 +1,36 @@
-# Folha para Android
+# Desenvolvimento
 
-Versão independente de um app de cadernos e anotações em PDF, pensado para tablet Samsung com S Pen. Interface em português, sem conta, sem anúncios e sem conexão com a internet.
+O aplicativo usa Java 8 e APIs nativas do Android, mínimo SDK 29 e alvo SDK 36. A compilação usa javac, aapt2, d8, zipalign e apksigner diretamente.
 
-## Instalar no tablet
+## Componentes
 
-1. Transfira `Folha-0.2.0.apk` para o tablet, por exemplo usando um cabo USB ou seu armazenamento de arquivos.
-2. No tablet, abra o APK no aplicativo **Meus Arquivos**.
-3. Se o Android solicitar, autorize a instalação a partir desse aplicativo e toque em **Instalar**.
-4. Abra **Folha**, crie um caderno ou toque em **Importar PDF**.
+- MainActivity: biblioteca, controles, importações, atualizações e filas de trabalho.
+- NotebookView: entrada de caneta, gestos, cache de tinta e borracha.
+- Ink: modelo independente de Android, curvas, pressão, corte e histórico.
+- SelectionEditor: laço, transformação visual, copiar/colar e edição de seleção.
+- Documents: JSON, metadados leves e gravação atômica.
+- MediaFiles: normalização e decodificação de imagens com orçamento de pixels.
+- Backups: pacote portátil .folha e restauração com validação de entradas.
+- PdfFiles: renderização nativa e exportação com conteúdo original preservado.
+- PageArt: desenho de papel, tinta, texto e imagens.
+- UpdateChecker: consulta manual da última versão do GitHub.
 
-É uma versão inicial para instalação direta, fora da Play Store. Requer Android 10 ou superior; compilada com SDK 36 e direcionada ao Android 16. O APK usa código Java sem bibliotecas nativas e atende ARM64 e x86_64.
+## Ferramentas e dependências
 
-## O que funciona
+`setup.ps1` baixa as ferramentas em `../toolchain`. `fetch-deps.ps1` obtém PdfBox-Android 2.0.27.0 e Bouncy Castle 1.72 do Maven Central, verifica SHA-256, extrai classes e recursos. Eles são usados no processamento de arquivos; a escrita não depende desse processamento.
 
-- Biblioteca de cadernos, nomes e pastas. Para mudar nome e pasta, mantenha um caderno pressionado na biblioteca ou toque no título no editor.
-- Papéis pautado, quadriculado, pontilhado e em branco, com adição de páginas.
-- Importação de PDF usando o seletor de arquivos do Android; o original é copiado para o armazenamento privado do app.
-- Caneta com pressão suavizada, curvas arredondadas, contorno contínuo, marca-texto, cores e ajuste de espessura.
-- Borracha de traços completos, desfazer e refazer na página aberta.
-- Escrita exclusiva pela caneta por padrão; os dedos movem e ampliam a página. A escrita com o dedo pode ser ativada nas opções.
-- Eventos cancelados descartam o traço em andamento. O cancelamento de um ponteiro da palma preserva o ponteiro ativo da caneta.
-- Botão lateral da S Pen funciona como borracha enquanto estiver pressionado ao iniciar o contato, quando o Android reporta esse botão.
-- Ajuste da página tocando na porcentagem do zoom, navegação por página e salto pelo número.
-- Salvamento automático local com gravação atômica.
-- Exportação de todas as páginas com anotações para um PDF no local escolhido. A escrita, o marca-texto e o papel dos cadernos são caminhos no PDF, sem rasterizar as anotações.
-- Layout adaptável a retrato, paisagem e janelas redimensionáveis.
+As bibliotecas e os recursos obtidos durante a compilação não são versionados. Licenças e avisos acompanham o APK em `assets/licenses` e `assets/THIRD_PARTY_NOTICES.txt`.
 
-## Limites desta versão
+A chave local fica em `../toolchain/private/folha.p12`. Não deve ser publicada ou incluída no backup dos cadernos. Preserve-a para assinar futuras atualizações do mesmo pacote.
 
-A escrita real, a latência, a pressão e a interação da palma com a S Pen devem ser validadas no tablet físico. Os testes no emulador usam eventos sintéticos de caneta e dedos. A versão 0.2.0 foi instalada sobre a 0.1.0, e a preservação dos cadernos foi verificada. O cache de tinta acompanha a área visível no zoom, em até duas vezes a resolução da tela, com limite de memória.
+## Publicar uma atualização
 
-As anotações permanecem editáveis no caderno dentro do app. O PDF exportado é uma cópia visual: as páginas dos PDFs importados são rasterizadas em até 2000 pixels na maior dimensão, com os traços desenhados sobre elas como caminhos. As anotações podem ser abertas como formas em um editor que importe caminhos de PDF; isso não as converte em texto editável ou nos tipos nativos de anotação de cada editor. Texto selecionável, pesquisa, links, formulários e estrutura do PDF original não são preservados nessa cópia. O arquivo original importado permanece guardado internamente.
+1. Incremente versionCode/versionName no manifesto e atualize os rótulos/documentação.
+2. Compile e execute testes adequados à mudança.
+3. Coloque o APK assinado em dist/Folha.apk, o ZIP em dist/Folha.zip e atualize dist/SHA256SUMS.txt e version.json.
+4. Publique o código no GitHub e crie uma release com a tag correspondente.
+5. O workflow Publicar instaladores valida os checksums e anexa os arquivos à release. Ele também pode ser executado manualmente para uma tag existente.
 
-PDFs protegidos por senha, OCR, reconhecimento de escrita, lasso, imagens, caixas de texto e sincronização ainda não estão implementados. O desfazer/refazer é limitado à página atualmente aberta e reinicia ao trocar de página.
+O workflow reutiliza os arquivos já assinados; nenhuma chave privada de assinatura é enviada ao GitHub. Os links releases/latest/download/Folha.apk e Folha.zip permanecem fixos nas atualizações.
 
-Os cadernos ficam no armazenamento privado do app. Desinstalar ou limpar os dados remove os cadernos. Exporte os PDFs que deseja guardar; a exportação não é um backup editável dos cadernos. PDFs muito extensos podem exigir bastante memória durante a exportação.
-
-## Código e compilação no Windows
-
-Este projeto usa as ferramentas oficiais do Android SDK diretamente, sem dependências de interface e sem precisar do Android Studio ou Gradle.
-
-```powershell
-.\setup.ps1
-```
-
-O script baixa JDK, Android SDK 36 e Build Tools 36.0.0 para uma pasta `toolchain` ao lado do projeto, valida os checksums e executa a compilação. Os URLs e checksums estão em `toolchain.json`. São cerca de 330 MB de downloads. Leia as licenças dos fornecedores das ferramentas antes de distribuí-las.
-
-Se as ferramentas já estiverem nessa pasta:
-
-```powershell
-.\build.ps1
-```
-
-O resultado é `Folha.apk`. A chave de assinatura de desenvolvimento fica em `toolchain/private/folha.p12`. Preserve a mesma chave para criar atualizações instaláveis sobre essa versão. A chave usada no APK entregue permanece no ambiente de criação e não acompanha o código-fonte. Uma compilação com outra chave não atualiza o APK entregue diretamente.
-
-Para publicação na Play Store, configure uma chave de distribuição própria e um processo de release.
-
-## Estrutura
-
-- `src/.../MainActivity.java`: biblioteca, organização, editor e seletores de arquivos.
-- `src/.../NotebookView.java`: escrita, pressão, gestos e cancelamento de ponteiros.
-- `src/.../Ink.java`: modelo dos traços, detecção da borracha e histórico.
-- `src/.../Documents.java`: formato JSON e persistência atômica.
-- `src/.../PdfFiles.java`: leitura e exportação com APIs nativas do Android.
-- `src/.../PageArt.java`: desenho do papel e dos traços.
-- `tests/InkTest.java`: cenários da lógica de escrita, executados na compilação.
-- `tests/FolhaInstrumentation.java`: testes de integração no Android.
-
-## Referências técnicas
-
-- [Entrada de caneta e cancelamento de palma — Android Developers](https://developer.android.com/develop/ui/views/touch-and-input/stylus-input/advanced-stylus-features)
-- [Mudanças do Android 16 e navegação de volta](https://developer.android.com/about/versions/16/behavior-changes-16)
-- [PdfRenderer](https://developer.android.com/reference/android/graphics/pdf/PdfRenderer)
-- [Android SDK](https://developer.android.com/studio)
-
-Folha é um projeto independente e não tem afiliação com Goodnotes ou Samsung.
-
+Veja VALIDACAO.md para os testes já executados e FORMATO.md para o arquivo portátil e a evolução para Windows/sincronização.

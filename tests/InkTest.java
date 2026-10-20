@@ -30,6 +30,13 @@ public class InkTest {
         Ink.Stroke stationary=new Ink.Stroke(0,4,false);stationary.points.add(new Ink.Point(10,10,0.2f));stationary.points.add(new Ink.Point(10,10,1));
         check(stationary.samples().size()==1&&stationary.samples().get(0).pressure>0.2f,"Stationary pressure must produce a finite rounded dot");
         int oldCount=curve.samples().size();curve.points.add(new Ink.Point(200,0,1));check(curve.samples().size()>oldCount,"A growing live stroke must refresh geometry");
-        System.out.println("14 scenarios passed: eraser, history, rounded curves, raw-input preservation, pressure continuity and live geometry.");
+        List<Ink.Stroke> fragments=Ink.cut(line,50,-5,50,5,2);check(fragments.size()==2,"Swept partial eraser must preserve both sides of a line");
+        check(fragments.get(0).points.get(fragments.get(0).points.size()-1).x<50&&fragments.get(1).points.get(0).x>50,"Partial eraser must open a gap at the contact");
+        check(line.points.size()==2,"Partial erasing must preserve the source for undo");
+        Ink.Stroke straight=line.copy(false);straight.pen="ballpoint";check(Ink.penWidth(straight,new Ink.Point(0,0,0.1f))==Ink.penWidth(straight,new Ink.Point(0,0,1.5f)),"Ballpoint has stable width");
+        straight.pen="brush";check(Ink.penWidth(straight,new Ink.Point(0,0,1.5f))>Ink.penWidth(straight,new Ink.Point(0,0,0.1f))*3,"Brush responds to pressure");
+        Ink.Stroke moved=line.transform(0,0,30,40,2,false);check(moved.id.equals(line.id)&&moved.points.get(1).x==230&&line.points.get(1).x==100,"Selection transform preserves identity and does not mutate history");
+        check(!line.copy(true).id.equals(line.id),"Copy gets its own persistent identity");
+        System.out.println("21 scenarios passed: smooth ink, history, partial erasing, pen styles and immutable transforms.");
     }
 }

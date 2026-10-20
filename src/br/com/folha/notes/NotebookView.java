@@ -16,12 +16,19 @@ final class NotebookView extends View {
     float zoom=1,panX=0,panY=0,base=1,left,top;
     int tool=0,color=Color.rgb(36,53,47);
     float penWidth=2.2f;
+    String pen="fountain";
+    float smoothing=1,sensitivity=1;
+    boolean partialEraser=true;
+    final SelectionEditor selection;
+    Map<String,Bitmap> images=new HashMap<>();
     boolean touchInk=false,ready=true;
     private Ink.Stroke pending;
     private int activeId=-1;
     private boolean erasing=false,eraseChanged=false;
     private List<Ink.Stroke> beforeErase;
     private float lastX,lastY;
+    private float eraseLastX,eraseLastY;
+    private boolean selecting=false;
     private boolean dragging=false,wasScaling=false,activeFinger=false;
     private final ScaleGestureDetector scaler;
     private Bitmap inkCache;
@@ -32,7 +39,7 @@ final class NotebookView extends View {
     private float hoverX=-1,hoverY=-1;
 
     NotebookView(Context c,List<Ink.Stroke> strokes,String paper,Listener listener) {
-        super(c);this.strokes=strokes;this.paper=paper;this.listener=listener;
+        super(c);this.strokes=strokes;this.paper=paper;this.listener=listener;selection=new SelectionEditor(this);
         setBackgroundColor(Color.rgb(230,234,231));setContentDescription("Página do caderno. Escreva com a S Pen e use dois dedos para ampliar.");
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         scaler=new ScaleGestureDetector(c,new ScaleGestureDetector.SimpleOnScaleGestureListener(){
@@ -49,11 +56,20 @@ final class NotebookView extends View {
     private float density(){return getResources().getDisplayMetrics().density;}
     void setPdf(PdfFiles.Rendered image){pdf=image.bitmap;pageW=image.width;pageH=image.height;ready=true;cacheDirty=true;invalidate();}
     void fit(){zoom=1;panX=panY=0;listener.zoom(zoom);invalidate();}
-    void dispose(){if(pdf!=null){pdf.recycle();pdf=null;}if(inkCache!=null){inkCache.recycle();inkCache=null;}}
-    void undo(){cancelInput();if(history.undo(strokes)){changed();}}
-    void redo(){cancelInput();if(history.redo(strokes)){changed();}}
-    void finishInput(){if(pending!=null||erasing)commit();}
+    void dispose(){if(pdf!=null){pdf.recycle();pdf=null;}if(inkCache!=null){inkCache.recycle();inkCache=null;}MediaFiles.recycle(images);}
+    void setImages(Map<String,Bitmap> next){MediaFiles.recycle(images);images=next;refreshLayer();}
+    void refreshLayer(){cacheDirty=true;invalidate();}
+    void documentChanged(){changed();}
+    void addObject(Ink.Stroke item){history.before(strokes);strokes.add(item);selection.select(item);changed();}
+    void undo(){cancelInput();selection.clear();if(history.undo(strokes)){changed();}}
+    void redo(){cancelInput();selection.clear();if(history.redo(strokes)){changed();}}
+    void finishInput(){if(pending!=null||erasing||selecting)commit();}
     private void changed(){cacheDirty=true;listener.changed();invalidate();}
+    private void appendInk(Ink.Stroke stroke){
+        geometry();float scale=base*zoom;
+        if(inkCache!=null&&!cacheDirty&&cachedLeft==left&&cachedTop==top&&cachedScale==scale){Canvas c=new Canvas(inkCache);c.scale((float)inkCache.getWidth()/Math.max(1,getWidth()),(float)inkCache.getHeight()/Math.max(1,getHeight()));c.translate(left,top);c.scale(scale,scale);c.clipRect(0,0,pageW,pageH);PageArt.stroke(c,stroke,images);}else cacheDirty=true;
+        listener.changed();invalidate();
+    }
     private void geometry(){
         float margin=18*density();base=Math.max(0.01f,Math.min((getWidth()-margin*2)/pageW,(getHeight()-margin*2)/pageH));
         left=(getWidth()-pageW*base*zoom)/2+panX;top=(getHeight()-pageH*base*zoom)/2+panY;
@@ -75,7 +91,8 @@ final class NotebookView extends View {
         float scale=base*zoom;
         if(cacheDirty||cachedLeft!=left||cachedTop!=top||cachedScale!=scale){
             inkCache.eraseColor(Color.TRANSPARENT);Canvas c=new Canvas(inkCache);
-            c.scale((float)inkCache.getWidth()/vw,(float)inkCache.getHeight()/vh);c.translate(left,top);c.scale(scale,scale);c.clipRect(0,0,pageW,pageH);PageArt.ink(c,strokes);
+            c.scale((float)inkCache.getWidth()/vw,(float)inkCache.getHeight()/vh);c.translate(left,top);c.scale(scale,scale);c.clipRect(0,0,pageW,pageH);
+            for(Ink.Stroke s:strokes)if(!selection.transforming||!selection.selected.contains(s))PageArt.stroke(c,s,images);
             cachedLeft=left;cachedTop=top;cachedScale=scale;cacheDirty=false;
         }
     }
@@ -87,8 +104,9 @@ final class NotebookView extends View {
         c.restoreToCount(saved);
         cache();c.drawBitmap(inkCache,null,new RectF(0,0,getWidth(),getHeight()),paint);
         if(pending!=null){saved=c.save();c.translate(left,top);c.scale(scale,scale);c.clipRect(0,0,pageW,pageH);PageArt.stroke(c,pending);c.restoreToCount(saved);}
+        if(tool==4){saved=c.save();c.translate(left,top);c.scale(scale,scale);selection.draw(c,scale,images);c.restoreToCount(saved);}
         if(!ready){paint.setColor(Color.rgb(50,107,86));paint.setTextSize(15*density());paint.setTypeface(Typeface.DEFAULT);c.drawText("Carregando PDF…",24*density(),36*density(),paint);}
-        if(hoverX>=0&&tool!=3){paint.setColor(0x90608070);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(density());float radius=(tool==2?10:tool==1?penWidth*4:penWidth)*scale;c.drawCircle(hoverX,hoverY,Math.max(3*density(),radius),paint);paint.setStyle(Paint.Style.FILL);}
+        if(hoverX>=0&&tool<3){paint.setColor(0x90608070);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(density());float radius=(tool==2?10:tool==1?penWidth*4:penWidth)*scale;c.drawCircle(hoverX,hoverY,Math.max(3*density(),radius),paint);paint.setStyle(Paint.Style.FILL);}
     }
     @Override public boolean onHoverEvent(MotionEvent e){if(e.getActionMasked()==MotionEvent.ACTION_HOVER_EXIT){hoverX=hoverY=-1;}else{hoverX=e.getX();hoverY=e.getY();}invalidate();return true;}
     private boolean stylus(MotionEvent e,int i){int t=e.getToolType(i);return t==MotionEvent.TOOL_TYPE_STYLUS||t==MotionEvent.TOOL_TYPE_ERASER;}
@@ -109,7 +127,10 @@ final class NotebookView extends View {
             activeId=e.getPointerId(idx);erasing=tool==2||e.getToolType(idx)==MotionEvent.TOOL_TYPE_ERASER||(e.getButtonState()&MotionEvent.BUTTON_STYLUS_PRIMARY)!=0;
             if(stylus(e,idx))requestUnbufferedDispatch(e);
             activeFinger=!stylus(e,idx);
-            if(erasing){beforeErase=new ArrayList<>(strokes);eraseChanged=false;}else pending=new Ink.Stroke(color,tool==1?penWidth*7:penWidth,tool==1);
+            selecting=tool==4;
+            if(selecting){erasing=false;selection.begin(x,y);}
+            else if(erasing){beforeErase=new ArrayList<>(strokes);eraseChanged=false;eraseLastX=x;eraseLastY=y;}
+            else{pending=new Ink.Stroke(color,tool==1?penWidth*7:penWidth,tool==1);pending.pen=pen;pending.smoothing=smoothing;pending.sensitivity=sensitivity;}
             sample(e,idx);getParent().requestDisallowInterceptTouchEvent(true);invalidate();return true;
         }
         // A second finger cancels optional finger-writing and enters navigation.
@@ -133,7 +154,11 @@ final class NotebookView extends View {
     private void point(float sx,float sy,float pressure) {
         float x=(sx-left)/(base*zoom),y=(sy-top)/(base*zoom);
         if(x<0||y<0||x>pageW||y>pageH)return;
-        if(erasing){boolean removed=false;for(Iterator<Ink.Stroke> it=strokes.iterator();it.hasNext();)if(it.next().hit(x,y,11/(base*zoom))){it.remove();removed=true;}
+        if(selecting){selection.move(x,y);return;}
+        if(erasing){boolean removed=false;float radius=11/(base*zoom);
+            for(int j=strokes.size()-1;j>=0;j--){Ink.Stroke s=strokes.get(j);if(!s.kind.equals("ink"))continue;float[] b=s.bounds();if(b[2]<Math.min(x,eraseLastX)-radius||b[0]>Math.max(x,eraseLastX)+radius||b[3]<Math.min(y,eraseLastY)-radius||b[1]>Math.max(y,eraseLastY)+radius)continue;
+                List<Ink.Stroke> fragments=Ink.cut(s,eraseLastX,eraseLastY,x,y,radius);if(fragments.size()!=1||fragments.get(0)!=s){strokes.remove(j);if(partialEraser)strokes.addAll(j,fragments);removed=true;}}
+            eraseLastX=x;eraseLastY=y;
             if(removed){eraseChanged=true;cacheDirty=true;}
         }else if(pending!=null){
             int n=pending.points.size();if(n>0){Ink.Point last=pending.points.get(n-1);if(Ink.distanceSquared(x,y,last.x,last.y,last.x,last.y)<0.04f&&Math.abs(last.pressure-pressure)<0.03f)return;}
@@ -141,10 +166,11 @@ final class NotebookView extends View {
         }
     }
     private void commit(){
-        if(pending!=null&&!pending.points.isEmpty()){history.before(strokes);strokes.add(pending);pending=null;changed();}
+        if(selecting){selection.end();selecting=false;}
+        if(pending!=null&&!pending.points.isEmpty()){history.before(strokes);Ink.Stroke finished=pending;strokes.add(finished);pending=null;appendInk(finished);}
         if(erasing&&eraseChanged){history.before(beforeErase);changed();}
         pending=null;erasing=false;eraseChanged=false;beforeErase=null;activeId=-1;dragging=false;invalidate();
     }
-    private void cancelInput(){if(erasing&&beforeErase!=null){strokes.clear();strokes.addAll(beforeErase);cacheDirty=true;}pending=null;beforeErase=null;erasing=false;activeId=-1;eraseChanged=false;invalidate();}
+    private void cancelInput(){if(selecting){selection.cancel();selecting=false;}if(erasing&&beforeErase!=null){strokes.clear();strokes.addAll(beforeErase);cacheDirty=true;}pending=null;beforeErase=null;erasing=false;activeId=-1;eraseChanged=false;invalidate();}
     @Override public boolean performClick(){super.performClick();return true;}
 }

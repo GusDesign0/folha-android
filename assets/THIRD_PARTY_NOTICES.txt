@@ -1,0 +1,15 @@
+PDF and cryptography components used only for file operations:
+
+PdfBox-Android 2.0.27.0 by Tom Roush, based on Apache PDFBox / FontBox.
+https://github.com/TomRoush/PdfBox-Android
+Apache License 2.0: licenses/Apache-2.0.txt
+
+Bouncy Castle 1.72 by the Legion of the Bouncy Castle.
+https://github.com/bcgit/bc-java/tree/r1rv72
+License: licenses/Bouncy-Castle-LICENSE.html
+
+Liberation Sans font resources bundled by PdfBox-Android:
+https://github.com/liberationfonts/liberation-fonts
+SIL Open Font License: licenses/Liberation-Fonts-LICENSE.txt
+
+Additional CMap, encoding and font resources include their own upstream notices.
