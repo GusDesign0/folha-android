@@ -1,0 +1,16 @@
+FOLHA 0.2.0 — ATUALIZAÇÃO
+
+1. Baixe e extraia Folha-0.2.0-para-tablet.zip.
+2. Abra Folha-0.2.0.apk no tablet e escolha Atualizar.
+3. Instale por cima da versão anterior. Não desinstale: a atualização preserva os cadernos.
+
+O pincel agora tem curvas suaves, pressão contínua e melhor definição no zoom.
+Use o ícone de exportação no canto superior direito para salvar o PDF.
+A escrita e o marca-texto são exportados como caminhos, sem virar imagem.
+Nas páginas de PDFs importados, o conteúdo original ainda é rasterizado na exportação;
+as anotações feitas no Folha permanecem em caminhos. Não há reconhecimento de escrita.
+
+Validação: testes de escrita e preservação dos cadernos na atualização em emulador
+Android 16. PDF de exemplo inspecionado com pypdf: nenhum objeto de imagem e
+presença de operadores de caminhos e preenchimentos. A sensação com S Pen física
+precisa ser avaliada no tablet.

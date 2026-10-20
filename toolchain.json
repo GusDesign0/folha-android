@@ -1,0 +1,23 @@
+[
+  {
+    "url": "https://dl.google.com/android/repository/platform-36_r02.zip",
+    "name": "platform.zip",
+    "folder": "platform",
+    "hash": "2c1a80dd4d9f7d0e6dd336ec603d9b5c55a6f576",
+    "algorithm": "SHA1"
+  },
+  {
+    "url": "https://dl.google.com/android/repository/build-tools_r36_windows.zip",
+    "name": "buildtools.zip",
+    "folder": "buildtools",
+    "hash": "f16ccffd34de8790dede813a6c7d8e2c11a27b50",
+    "algorithm": "SHA1"
+  },
+  {
+    "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_windows_hotspot_21.0.12.1_1.zip",
+    "name": "jdk.zip",
+    "folder": "jdk",
+    "hash": "f9d6e191ab098c0d416e7d588a24420a8621cd2f4720dab2459b8b7b2d2d8b4e",
+    "algorithm": "SHA256"
+  }
+]

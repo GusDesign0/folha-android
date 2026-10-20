@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="br.com.folha.notes.tests">
+    <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="36" />
+    <application android:label="Folha integration tests" />
+    <instrumentation android:name="br.com.folha.notes.FolhaInstrumentation" android:targetPackage="br.com.folha.notes" android:label="Folha integration tests" />
+</manifest>

@@ -1,0 +1,12 @@
+# Build outputs and downloaded SDK/JDK
+/build/
+/toolchain/
+*.idsig
+
+# Signing keys stay local
+*.p12
+*.jks
+*.keystore
+*.pem
+.env
+.env.*
