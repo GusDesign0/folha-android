@@ -13,7 +13,7 @@ final class Documents {
         String id=UUID.randomUUID().toString(),name="Sem título",folder="",paper="lines";
         String revision=UUID.randomUUID().toString(),originId="";
         boolean loaded=true;
-        boolean pdf;
+        boolean pdf,deleted;
         int count=1,lastPage=0;
         long updated=System.currentTimeMillis();
         final Map<Integer,List<Ink.Stroke>> pages=new HashMap<>();
@@ -50,7 +50,7 @@ final class Documents {
         JSONObject metadata() throws Exception {
             JSONObject o=new JSONObject();o.put("version",2);o.put("id",id);o.put("name",name);o.put("folder",folder);o.put("revision",revision);o.put("originId",originId);
             o.put("pdf",pdf);o.put("paper",paper);o.put("count",count);o.put("lastPage",lastPage);o.put("updated",updated);
-            o.put("bookmarks",new JSONArray(bookmarks));
+            o.put("bookmarks",new JSONArray(bookmarks));if(deleted)o.put("deleted",true);
             return o;
         }
         static JSONObject strokeJson(Ink.Stroke s) throws Exception {
@@ -61,11 +61,11 @@ final class Documents {
                     for(Ink.Point pt:s.points){JSONArray q=new JSONArray();q.put((double)pt.x);q.put((double)pt.y);q.put((double)pt.pressure);points.put(q);}
                     item.put("points",points);return item;
         }
-        Doc copy(){Doc d=new Doc();d.id=id;d.name=name;d.folder=folder;d.paper=paper;d.pdf=pdf;d.count=count;d.lastPage=lastPage;d.updated=updated;d.revision=revision;d.originId=originId;d.loaded=loaded;d.bookmarks.addAll(bookmarks);for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())d.pages.put(e.getKey(),new ArrayList<>(e.getValue()));return d;}
+        Doc copy(){Doc d=new Doc();d.id=id;d.name=name;d.folder=folder;d.paper=paper;d.pdf=pdf;d.deleted=deleted;d.count=count;d.lastPage=lastPage;d.updated=updated;d.revision=revision;d.originId=originId;d.loaded=loaded;d.bookmarks.addAll(bookmarks);for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())d.pages.put(e.getKey(),new ArrayList<>(e.getValue()));return d;}
         Doc light(){Doc d=copy();d.pages.clear();d.loaded=false;return d;}
         static Doc parse(String text) throws Exception {
             JSONObject o=new JSONObject(text);Doc d=new Doc();d.id=o.getString("id");d.name=o.getString("name");
-            d.folder=o.optString("folder","");d.paper=o.optString("paper","lines");d.pdf=o.optBoolean("pdf");d.count=o.getInt("count");
+            d.folder=o.optString("folder","");d.paper=o.optString("paper","lines");d.pdf=o.optBoolean("pdf");d.deleted=o.optBoolean("deleted");d.count=o.getInt("count");
             d.lastPage=Math.max(0,Math.min(d.count-1,o.optInt("lastPage",0)));d.updated=o.optLong("updated",0);
             d.revision=o.optString("revision",d.revision);d.originId=o.optString("originId","");
             JSONArray marks=o.optJSONArray("bookmarks");if(marks!=null)for(int i=0;i<marks.length();i++){int value=marks.optInt(i,-1);if(value>=0&&value<d.count)d.bookmarks.add(value);}

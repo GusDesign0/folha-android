@@ -20,3 +20,13 @@ A medição recente do desenho no emulador, com 250 traços de 40 pontos, ficou 
 Não foi feito teste em iPad, macOS, Linux, Windows ARM ou com PDF protegido por senha. O Windows ainda é uma prévia com parte das ferramentas do Android. A sincronização funciona enquanto o app está aberto e preserva conflitos em cópias; não é colaboração simultânea.
 
 Os instaladores não contêm a biblioteca do usuário, tokens de conta, senha Google ou chave de assinatura. A configuração OAuth de cliente instalado é distribuída separadamente da autorização pessoal, que permanece protegida no perfil local.
+
+## Validação 0.6.1
+
+- O erro real de abertura foi reproduzido no WebView2 instalado (155). A origem virtual da interface não disparava WebResourceRequested para /data. O acesso aos arquivos passou para origem HTTPS separada, interceptada localmente, com caminhos permitidos e CORS limitado à interface. Comportamento documentado pela Microsoft: https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/webresourcerequested
+- Teste invisível com perfil separado: PDFs locais de 111, 192 e 23 páginas, primeira e última página renderizadas. Esses documentos pessoais não acompanham o código. PdfQa.cs recebe uma lista de caminhos para reprodução local.
+- Editor real executado em adaptador DOM/Canvas: mouse/caneta só navegam; criar/editar/excluir texto; undo/redo; retry sem duplicação; salvar ao fechar; confirmação/lixeira/restaurar. Escrita do tablet preservada.
+- C# e Java: exclusão e restauração sincronizadas, repetição idempotente e PDF sem reenvio. Teste Java → C# → Java passou.
+- Exportação PDF: três páginas com rotação, corte e links preservados, escrita em caminhos.
+- APK 0.6.1 instalado sobre a versão anterior no emulador: biblioteca antiga preservada; gestos, rotação, ferramentas, PDFs e atualização passaram. Exclusão/restauração via salvamento assíncrono de metadados preservou a escrita. CPU draw p50 1,7 ms / p95 2,2 ms em página com 250 traços (não representa latência física da S Pen).
+- A conta no tablet físico e dois aparelhos físicos ao mesmo tempo ainda precisam de conferência do usuário.

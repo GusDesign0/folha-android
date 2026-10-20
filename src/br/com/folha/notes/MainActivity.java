@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
     float smoothing=1,sensitivity=1;
     boolean partialEraser=true;
     boolean autoShapes=true,rulerOn=false;
-    boolean touchInk=false,loading=false;
+    boolean touchInk=false,loading=false,trashView=false;
     final Runnable delayedSave=()->saveCurrent();
 
     @Override public void onCreate(Bundle state) {
@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
         showLoading("Abrindo sua biblioteca…");
         worker.execute(()->{try{List<Documents.Doc> docs=store.load();main.post(()->{library.addAll(docs);
             String restore=state==null?null:state.getString("document");Documents.Doc found=null;for(Documents.Doc d:library)if(d.id.equals(restore))found=d;
-            if(found!=null)open(found);else home();
+            if(found!=null&&!found.deleted)open(found);else home();
         });}catch(Exception e){main.post(()->{home();error("Não foi possível ler a biblioteca. Os arquivos locais foram preservados.",e);});}});
     }
     @Override protected void onSaveInstanceState(Bundle state){saveCurrent();if(current!=null)state.putString("document",current.id);super.onSaveInstanceState(state);}
@@ -86,13 +86,13 @@ public class MainActivity extends Activity {
         LinearLayout brand=column();brand.addView(text("folha",28,INK,true));brand.addView(text("Espaço para pensar.",12,MUTED,false));header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
         header.addView(button("Conta e sincronização",false,()->cloud.show()));gap(header,8);header.addView(button("Atualizar app",false,()->checkUpdates()));TextView version=text("  v"+appVersion(),11,MUTED,true);header.addView(version);root.addView(header);line(root);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);LinearLayout body=column();body.setPadding(dp(28),dp(28),dp(28),dp(28));scroll.addView(body);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
-        body.addView(text("Sua biblioteca",30,INK,true));gap(body,6);body.addView(text("Ideias à mão. Do tablet ao computador.",15,MUTED,false));gap(body,24);
-        HorizontalScrollView actionScroll=new HorizontalScrollView(this);actionScroll.setHorizontalScrollBarEnabled(false);LinearLayout actions=row();actions.addView(button("+ Novo caderno",true,()->createNotebook()));gap(actions,10);actions.addView(button("Importar PDF",false,()->importPdf()));gap(actions,10);actions.addView(button("Restaurar backup",false,()->restoreBackup()));actionScroll.addView(actions);body.addView(actionScroll);gap(body,24);
+        body.addView(text(trashView?"Lixeira":"Sua biblioteca",30,INK,true));gap(body,6);body.addView(text("Ideias à mão. Do tablet ao computador.",15,MUTED,false));gap(body,24);
+        HorizontalScrollView actionScroll=new HorizontalScrollView(this);actionScroll.setHorizontalScrollBarEnabled(false);LinearLayout actions=row();actions.addView(button("+ Novo caderno",true,()->createNotebook()));gap(actions,10);actions.addView(button("Importar PDF",false,()->importPdf()));gap(actions,10);actions.addView(button("Restaurar backup",false,()->restoreBackup()));gap(actions,10);actions.addView(button(trashView?"Voltar à biblioteca":"Lixeira",false,()->{trashView=!trashView;folderFilter="Todas";home();}));actionScroll.addView(actions);body.addView(actionScroll);gap(body,24);
         TreeSet<String> folders=new TreeSet<>();for(Documents.Doc d:library)if(!d.folder.isEmpty())folders.add(d.folder);
         HorizontalScrollView filters=new HorizontalScrollView(this);filters.setHorizontalScrollBarEnabled(false);LinearLayout chips=row();ArrayList<String> all=new ArrayList<>();all.add("Todas");all.addAll(folders);
         for(String f:all){TextView chip=button(f,folderFilter.equals(f),()->{folderFilter=f;home();});chips.addView(chip);gap(chips,8);}filters.addView(chips);body.addView(filters);gap(body,24);
         library.sort((a,b)->Long.compare(b.updated,a.updated));
-        ArrayList<Documents.Doc> visible=new ArrayList<>();for(Documents.Doc d:library)if(folderFilter.equals("Todas")||folderFilter.equals(d.folder))visible.add(d);
+        ArrayList<Documents.Doc> visible=new ArrayList<>();for(Documents.Doc d:library)if(d.deleted==trashView&&(folderFilter.equals("Todas")||folderFilter.equals(d.folder)))visible.add(d);
         if(visible.isEmpty()) {
             LinearLayout empty=column();empty.setPadding(dp(28),dp(30),dp(28),dp(30));empty.setBackground(shape(0xFFECF0E9,18));
             TextView e=text("Sua próxima ideia começa aqui.",22,INK,true);empty.addView(e);gap(empty,12);
@@ -117,8 +117,9 @@ public class MainActivity extends Activity {
         TextView title=text(d.name,17,INK,true);title.setMaxLines(2);card.addView(title);gap(card,4);
         card.addView(text((d.pdf?"PDF":"CADERNO")+"  ·  "+d.count+(d.count==1?" página":" páginas"),11,MUTED,true));
         if(!d.folder.isEmpty()){gap(card,4);card.addView(text(d.folder,12,GREEN,false));}
-        card.setOnClickListener(v->open(d));card.setOnLongClickListener(v->{editDetails(d);return true;});card.setContentDescription("Abrir "+d.name);return card;
+        card.addView(button(d.deleted?"Restaurar":"Excluir",false,()->trashDocument(d)));card.setOnClickListener(v->{if(!d.deleted)open(d);});card.setOnLongClickListener(v->{if(!d.deleted)editDetails(d);return true;});card.setContentDescription("Abrir "+d.name);return card;
     }
+    void trashDocument(Documents.Doc d){if(d.deleted){d.deleted=false;d.updated=System.currentTimeMillis();persist(d);home();return;}new AlertDialog.Builder(this).setTitle("Excluir da biblioteca?").setMessage(d.name+"\n\nO arquivo irá para a lixeira do Folha e a mudança será sincronizada. Você pode restaurá-lo depois.").setNegativeButton("Cancelar",null).setPositiveButton("Mover para lixeira",(dialog,w)->{d.deleted=true;d.updated=System.currentTimeMillis();persist(d);home();}).show();}
     void createNotebook(){
         LinearLayout box=column();box.setPadding(dp(24),dp(8),dp(24),dp(8));EditText name=new EditText(this);name.setSingleLine();name.setHint("Nome do caderno");box.addView(name);
         EditText folder=new EditText(this);folder.setSingleLine();folder.setHint("Pasta (opcional)");box.addView(folder);gap(box,12);box.addView(text("Tipo de papel",13,MUTED,true));
@@ -137,7 +138,7 @@ public class MainActivity extends Activity {
         }).show();
     }
     void importPdf(){Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("application/pdf");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,100);}
-    void open(Documents.Doc d){if(current!=null)leaveEditor();editingId=d.id;
+    void open(Documents.Doc d){if(d.deleted)return;if(current!=null)leaveEditor();editingId=d.id;
         if(!d.loaded){loading=true;showLoading("Abrindo caderno…");final int token=++generation;worker.execute(()->{try{Documents.Doc full=store.read(d.id);main.post(()->{if(token!=generation||isDestroyed())return;loading=false;for(int i=0;i<library.size();i++)if(library.get(i).id.equals(full.id)){library.set(i,full);break;}current=full;page=full.lastPage;editor();});}catch(Exception e){main.post(()->{loading=false;home();error("Não foi possível abrir o caderno.",e);});}});return;}
         current=d;page=d.lastPage;editor();}
     void leaveEditor(){if(canvas!=null){canvas.finishInput();saveCurrent();canvas.dispose();canvas=null;}if(current!=null)for(int i=0;i<library.size();i++)if(library.get(i).id.equals(current.id)){library.set(i,current.light());break;}generation++;current=null;editingId="";}
@@ -236,9 +237,9 @@ public class MainActivity extends Activity {
     void saveCurrent(){main.removeCallbacks(delayedSave);if(current==null)return;current.lastPage=page;current.updated=System.currentTimeMillis();persist(current);}
     void persist(Documents.Doc d){
         d.revision=UUID.randomUUID().toString();final String id=d.id;final Documents.Doc incoming=d.copy();
-        pendingWrites.compute(id,(key,previous)->{if(previous!=null&&previous.loaded&&!incoming.loaded){Documents.Doc merged=previous.copy();merged.name=incoming.name;merged.folder=incoming.folder;merged.updated=incoming.updated;merged.revision=incoming.revision;return merged;}return incoming;});
+        pendingWrites.compute(id,(key,previous)->{if(previous!=null&&previous.loaded&&!incoming.loaded){Documents.Doc merged=previous.copy();merged.deleted=incoming.deleted;merged.name=incoming.name;merged.folder=incoming.folder;merged.updated=incoming.updated;merged.revision=incoming.revision;return merged;}return incoming;});
         worker.execute(()->{Documents.Doc snapshot=pendingWrites.remove(id);if(snapshot==null)return;try{
-            if(!snapshot.loaded){Documents.Doc full=store.read(id);full.name=snapshot.name;full.folder=snapshot.folder;full.updated=snapshot.updated;full.revision=snapshot.revision;snapshot=full;}
+            if(!snapshot.loaded){Documents.Doc full=store.read(id);full.deleted=snapshot.deleted;full.name=snapshot.name;full.folder=snapshot.folder;full.updated=snapshot.updated;full.revision=snapshot.revision;snapshot=full;}
             store.write(snapshot);if(cloud!=null)cloud.edited();final String revision=snapshot.revision;main.post(()->{if(current!=null&&current.id.equals(id)&&current.revision.equals(revision)&&saveLabel!=null)saveLabel.setText("Salvo no tablet");});
         }catch(Exception|OutOfMemoryError e){main.post(()->{if(current!=null&&current.id.equals(id)&&saveLabel!=null)saveLabel.setText("Falha ao salvar");error("Não foi possível salvar. Libere espaço no tablet e tente novamente.",e);});}});
     }

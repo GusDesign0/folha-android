@@ -12,7 +12,7 @@ No Windows, extraia **todo o ZIP** para uma pasta e abra **Folha.exe**. Feche um
 
 No tablet, use **Conta e sincronização → Conectar Google**, com a mesma conta conectada no PC. Feche o caderno antes de usar **Sincronizar agora** e trocar de aparelho. A sincronização automática ocorre enquanto o app está aberto; o trabalho offline continua disponível.
 
-**Prévia 0.6.0:** login habilitado para a conta de teste cadastrada no projeto Google. Edições simultâneas são preservadas em cópias de conflito. A sincronização real no tablet precisa da autorização do usuário e Google Play Services. [Como funciona, privacidade e limitações](docs/SINCRONIZACAO.md).
+**Prévia 0.6.1:** login habilitado para a conta de teste cadastrada no projeto Google. Edições simultâneas são preservadas em cópias de conflito. A sincronização real no tablet precisa da autorização do usuário e Google Play Services. [Como funciona, privacidade e limitações](docs/SINCRONIZACAO.md).
 
 ## O que há no app
 
@@ -21,7 +21,8 @@ No tablet, use **Conta e sincronização → Conectar Google**, com a mesma cont
 - Miniaturas e marcadores; mover, duplicar e excluir páginas de cadernos. PDFs mantêm sua ordem original.
 - Biblioteca com pastas, salvamento local e backup editável `.folha`.
 - Exportação de PDF preservando o original e acrescentando escrita em caminhos.
-- Windows: biblioteca, PDF, canetas/pressão, marca-texto, borracha de traço inteiro, texto, desfazer/refazer, páginas, zoom, backups, exportação e sincronização. Imagens vindas do tablet são exibidas e preservadas. Ferramentas avançadas do Android ainda não têm todas suas interfaces no Windows.
+- Windows: leitura de PDFs, navegação, digitação/edição/exclusão de texto, desfazer/refazer, páginas, zoom, backups, exportação e sincronização. A escrita e as imagens vindas do tablet são exibidas e preservadas; desenhe pelo tablet.
+- Excluir arquivos da biblioteca com confirmação; Lixeira e Restaurar no Android e Windows. Atualize ambos para 0.6.1 para sincronizar exclusões. A lixeira mantém os arquivos armazenados e não tem remoção definitiva nesta versão.
 
 O Android mantém **Atualizar app**, que busca a versão mais recente no GitHub, verifica tamanho/SHA-256/assinatura e abre a confirmação de instalação do sistema. A verificação só ocorre quando solicitada. O pacote Windows é atualizado baixando o novo ZIP; os cadernos ficam no perfil do Windows, fora da pasta do executável.
 

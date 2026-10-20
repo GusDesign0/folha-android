@@ -3,7 +3,7 @@ android {
     namespace 'br.com.folha.notes'
     compileSdk 36
     buildToolsVersion '36.0.0'
-    defaultConfig { applicationId 'br.com.folha.notes'; minSdk 29; targetSdk 36; versionCode 6; versionName '0.6.0' }
+    defaultConfig { applicationId 'br.com.folha.notes'; minSdk 29; targetSdk 36; versionCode 7; versionName '0.6.1' }
     sourceSets { main { manifest.srcFile 'AndroidManifest.xml'; java.srcDirs = ['src']; res.srcDirs = ['res']; assets.srcDirs = ['assets'] } }
     compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
     signingConfigs { release { storeFile file('../toolchain/private/folha.p12'); storePassword 'folha-local-dev'; keyAlias 'folha'; keyPassword 'folha-local-dev' } }

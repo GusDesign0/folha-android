@@ -36,3 +36,7 @@ Uma revisão que não é pai de outra revisão conhecida é uma ponta do grafo. 
 A cópia preserva o conteúdo daquela ponta e recebe `originId` do caderno original. Seu ID estável evita cópias repetidas; revisões e blobs anteriores não são apagados. Relógios diferentes podem mudar qual ponta será principal, mas as outras edições permanecem nas cópias. Não há edição colaborativa simultânea nem mesclagem automática de traços.
 
 A instalação local é recusada se o caderno estiver aberto, houver salvamentos pendentes ou o conteúdo local tiver mudado desde a verificação. A atualização fica para outra sincronização, depois de fechar o editor. Esta versão não propaga exclusão de cadernos nem coleta o histórico remoto.
+
+## Exclusão reversível (0.6.1)
+
+A lixeira é uma revisão do mesmo documento com `deleted: true`; usa a cadeia de revisões existente, sem apagar blobs. Restauração publica nova revisão sem a marca. Todos os documentos, inclusive os da lixeira, participam do cálculo de alterações. A interface filtra a marca, evitando reaparecimento após sincronizar. Atualize ambos os dispositivos para preservar a marca. Edições offline concorrentes seguem a política de cópias de conflito; não há limpeza automática nem remoção definitiva.

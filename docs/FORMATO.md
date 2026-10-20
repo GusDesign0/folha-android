@@ -23,3 +23,7 @@ Requisitos permanentes: não colocar operações de rede no caminho da caneta; n
 ## Campos opcionais da versão 0.5
 
 `bookmarks` contém índices de página marcados, iniciando em zero. Mover, duplicar e excluir páginas de cadernos atualiza o mapa `pages`, `count`, `lastPage` e os marcadores na mesma gravação de JSON. PDFs continuam com a sequência original. O schema permanece 2: tinta de formas/régua usa os mesmos pontos e tipos de caneta. Versões antigas podem ler a tinta e a organização de cadernos, mas ignoram os marcadores. Não há conta ou sincronização implementadas.
+
+## Lixeira (0.6.1)
+
+O campo opcional `deleted: true` mantém o caderno e seus arquivos na lixeira. Ausência do campo significa biblioteca ativa. A restauração remove o campo. Escrita e arquivos originais são preservados. `pdfPending: true` é usado apenas no Windows para importações ainda não abertas; estas não são enviadas ao Drive até a contagem de páginas ser validada.

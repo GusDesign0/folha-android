@@ -71,6 +71,7 @@ public class FolhaInstrumentation extends Instrumentation {
             featureChecks();
             newToolsChecks();
             rotationChecks();
+            trashChecks();
             updaterChecks();
             ui(()->{activity.leaveEditor();activity.home();});report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);
         }catch(Throwable e){report.putString("stream","\nFAIL: "+e+"\n"+android.util.Log.getStackTraceString(e));finish(0,report);}
@@ -117,6 +118,14 @@ public class FolhaInstrumentation extends Instrumentation {
             final PagePanel panel=activity.pagePanel;shell("settings put system user_rotation "+original);awaitOrientation(orientation);ui(()->{check(activity.pagePanel==panel&&panel.dialog.isShowing(),"Open thumbnails survive rotation");check(panel.grid.getNumColumns()==Math.max(2,Math.min(4,(activity.getResources().getConfiguration().screenWidthDp-80)/175)),"Thumbnail columns adapt to the new width");check(panel.dialog.getWindow().getDecorView().getWidth()<=activity.getResources().getDisplayMetrics().widthPixels,"Thumbnail dialog fits the rotated window");panel.dialog.dismiss();activity.canvas.fit();activity.saveCurrent();});
         }finally{if(activity.pagePanel!=null)ui(()->activity.pagePanel.dialog.dismiss());shell(rotation.matches("[0-3]")?"settings put system user_rotation "+rotation:"settings delete system user_rotation");shell(sensor.matches("[01]")?"settings put system accelerometer_rotation "+sensor:"settings delete system accelerometer_rotation");}
         results.add("Physical emulator rotation: portrait/landscape, same page and ink, undo/redo, zoom and responsive open thumbnails");
+    }
+    void trashChecks() throws Exception {
+        final Documents.Doc light=activity.store.read(notebook.id).light();final int count=activity.store.read(notebook.id).strokes(0).size();
+        ui(()->{activity.leaveEditor();light.deleted=true;activity.persist(light);});activity.worker.submit(()->{}).get();
+        Documents.Doc trashed=activity.store.read(notebook.id);check(trashed.deleted&&trashed.strokes(0).size()==count,"Trashing light library metadata must preserve all saved strokes");
+        check(trashed.copy().deleted&&trashed.light().deleted&&Documents.Doc.parse(trashed.metadata().toString()).deleted,"Deletion state survives copy and metadata reload");
+        final Documents.Doc restore=trashed.light();ui(()->{restore.deleted=false;activity.persist(restore);});activity.worker.submit(()->{}).get();
+        Documents.Doc restored=activity.store.read(notebook.id);check(!restored.deleted&&restored.strokes(0).size()==count,"Restoring must retain all annotations");results.add("Trash/restore through async metadata saves preserves tablet ink");
     }
     void updaterChecks() throws Exception {
         check(UpdateChecker.compare("0.10.0","0.9.9")>0&&UpdateChecker.compare("1.0.0","0.99.9")>0,"Semantic version ordering");
