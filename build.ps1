@@ -21,6 +21,10 @@ Check-Exit 'Java compilation'
 Check-Exit 'Test compilation'
 & "$javaBin\java.exe" -cp "$build\tests" InkTest
 Check-Exit 'Ink scenarios'
+& "$javaBin\javac.exe" -encoding UTF-8 -cp "$build\tests" -d "$build\tests" (Join-Path $PSScriptRoot 'src\br\com\folha\notes\TwoFingerTap.java') (Join-Path $PSScriptRoot 'src\br\com\folha\notes\ShapeRecognizer.java') (Join-Path $PSScriptRoot 'src\br\com\folha\notes\RulerGuide.java') (Join-Path $PSScriptRoot 'tests\GesturesShapesTest.java')
+Check-Exit 'Gestures and shapes compilation'
+& "$javaBin\java.exe" -cp "$build\tests" br.com.folha.notes.GesturesShapesTest
+Check-Exit 'Gestures and shapes scenarios'
 & "$tools\aapt2.exe" compile --dir (Join-Path $PSScriptRoot 'res') -o "$build\resources.zip"
 Check-Exit 'Resource compilation'
 & "$tools\aapt2.exe" link -o "$build\base.apk" -I $platform -A (Join-Path $PSScriptRoot 'assets') --manifest (Join-Path $PSScriptRoot 'AndroidManifest.xml') --min-sdk-version 29 --target-sdk-version 36 --auto-add-overlay "$build\resources.zip"

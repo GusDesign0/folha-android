@@ -17,7 +17,26 @@ final class Documents {
         int count=1,lastPage=0;
         long updated=System.currentTimeMillis();
         final Map<Integer,List<Ink.Stroke>> pages=new HashMap<>();
+        final TreeSet<Integer> bookmarks=new TreeSet<>();
         List<Ink.Stroke> strokes(int page){return pages.computeIfAbsent(page,k->new ArrayList<>());}
+        void movePage(int from,int to){
+            if(pdf||from<0||to<0||from>=count||to>=count||from==to)return;
+            Map<Integer,List<Ink.Stroke>> next=new HashMap<>();TreeSet<Integer> marks=new TreeSet<>();
+            for(int i=0;i<count;i++){int target=i==from?to:from<to&&i>from&&i<=to?i-1:from>to&&i>=to&&i<from?i+1:i;if(pages.containsKey(i))next.put(target,pages.get(i));if(bookmarks.contains(i))marks.add(target);}
+            pages.clear();pages.putAll(next);bookmarks.clear();bookmarks.addAll(marks);lastPage=to;
+        }
+        void duplicatePage(int index){
+            if(pdf||index<0||index>=count||count>=10000)return;Map<Integer,List<Ink.Stroke>> next=new HashMap<>();TreeSet<Integer> marks=new TreeSet<>();
+            for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())next.put(e.getKey()>index?e.getKey()+1:e.getKey(),e.getValue());
+            List<Ink.Stroke> copy=new ArrayList<>();for(Ink.Stroke s:strokes(index))copy.add(s.copy(true));next.put(index+1,copy);
+            for(int i:bookmarks)marks.add(i>index?i+1:i);if(bookmarks.contains(index))marks.add(index+1);
+            pages.clear();pages.putAll(next);bookmarks.clear();bookmarks.addAll(marks);count++;lastPage=index+1;
+        }
+        void deletePage(int index){
+            if(pdf||count<=1||index<0||index>=count)return;Map<Integer,List<Ink.Stroke>> next=new HashMap<>();TreeSet<Integer> marks=new TreeSet<>();
+            for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())if(e.getKey()!=index)next.put(e.getKey()>index?e.getKey()-1:e.getKey(),e.getValue());for(int i:bookmarks)if(i!=index)marks.add(i>index?i-1:i);
+            pages.clear();pages.putAll(next);bookmarks.clear();bookmarks.addAll(marks);count--;lastPage=Math.min(index,count-1);
+        }
         JSONObject json() throws Exception {
             JSONObject o=metadata();
             JSONObject p=new JSONObject();
@@ -31,6 +50,7 @@ final class Documents {
         JSONObject metadata() throws Exception {
             JSONObject o=new JSONObject();o.put("version",2);o.put("id",id);o.put("name",name);o.put("folder",folder);o.put("revision",revision);o.put("originId",originId);
             o.put("pdf",pdf);o.put("paper",paper);o.put("count",count);o.put("lastPage",lastPage);o.put("updated",updated);
+            o.put("bookmarks",new JSONArray(bookmarks));
             return o;
         }
         static JSONObject strokeJson(Ink.Stroke s) throws Exception {
@@ -41,13 +61,14 @@ final class Documents {
                     for(Ink.Point pt:s.points){JSONArray q=new JSONArray();q.put((double)pt.x);q.put((double)pt.y);q.put((double)pt.pressure);points.put(q);}
                     item.put("points",points);return item;
         }
-        Doc copy(){Doc d=new Doc();d.id=id;d.name=name;d.folder=folder;d.paper=paper;d.pdf=pdf;d.count=count;d.lastPage=lastPage;d.updated=updated;d.revision=revision;d.originId=originId;d.loaded=loaded;for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())d.pages.put(e.getKey(),new ArrayList<>(e.getValue()));return d;}
+        Doc copy(){Doc d=new Doc();d.id=id;d.name=name;d.folder=folder;d.paper=paper;d.pdf=pdf;d.count=count;d.lastPage=lastPage;d.updated=updated;d.revision=revision;d.originId=originId;d.loaded=loaded;d.bookmarks.addAll(bookmarks);for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())d.pages.put(e.getKey(),new ArrayList<>(e.getValue()));return d;}
         Doc light(){Doc d=copy();d.pages.clear();d.loaded=false;return d;}
         static Doc parse(String text) throws Exception {
             JSONObject o=new JSONObject(text);Doc d=new Doc();d.id=o.getString("id");d.name=o.getString("name");
             d.folder=o.optString("folder","");d.paper=o.optString("paper","lines");d.pdf=o.optBoolean("pdf");d.count=o.getInt("count");
             d.lastPage=Math.max(0,Math.min(d.count-1,o.optInt("lastPage",0)));d.updated=o.optLong("updated",0);
             d.revision=o.optString("revision",d.revision);d.originId=o.optString("originId","");
+            JSONArray marks=o.optJSONArray("bookmarks");if(marks!=null)for(int i=0;i<marks.length();i++){int value=marks.optInt(i,-1);if(value>=0&&value<d.count)d.bookmarks.add(value);}
             JSONObject p=o.optJSONObject("pages");if(p==null)return d;
             Iterator<String> keys=p.keys();while(keys.hasNext()) {
                 String key=keys.next();JSONArray a=p.getJSONArray(key);List<Ink.Stroke> list=d.strokes(Integer.parseInt(key));

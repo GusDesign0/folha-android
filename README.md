@@ -12,8 +12,12 @@ A partir da 0.4.0, use **Atualizar app** para as próximas versões. Na primeira
 
 Requer Android 10 ou superior. Alvo Android 16. APK independente, fora da Play Store.
 
-## Versão 0.4.0
+## Versão 0.5.0
 
+- **Dois dedos para desfazer:** um toque curto e parado desfaz uma edição. Pinça, arraste, terceiro dedo e toques cancelados não acionam o atalho. Refazer continua na barra.
+- **Formas ao segurar:** linhas, círculos/elipses e retângulos são ajustados quando você segura a ponta por cerca de 0,6 s antes de levantar. Pode ser desligado na barra.
+- **Régua:** arraste o corpo ou as pontas com um dedo para mover/girar. A S Pen traça sobre a linha. Escala em centímetros da página, não do tamanho físico da tela.
+- **Miniaturas e marcadores:** toque no ícone de páginas ou no contador. Segure uma miniatura para marcar. Em cadernos, também é possível mover, duplicar e excluir páginas. PDFs permitem navegar e marcar, mantendo a ordem original.
 - **Escrita:** esferográfica, tinteiro, pincel e marca-texto, com cores, espessura, pressão e suavização ajustáveis.
 - **Borracha:** apaga uma parte ou o traço inteiro.
 - **Laço:** seleciona, move, redimensiona, copia, duplica, apaga e recolore. Permite colar em outra página do mesmo caderno.
@@ -26,13 +30,15 @@ Requer Android 10 ou superior. Alvo Android 16. APK independente, fora da Play S
 
 Para escolher o tipo da caneta, segure seu ícone. Segure a borracha para trocar o modo. Com o laço, contorne os objetos e arraste a seleção ou a bolinha do canto. O ícone de folhas sobrepostas abre copiar/colar e edição de texto.
 
+![Miniaturas e marcadores](docs/images/paginas-0.5.png)
+
 ![Editor com texto e imagens](docs/images/editor-0.3.png)
 
 ## Desempenho e validação
 
 A caneta trabalha com a página aberta, reutiliza a geometria pronta e acrescenta traços ao cache sem redesenhar toda a página. Leitura de arquivo, JSON, PDF e backup usam filas de segundo plano. A biblioteca carrega metadados leves e as imagens possuem limites de resolução e memória.
 
-Foram executados 21 cenários de lógica e testes de integração no Android 16, incluindo atualização, pressão, palma, laço, borracha parcial, texto/imagem, backup e PDFs girados/recortados. Em uma cena sintética com 250 traços, a CPU de desenho teve p50 de 1,882 ms e p95 de 2,491 ms no emulador. Isso não mede latência física da S Pen nem garante taxa de quadros no aparelho.
+Foram executados 41 cenários de lógica e testes de integração no Android 16, incluindo gesto de desfazer sem conflito com zoom/palma, formas ao segurar, régua girada, operações de página/marcadores, miniaturas, atualização, pressão, laço, borracha parcial, texto/imagem, backup e PDFs girados/recortados. Em uma cena sintética com 250 traços, a CPU de desenho teve p50 de 1,746 ms e p95 de 2,103 ms no emulador. Isso não mede latência física da S Pen nem garante taxa de quadros no aparelho.
 
 [Validação e limites](docs/VALIDACAO.md).
 

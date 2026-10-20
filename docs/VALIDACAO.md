@@ -39,3 +39,16 @@ A resposta física da S Pen não foi testada.
 ## Atualizador 0.4.0
 
 A consulta, o download em blocos de 32 KB, o hash e a leitura do pacote usam uma fila exclusiva com prioridade de segundo plano. O progresso visual é limitado a cerca de 7 atualizações por segundo. Não há serviço em segundo plano nem verificações periódicas. Requer confirmação de instalação pelo Android e, na primeira vez, permissão para instalar apps pelo Folha. A versão 0.3.0 precisa receber esta atualização pelo APK; as próximas podem usar o botão. O aparelho pode impor políticas adicionais de instalação.
+
+## Atualização 0.5.0
+
+- 21 cenários de tinta existentes e 20 novos cenários de gesto, formas e geometria da régua passaram.
+- Integração Android 16: toque com dois dedos desfaz uma edição e aceita refazer; pinça saindo/voltando, terceiro dedo, cancelamento e palma não desfazem. Escrita opcional com o dedo é cancelada antes de reconhecer o atalho.
+- Linha e elipse ajustadas por espera real de 0,6 s na S Pen sintética; régua girada mantém o traço alinhado.
+- Mover, duplicar e excluir páginas de caderno preservam ordem, objetos e marcadores; duplicação cria IDs independentes. JSON e backup editável preservam esses dados. A ordem dos PDFs não é alterada.
+- Miniatura real de PDF com rotação/CropBox e miniaturas de caderno têm dimensão máxima de 256 px. Grade recicla células, limita cache a 10 miniaturas e fila a 12 pedidos. Imagens de células visíveis são liberadas ao fechar o painel; a atividade também solta a referência ao snapshot do caderno.
+- Reconhecimento é executado uma vez após segurar, limitado a 8192 pontos. O gesto de toque mantém apenas estado numérico, sem criar listas por amostra.
+- A régua e o reconhecimento produzem traços comuns, selecionáveis e exportáveis como caminhos; não mudam o formato de tinta.
+- O script de testes agora falha explicitamente em crash ou ausência de PASS e usa um dispositivo ADB nomeado.
+
+Não foram testados Apple Pencil/iPadOS nem a S Pen física. iPadOS, Windows, conta e sincronização continuam como plataformas/etapas futuras.

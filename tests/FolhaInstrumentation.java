@@ -17,7 +17,7 @@ public class FolhaInstrumentation extends Instrumentation {
     Bundle options;
     void check(boolean b,String msg){if(!b)throw new AssertionError(msg);}
     @Override public void onCreate(Bundle args){super.onCreate(args);options=args;start();}
-    void ui(Runnable r){runOnMainSync(r);waitForIdleSync();}
+    void ui(Runnable r){final Throwable[] failure={null};runOnMainSync(()->{try{r.run();}catch(Throwable e){failure[0]=e;}});waitForIdleSync();if(failure[0]!=null)throw new AssertionError("UI check failed",failure[0]);}
     void event(NotebookView v,int action,int[] types,int[] ids,float[] xs,float[] ys,float[] pressure,int flags){
         MotionEvent.PointerProperties[] props=new MotionEvent.PointerProperties[ids.length];MotionEvent.PointerCoords[] coords=new MotionEvent.PointerCoords[ids.length];
         for(int i=0;i<ids.length;i++){props[i]=new MotionEvent.PointerProperties();props[i].id=ids[i];props[i].toolType=types[i];coords[i]=new MotionEvent.PointerCoords();coords[i].x=xs[i];coords[i].y=ys[i];coords[i].pressure=pressure[i];coords[i].size=0.1f;}
@@ -69,9 +69,38 @@ public class FolhaInstrumentation extends Instrumentation {
             try(OutputStream out=new FileOutputStream(annotated)){PdfFiles.export(imported,activity.store.pdf(imported),out);}check(PdfFiles.count(annotated)==1,"Annotated imported PDF exports");results.add("PDF import, annotation and re-export");
             qualityArtifacts();results.add("Smooth ink and PDF-path example generated");
             featureChecks();
+            newToolsChecks();
             updaterChecks();
             ui(()->{activity.leaveEditor();activity.home();});report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);
         }catch(Throwable e){report.putString("stream","\nFAIL: "+e+"\n"+android.util.Log.getStackTraceString(e));finish(0,report);}
+    }
+    void chord(NotebookView v,int kind){
+        int[] types={MotionEvent.TOOL_TYPE_FINGER,MotionEvent.TOOL_TYPE_FINGER};int[] ids={7,19};float x=v.getWidth()/2f,y=v.getHeight()/2f;
+        event(v,MotionEvent.ACTION_DOWN,new int[]{1},new int[]{7},new float[]{x-70},new float[]{y},new float[]{1},0);
+        event(v,MotionEvent.ACTION_POINTER_DOWN|(1<<8),types,ids,new float[]{x-70,x+70},new float[]{y,y},new float[]{1,1},0);
+        if(kind==1){event(v,MotionEvent.ACTION_MOVE,types,ids,new float[]{x-140,x+140},new float[]{y,y},new float[]{1,1},0);event(v,MotionEvent.ACTION_MOVE,types,ids,new float[]{x-70,x+70},new float[]{y,y},new float[]{1,1},0);}
+        if(kind==2){event(v,MotionEvent.ACTION_CANCEL,types,ids,new float[]{x-70,x+70},new float[]{y,y},new float[]{1,1},0);return;}
+        if(kind==3){event(v,MotionEvent.ACTION_POINTER_DOWN|(2<<8),new int[]{1,1,1},new int[]{7,19,23},new float[]{x-70,x+70,x},new float[]{y,y,y+90},new float[]{1,1,1},0);event(v,MotionEvent.ACTION_POINTER_UP|(2<<8),new int[]{1,1,1},new int[]{7,19,23},new float[]{x-70,x+70,x},new float[]{y,y,y+90},new float[]{1,1,1},0);}
+        event(v,MotionEvent.ACTION_POINTER_UP|(1<<8),types,ids,new float[]{x-70,x+70},new float[]{y,y},new float[]{1,1},kind==4?MotionEvent.FLAG_CANCELED:0);
+        event(v,MotionEvent.ACTION_UP,new int[]{1},new int[]{7},new float[]{x-70},new float[]{y},new float[]{1},0);
+    }
+    void newToolsChecks() throws Exception {
+        Documents.Doc doc=new Documents.Doc();doc.name="Formas, régua e páginas";doc.count=3;
+        ui(()->{activity.library.add(doc);activity.open(doc);NotebookView v=activity.canvas;for(int k=0;k<3;k++){Ink.Stroke s=new Ink.Stroke(0xFF3562B7,3,false);s.points.add(new Ink.Point(50,60+k*25,1));s.points.add(new Ink.Point(200,60+k*25,1));v.addObject(s);}v.selection.clear();
+            chord(v,0);check(v.strokes.size()==2,"Stationary two-finger chord undoes one edit");v.redo();check(v.strokes.size()==3,"Two-finger undo supports redo");
+            for(int k=1;k<=4;k++){chord(v,k);check(v.strokes.size()==3,"Pinch, cancel, third finger and canceled palm must never undo: "+k);}v.fit();v.touchInk=true;chord(v,0);check(v.strokes.size()==2,"Two-finger tap cancels optional finger ink before undoing");v.touchInk=false;v.redo();
+        });results.add("Native two-finger undo, redo, pinch out/back, third finger, ACTION_CANCEL, palm flag and finger-ink cancellation");
+        ui(()->{NotebookView v=activity.canvas;float y=v.getHeight()*0.4f,x=v.getWidth()*0.45f;pen(v,0,x,y,1);for(int k=1;k<=20;k++)pen(v,2,x+k*6,y+(k%2==0?0:0.5f),1);});SystemClock.sleep(680);ui(()->{NotebookView v=activity.canvas;float x=v.getWidth()*0.45f+120,y=v.getHeight()*0.4f;pen(v,1,x,y,1);Ink.Stroke s=v.strokes.get(v.strokes.size()-1);check(s.points.size()==2&&s.pen.equals("ballpoint"),"Holding a native stylus line adjusts it before commit");});
+        ui(()->{NotebookView v=activity.canvas;float x=v.getWidth()*0.40f,y=v.getHeight()*0.55f,rx=75,ry=50;pen(v,0,x+rx,y,1);for(int k=1;k<=80;k++){double angle=k*Math.PI*2/80;pen(v,2,x+rx*(float)Math.cos(angle),y+ry*(float)Math.sin(angle),1);}});SystemClock.sleep(680);ui(()->{NotebookView v=activity.canvas;pen(v,1,v.getWidth()*0.40f+75,v.getHeight()*0.55f,1);check(v.strokes.get(v.strokes.size()-1).points.size()==81,"Holding a closed ellipse snaps to a smooth oval");v.setRuler(true);v.ruler.x1=80;v.ruler.y1=100;v.ruler.x2=420;v.ruler.y2=340;float x=v.getWidth()*0.45f,y=v.getHeight()*0.4f;pen(v,0,x,y,0.5f);pen(v,2,x+60,y+80,1);pen(v,1,x+90,y+65,1);Ink.Stroke s=v.strokes.get(v.strokes.size()-1);check(s.points.size()==2,"Ruler keeps only the two endpoints");for(Ink.Point p:s.points)check(Math.abs((p.x-80)*240-(p.y-100)*340)<0.02,"Ink lies on a rotated ruler");v.setRuler(false);activity.saveCurrent();});
+        activity.worker.submit(()->{}).get();Documents.Doc disk=activity.store.read(doc.id);check(disk.strokes(0).size()==6,"Adjusted shapes and ruler ink survive persistence");
+        Ink.Stroke first=disk.strokes(0).get(0);disk.strokes(1).add(first.copy(true));disk.strokes(2).add(first.copy(true));String originalId=disk.strokes(0).get(0).id;disk.bookmarks.add(0);disk.bookmarks.add(2);disk.movePage(0,2);check(disk.strokes(2).get(0).id.equals(originalId)&&disk.bookmarks.equals(new TreeSet<>(Arrays.asList(1,2))),"Reordering moves ink and markers together");disk.duplicatePage(1);check(disk.count==4&&!disk.strokes(1).get(0).id.equals(disk.strokes(2).get(0).id)&&disk.bookmarks.contains(2),"Duplicated page gets independent object identities and marker");disk.deletePage(2);check(disk.count==3&&disk.strokes(2).get(0).id.equals(originalId),"Deleting a page preserves remaining content order");
+        Documents.Doc roundtrip=Documents.Doc.parse(disk.json().toString());check(roundtrip.bookmarks.equals(disk.bookmarks),"Page markers survive JSON");ByteArrayOutputStream bytes=new ByteArrayOutputStream();Backups.export(disk,activity.store.dir(disk.id),bytes);Documents.Doc restored=Backups.restore(activity.store,activity.getCacheDir(),new ByteArrayInputStream(bytes.toByteArray()));check(restored.bookmarks.equals(disk.bookmarks)&&restored.strokes(2).size()==6,"Backup round-trip preserves page order, markers and adjusted shapes");
+        Bitmap thumb=PagePanel.thumbnail(disk,activity.store.dir(disk.id),2);check(thumb.getWidth()<=256&&thumb.getHeight()<=256,"Notebook thumbnails use a bounded pixel size");thumb.recycle();
+        Documents.Doc pdfDoc=new Documents.Doc();pdfDoc.pdf=true;pdfDoc.count=3;try(InputStream in=new FileInputStream(new File(activity.getExternalFilesDir(null),"fixture-preservar.pdf"));OutputStream out=new FileOutputStream(activity.store.pdf(pdfDoc))){Documents.copy(in,out);}pdfDoc.bookmarks.add(2);thumb=PagePanel.thumbnail(pdfDoc,activity.store.dir(pdfDoc.id),2);check(thumb.getWidth()<=256&&thumb.getHeight()<=256,"Rotated/cropped PDF thumbnail renders");thumb.recycle();pdfDoc.movePage(0,1);pdfDoc.duplicatePage(0);pdfDoc.deletePage(0);check(pdfDoc.count==3,"PDF structural operations leave original order intact");
+        ui(()->{activity.leaveEditor();activity.open(restored);activity.showPages();});activity.pagePanel.worker.submit(()->{}).get();waitForIdleSync();ui(()->{check(activity.pagePanel.grid.getChildCount()>0&&activity.pagePanel.grid.getHeight()>100,"Thumbnail grid is visible and measured");check(activity.pagePanel.cache.size()<=10&&activity.pagePanel.pending.size()<=12,"Thumbnail cache and queue are bounded");});
+        SystemClock.sleep(250);Bitmap proof=getUiAutomation().takeScreenshot();if(proof!=null){try(OutputStream out=new FileOutputStream(new File(activity.getExternalFilesDir(null),"folha-v05-pages.png"))){proof.compress(Bitmap.CompressFormat.PNG,100,out);}proof.recycle();}
+        final PagePanel closing=activity.pagePanel;ui(()->{closing.filter(true);check(closing.adapter.getCount()==restored.bookmarks.size(),"Bookmarks filter shows marked pages only");closing.dialog.dismiss();});ui(()->check(closing.worker.isShutdown()&&activity.pagePanel==null,"Closing thumbnails stops the worker and releases the full notebook snapshot"));
+        results.add("Held line/oval, rotated ruler, page move/duplicate/delete, persistent bookmarks, backup and bounded lazy thumbnails (PDF included)");
     }
     void updaterChecks() throws Exception {
         check(UpdateChecker.compare("0.10.0","0.9.9")>0&&UpdateChecker.compare("1.0.0","0.99.9")>0,"Semantic version ordering");

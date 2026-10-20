@@ -19,3 +19,7 @@ A sincronização de conta e o aplicativo Windows ainda não estão implementado
 O serviço futuro deverá manter uma revisão-base por dispositivo, enviar somente alterações e assets novos, detectar alterações simultâneas e preservar cópias conflitantes sem sobrescrever silenciosamente o trabalho. Antes dessa etapa serão definidos o login, o armazenamento, a política de conflitos e os testes entre aparelhos.
 
 Requisitos permanentes: não colocar operações de rede no caminho da caneta; não bloquear a escrita ao ficar offline; manter texto, imagens, traços e PDF original portáteis.
+
+## Campos opcionais da versão 0.5
+
+`bookmarks` contém índices de página marcados, iniciando em zero. Mover, duplicar e excluir páginas de cadernos atualiza o mapa `pages`, `count`, `lastPage` e os marcadores na mesma gravação de JSON. PDFs continuam com a sequência original. O schema permanece 2: tinta de formas/régua usa os mesmos pontos e tipos de caneta. Versões antigas podem ler a tinta e a organização de cadernos, mas ignoram os marcadores. Não há conta ou sincronização implementadas.

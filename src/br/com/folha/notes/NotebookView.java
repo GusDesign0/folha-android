@@ -19,6 +19,20 @@ final class NotebookView extends View {
     String pen="fountain";
     float smoothing=1,sensitivity=1;
     boolean partialEraser=true;
+    boolean autoShapes=true,rulerEnabled=false;
+    final RulerGuide ruler=new RulerGuide();
+    final TwoFingerTap twoTap;
+    private int rulerDrag=-1;
+    private boolean drawingWithRuler=false;
+    private Ink.Stroke heldRaw;
+    private float holdX,holdY,tapZoom,tapPanX,tapPanY;
+    private long lastStylusTime=-1000;
+    private final Runnable shapeHold=()->snapShape();
+    private void snapShape(){
+        if(activeId<0||pending==null||heldRaw!=null||drawingWithRuler||!autoShapes)return;
+        Ink.Stroke adjusted=ShapeRecognizer.recognize(pending);
+        if(adjusted!=null){heldRaw=pending;pending=adjusted;performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);invalidate();}
+    }
     final SelectionEditor selection;
     Map<String,Bitmap> images=new HashMap<>();
     boolean touchInk=false,ready=true;
@@ -40,7 +54,8 @@ final class NotebookView extends View {
 
     NotebookView(Context c,List<Ink.Stroke> strokes,String paper,Listener listener) {
         super(c);this.strokes=strokes;this.paper=paper;this.listener=listener;selection=new SelectionEditor(this);
-        setBackgroundColor(Color.rgb(230,234,231));setContentDescription("Página do caderno. Escreva com a S Pen e use dois dedos para ampliar.");
+        twoTap=new TwoFingerTap(ViewConfiguration.get(c).getScaledTouchSlop());ruler.reset(pageW,pageH);
+        setBackgroundColor(Color.rgb(230,234,231));setContentDescription("Página do caderno. S Pen escreve. Dois dedos ampliam; um toque curto com dois dedos desfaz.");
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         scaler=new ScaleGestureDetector(c,new ScaleGestureDetector.SimpleOnScaleGestureListener(){
             @Override public boolean onScaleBegin(ScaleGestureDetector d){wasScaling=true;return activeId==-1;}
@@ -54,9 +69,10 @@ final class NotebookView extends View {
         });
     }
     private float density(){return getResources().getDisplayMetrics().density;}
-    void setPdf(PdfFiles.Rendered image){pdf=image.bitmap;pageW=image.width;pageH=image.height;ready=true;cacheDirty=true;invalidate();}
+    void setPdf(PdfFiles.Rendered image){pdf=image.bitmap;pageW=image.width;pageH=image.height;ruler.reset(pageW,pageH);ready=true;cacheDirty=true;invalidate();}
     void fit(){zoom=1;panX=panY=0;listener.zoom(zoom);invalidate();}
-    void dispose(){if(pdf!=null){pdf.recycle();pdf=null;}if(inkCache!=null){inkCache.recycle();inkCache=null;}MediaFiles.recycle(images);}
+    void dispose(){removeCallbacks(shapeHold);twoTap.cancel();if(pdf!=null){pdf.recycle();pdf=null;}if(inkCache!=null){inkCache.recycle();inkCache=null;}MediaFiles.recycle(images);}
+    void setRuler(boolean enabled){finishInput();rulerEnabled=enabled;rulerDrag=-1;twoTap.cancel();invalidate();}
     void setImages(Map<String,Bitmap> next){MediaFiles.recycle(images);images=next;refreshLayer();}
     void refreshLayer(){cacheDirty=true;invalidate();}
     void documentChanged(){changed();}
@@ -105,22 +121,58 @@ final class NotebookView extends View {
         cache();c.drawBitmap(inkCache,null,new RectF(0,0,getWidth(),getHeight()),paint);
         if(pending!=null){saved=c.save();c.translate(left,top);c.scale(scale,scale);c.clipRect(0,0,pageW,pageH);PageArt.stroke(c,pending);c.restoreToCount(saved);}
         if(tool==4){saved=c.save();c.translate(left,top);c.scale(scale,scale);selection.draw(c,scale,images);c.restoreToCount(saved);}
+        if(rulerEnabled){saved=c.save();c.translate(left,top);c.scale(scale,scale);drawRuler(c,scale);c.restoreToCount(saved);}
         if(!ready){paint.setColor(Color.rgb(50,107,86));paint.setTextSize(15*density());paint.setTypeface(Typeface.DEFAULT);c.drawText("Carregando PDF…",24*density(),36*density(),paint);}
         if(hoverX>=0&&tool<3){paint.setColor(0x90608070);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(density());float radius=(tool==2?10:tool==1?penWidth*4:penWidth)*scale;c.drawCircle(hoverX,hoverY,Math.max(3*density(),radius),paint);paint.setStyle(Paint.Style.FILL);}
     }
     @Override public boolean onHoverEvent(MotionEvent e){if(e.getActionMasked()==MotionEvent.ACTION_HOVER_EXIT){hoverX=hoverY=-1;}else{hoverX=e.getX();hoverY=e.getY();}invalidate();return true;}
     private boolean stylus(MotionEvent e,int i){int t=e.getToolType(i);return t==MotionEvent.TOOL_TYPE_STYLUS||t==MotionEvent.TOOL_TYPE_ERASER;}
+    private boolean tapEvent(MotionEvent e){
+        int action=e.getActionMasked(),idx=e.getActionIndex();long time=e.getEventTime();
+        for(int i=0;i<e.getPointerCount();i++)if(e.getToolType(i)!=MotionEvent.TOOL_TYPE_FINGER){lastStylusTime=time;twoTap.cancel();return false;}
+        if(action==MotionEvent.ACTION_CANCEL||(e.getFlags()&MotionEvent.FLAG_CANCELED)!=0){twoTap.cancel();return false;}
+        if(action==MotionEvent.ACTION_DOWN){twoTap.begin(e.getPointerId(0),e.getX(),e.getY(),time);tapZoom=zoom;tapPanX=panX;tapPanY=panY;if(time-lastStylusTime<120)twoTap.cancel();}
+        if(action==MotionEvent.ACTION_POINTER_DOWN)twoTap.add(e.getPointerId(idx),e.getX(idx),e.getY(idx),time);
+        for(int i=0;i<e.getPointerCount();i++){for(int h=0;h<e.getHistorySize();h++)twoTap.move(e.getPointerId(i),e.getHistoricalX(i,h),e.getHistoricalY(i,h),e.getHistoricalEventTime(h));twoTap.move(e.getPointerId(i),e.getX(i),e.getY(i),time);}
+        if(action==MotionEvent.ACTION_POINTER_UP||action==MotionEvent.ACTION_UP)return twoTap.lift(e.getPointerId(idx),time,action==MotionEvent.ACTION_UP);
+        return false;
+    }
+    private void hold(MotionEvent e,int i,boolean start){
+        float x=e.getX(i),y=e.getY(i),slop=3*density();
+        if(start||(x-holdX)*(x-holdX)+(y-holdY)*(y-holdY)>slop*slop){
+            if(heldRaw!=null){pending=heldRaw;heldRaw=null;}
+            holdX=x;holdY=y;removeCallbacks(shapeHold);if(autoShapes&&pending!=null&&!drawingWithRuler)postDelayed(shapeHold,600);
+        }
+    }
+    private boolean rulerTouch(MotionEvent e){
+        if(!rulerEnabled)return false;int a=e.getActionMasked();if(e.getPointerCount()>1){rulerDrag=-1;return false;}
+        if(e.getToolType(0)!=MotionEvent.TOOL_TYPE_FINGER)return false;
+        float x=Math.max(0,Math.min(pageW,(e.getX()-left)/(base*zoom))),y=Math.max(0,Math.min(pageH,(e.getY()-top)/(base*zoom)));
+        if(a==MotionEvent.ACTION_DOWN){float radius=22*density()/(base*zoom);if(Math.hypot(x-ruler.x1,y-ruler.y1)<radius)rulerDrag=0;else if(Math.hypot(x-ruler.x2,y-ruler.y2)<radius)rulerDrag=1;else if(Ink.distanceSquared(x,y,ruler.x1,ruler.y1,ruler.x2,ruler.y2)<radius*radius/4)rulerDrag=2;else rulerDrag=-1;lastX=x;lastY=y;}
+        if(rulerDrag<0)return false;twoTap.cancel();
+        if(a==MotionEvent.ACTION_MOVE){if(rulerDrag<2)ruler.endpoint(rulerDrag,x,y);else ruler.translate(x-lastX,y-lastY,pageW,pageH);lastX=x;lastY=y;invalidate();}
+        if(a==MotionEvent.ACTION_UP||a==MotionEvent.ACTION_CANCEL)rulerDrag=-1;
+        return true;
+    }
+    private void drawRuler(Canvas c,float scale){
+        float radius=9*density()/scale,dx=ruler.x2-ruler.x1,dy=ruler.y2-ruler.y1,len=(float)Math.hypot(dx,dy);int saved=c.save();c.translate(ruler.x1,ruler.y1);c.rotate((float)Math.toDegrees(Math.atan2(dy,dx)));
+        paint.setStyle(Paint.Style.FILL);paint.setColor(0x55E6B848);c.drawRect(0,-radius*2,len,0,paint);paint.setColor(0xFF8C742A);paint.setStrokeWidth(density()/scale);c.drawLine(0,0,len,0,paint);paint.setTextSize(9*density()/scale);paint.setTypeface(Typeface.DEFAULT);
+        for(int i=0;i*14.1732f<len;i++){float x=i*14.1732f;c.drawLine(x,0,x,-radius*(i%2==0?1.15f:0.6f),paint);if(i%2==0)c.drawText(String.valueOf(i/2),x+radius*0.18f,-radius*1.25f,paint);}c.restoreToCount(saved);
+        paint.setColor(0xFFE6B848);c.drawCircle(ruler.x1,ruler.y1,radius,paint);c.drawCircle(ruler.x2,ruler.y2,radius,paint);paint.setStyle(Paint.Style.STROKE);paint.setColor(0xFF8C742A);c.drawCircle(ruler.x1,ruler.y1,radius,paint);c.drawCircle(ruler.x2,ruler.y2,radius,paint);paint.setStyle(Paint.Style.FILL);
+    }
     @Override public boolean onTouchEvent(MotionEvent e) {
         if(!ready)return true;geometry();int a=e.getActionMasked(),idx=e.getActionIndex();
-        if(a==MotionEvent.ACTION_CANCEL){cancelInput();dragging=false;return true;}
+        if(tapEvent(e)){scaler.onTouchEvent(e);undo();zoom=tapZoom;panX=tapPanX;panY=tapPanY;constrain();listener.zoom(zoom);wasScaling=false;dragging=false;performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);return true;}
+        if(a==MotionEvent.ACTION_CANCEL){cancelInput();rulerDrag=-1;dragging=false;return true;}
         if(activeId!=-1&&activeFinger&&a==MotionEvent.ACTION_POINTER_DOWN){cancelInput();wasScaling=true;dragging=false;}
         if(activeId!=-1) {
             int p=e.findPointerIndex(activeId);if(p<0){cancelInput();return true;}
             if((e.getFlags()&MotionEvent.FLAG_CANCELED)!=0&&(a==MotionEvent.ACTION_UP||a==MotionEvent.ACTION_POINTER_UP)&&e.getPointerId(idx)==activeId){cancelInput();return true;}
-            if(a==MotionEvent.ACTION_MOVE){sample(e,p);invalidate();}
+            if(a==MotionEvent.ACTION_MOVE){hold(e,p,false);sample(e,p);invalidate();}
             if((a==MotionEvent.ACTION_UP||a==MotionEvent.ACTION_POINTER_UP)&&e.getPointerId(idx)==activeId){sample(e,p);commit();}
             return true;
         }
+        if(rulerTouch(e))return true;
         if((a==MotionEvent.ACTION_DOWN||a==MotionEvent.ACTION_POINTER_DOWN)&&tool!=3&&(stylus(e,idx)||(touchInk&&e.getPointerCount()==1))) {
             float x=(e.getX(idx)-left)/(base*zoom),y=(e.getY(idx)-top)/(base*zoom);
             if(x<0||y<0||x>pageW||y>pageH)return true;
@@ -130,8 +182,8 @@ final class NotebookView extends View {
             selecting=tool==4;
             if(selecting){erasing=false;selection.begin(x,y);}
             else if(erasing){beforeErase=new ArrayList<>(strokes);eraseChanged=false;eraseLastX=x;eraseLastY=y;}
-            else{pending=new Ink.Stroke(color,tool==1?penWidth*7:penWidth,tool==1);pending.pen=pen;pending.smoothing=smoothing;pending.sensitivity=sensitivity;}
-            sample(e,idx);getParent().requestDisallowInterceptTouchEvent(true);invalidate();return true;
+            else{pending=new Ink.Stroke(color,tool==1?penWidth*7:penWidth,tool==1);pending.pen=pen;pending.smoothing=smoothing;pending.sensitivity=sensitivity;drawingWithRuler=rulerEnabled&&tool<=1;if(drawingWithRuler){pending.pen="ballpoint";pending.smoothing=0;}}
+            sample(e,idx);hold(e,idx,true);getParent().requestDisallowInterceptTouchEvent(true);invalidate();return true;
         }
         // A second finger cancels optional finger-writing and enters navigation.
         if(!stylus(e,idx)) {
@@ -152,6 +204,7 @@ final class NotebookView extends View {
         point(e.getX(i),e.getY(i),e.getPressure(i));
     }
     private void point(float sx,float sy,float pressure) {
+        if(heldRaw!=null)return;
         float x=(sx-left)/(base*zoom),y=(sy-top)/(base*zoom);
         if(x<0||y<0||x>pageW||y>pageH)return;
         if(selecting){selection.move(x,y);return;}
@@ -161,16 +214,18 @@ final class NotebookView extends View {
             eraseLastX=x;eraseLastY=y;
             if(removed){eraseChanged=true;cacheDirty=true;}
         }else if(pending!=null){
+            if(drawingWithRuler){Ink.Point p=ruler.project(x,y,pressure);if(pending.points.size()<2)pending.points.add(p);else pending.points.set(1,p);return;}
             int n=pending.points.size();if(n>0){Ink.Point last=pending.points.get(n-1);if(Ink.distanceSquared(x,y,last.x,last.y,last.x,last.y)<0.04f&&Math.abs(last.pressure-pressure)<0.03f)return;}
             pending.points.add(new Ink.Point(x,y,pressure));
         }
     }
     private void commit(){
+        removeCallbacks(shapeHold);heldRaw=null;drawingWithRuler=false;
         if(selecting){selection.end();selecting=false;}
         if(pending!=null&&!pending.points.isEmpty()){history.before(strokes);Ink.Stroke finished=pending;strokes.add(finished);pending=null;appendInk(finished);}
         if(erasing&&eraseChanged){history.before(beforeErase);changed();}
         pending=null;erasing=false;eraseChanged=false;beforeErase=null;activeId=-1;dragging=false;invalidate();
     }
-    private void cancelInput(){if(selecting){selection.cancel();selecting=false;}if(erasing&&beforeErase!=null){strokes.clear();strokes.addAll(beforeErase);cacheDirty=true;}pending=null;beforeErase=null;erasing=false;activeId=-1;eraseChanged=false;invalidate();}
+    private void cancelInput(){removeCallbacks(shapeHold);heldRaw=null;drawingWithRuler=false;if(selecting){selection.cancel();selecting=false;}if(erasing&&beforeErase!=null){strokes.clear();strokes.addAll(beforeErase);cacheDirty=true;}pending=null;beforeErase=null;erasing=false;activeId=-1;eraseChanged=false;invalidate();}
     @Override public boolean performClick(){super.performClick();return true;}
 }

@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
     final ArrayList<Documents.Doc> library=new ArrayList<>();
     Documents store;
     AppUpdater updater;
+    PagePanel pagePanel;
     Documents.Doc current;
     Documents.Doc exportSnapshot;
     LinearLayout root;
@@ -38,6 +39,7 @@ public class MainActivity extends Activity {
     int imagePage=0;
     float smoothing=1,sensitivity=1;
     boolean partialEraser=true;
+    boolean autoShapes=true,rulerOn=false;
     boolean touchInk=false,loading=false;
     final Runnable delayedSave=()->saveCurrent();
 
@@ -45,6 +47,7 @@ public class MainActivity extends Activity {
         super.onCreate(state);store=new Documents(this);updater=new AppUpdater(this);
         PdfFiles.init(this);
         SharedPreferences prefs=getSharedPreferences("pens",0);width=prefs.getFloat("width",2.2f);pen=prefs.getString("pen","fountain");smoothing=prefs.getFloat("smoothing",1);sensitivity=prefs.getFloat("sensitivity",1);partialEraser=prefs.getBoolean("partial",true);
+        autoShapes=prefs.getBoolean("shapes",true);
         if(Build.VERSION.SDK_INT>=33)getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,()->navigateBack());
         getWindow().setStatusBarColor(BG);getWindow().setNavigationBarColor(BG);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
@@ -57,7 +60,7 @@ public class MainActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state){saveCurrent();if(current!=null)state.putString("document",current.id);super.onSaveInstanceState(state);}
     @Override protected void onPause(){super.onPause();if(canvas!=null)canvas.finishInput();saveCurrent();}
     @Override public void onConfigurationChanged(android.content.res.Configuration config){super.onConfigurationChanged(config);if(current==null&&!loading)home();}
-    @Override protected void onDestroy(){main.removeCallbacks(delayedSave);if(updater!=null)updater.close();if(canvas!=null)canvas.dispose();worker.shutdown();renderWorker.shutdown();fileWorker.shutdown();super.onDestroy();}
+    @Override protected void onDestroy(){main.removeCallbacks(delayedSave);PagePanel panel=pagePanel;if(panel!=null){panel.dialog.dismiss();panel.close();}if(updater!=null)updater.close();if(canvas!=null)canvas.dispose();worker.shutdown();renderWorker.shutdown();fileWorker.shutdown();super.onDestroy();}
     void navigateBack(){if(loading){generation++;loading=false;home();}else if(current!=null){leaveEditor();home();}else finish();}
     @Override public void onBackPressed(){navigateBack();}
     int dp(float v){return Math.round(v*getResources().getDisplayMetrics().density);}
@@ -146,6 +149,8 @@ public class MainActivity extends Activity {
         String[] symbols={"pen","marker","eraser","hand","lasso"},labels={"Caneta","Marca-texto","Borracha: segure para escolher o tipo","Mover página","Laço: selecionar, mover e redimensionar"};
         for(int i=0;i<5;i++){final int t=i;Icon b=icon(symbols[i],labels[i],()->selectTool(t));if(i==0)b.setOnLongClickListener(v->{chooseWidth();return true;});if(i==2)b.setOnLongClickListener(v->{chooseEraser();return true;});toolIcons.add(b);tools.addView(b);gap(tools,4);}gap(tools,12);
         tools.addView(icon("undo","Desfazer",()->canvas.undo()));tools.addView(icon("redo","Refazer",()->canvas.redo()));gap(tools,18);
+        Icon rulerButton=icon("ruler","Régua: arraste as pontas com o dedo",()->{});rulerButton.selected=rulerOn;rulerButton.setOnClickListener(v->{rulerOn=!rulerOn;if(rulerOn&&tool>1)selectTool(0);canvas.setRuler(rulerOn);rulerButton.selected=rulerOn;rulerButton.invalidate();toast(rulerOn?"Arraste a régua ou suas pontas com um dedo. A S Pen traça a linha.":"Régua desligada");});tools.addView(rulerButton);
+        Icon shapeButton=icon("shapes","Ajustar formas ao segurar a caneta",()->{});shapeButton.selected=autoShapes;shapeButton.setOnClickListener(v->{canvas.finishInput();autoShapes=!autoShapes;canvas.autoShapes=autoShapes;shapeButton.selected=autoShapes;shapeButton.invalidate();getSharedPreferences("pens",0).edit().putBoolean("shapes",autoShapes).apply();toast(autoShapes?"Desenhe uma linha, círculo ou retângulo e segure a caneta por um instante.":"Ajuste de formas desligado");});tools.addView(shapeButton);gap(tools,12);
         tools.addView(icon("selectmenu","Copiar, colar e editar seleção",()->selectionOptions()));tools.addView(icon("text","Inserir texto",()->textBox(null)));tools.addView(icon("image","Inserir imagem",()->insertImage()));gap(tools,12);
         int[] colors={INK,0xFF3562B7,0xFFB9564A,0xFF8C63B4,0xFFE6B848,0xFF56A792};
         for(int c:colors){View swatch=new View(this);GradientDrawable drawable=shape(c,20);drawable.setStroke(dp(c==color?3:1),c==color?Color.WHITE:BG);swatch.setBackground(drawable);
@@ -154,11 +159,11 @@ public class MainActivity extends Activity {
         gap(tools,12);tools.addView(icon("width","Tipo de caneta, espessura e suavização",()->chooseWidth()));toolbar.addView(tools);root.addView(toolbar);line(root);
         LinearLayout.LayoutParams pageParams=new LinearLayout.LayoutParams(-1,0,1);
         canvas=new NotebookView(this,current.strokes(page),current.paper,new NotebookView.Listener(){public void changed(){scheduleSave();}public void zoom(float z){if(zoomLabel!=null)zoomLabel.setText(Math.round(z*100)+"%");}});
-        canvas.color=color;canvas.penWidth=width;canvas.pen=pen;canvas.smoothing=smoothing;canvas.sensitivity=sensitivity;canvas.partialEraser=partialEraser;canvas.touchInk=touchInk;canvas.tool=tool;canvas.ready=!current.pdf;root.addView(canvas,pageParams);
+        canvas.color=color;canvas.penWidth=width;canvas.pen=pen;canvas.smoothing=smoothing;canvas.sensitivity=sensitivity;canvas.partialEraser=partialEraser;canvas.touchInk=touchInk;canvas.tool=tool;canvas.autoShapes=autoShapes;canvas.rulerEnabled=rulerOn;canvas.ready=!current.pdf;root.addView(canvas,pageParams);
         LinearLayout bottom=row();bottom.setPadding(dp(12),dp(5),dp(12),dp(5));
-        bottom.addView(icon("prev","Página anterior",()->changePage(-1)));pageLabel=text((page+1)+" / "+current.count,13,INK,true);pageLabel.setPadding(dp(6),0,dp(6),0);pageLabel.setOnClickListener(v->jump());bottom.addView(pageLabel);bottom.addView(icon("next","Próxima página",()->changePage(1)));
+        bottom.addView(icon("pages","Miniaturas e marcadores de páginas",()->showPages()));bottom.addView(icon("prev","Página anterior",()->changePage(-1)));pageLabel=text((page+1)+" / "+current.count,13,INK,true);pageLabel.setPadding(dp(6),0,dp(6),0);pageLabel.setOnClickListener(v->showPages());pageLabel.setOnLongClickListener(v->{jump();return true;});bottom.addView(pageLabel);bottom.addView(icon("next","Próxima página",()->changePage(1)));
         if(!current.pdf)bottom.addView(icon("plus","Adicionar página",()->{canvas.finishInput();saveCurrent();current.count++;page=current.count-1;current.lastPage=page;canvas.dispose();generation++;editor();saveCurrent();}));
-        TextView hint=text("S Pen escreve · dedos navegam",11,MUTED,false);hint.setGravity(Gravity.CENTER);bottom.addView(hint,new LinearLayout.LayoutParams(0,-2,1));
+        TextView hint=text("S Pen escreve · toque com 2 dedos desfaz",11,MUTED,false);hint.setGravity(Gravity.CENTER);hint.setMaxLines(2);bottom.addView(hint,new LinearLayout.LayoutParams(0,-2,1));
         zoomLabel=text("100%",12,GREEN,true);zoomLabel.setGravity(Gravity.CENTER);zoomLabel.setMinWidth(dp(50));zoomLabel.setMinHeight(dp(48));zoomLabel.setOnClickListener(v->canvas.fit());bottom.addView(zoomLabel);root.addView(bottom);selectTool(tool);
         if(current.pdf)loadPdfPage();
         loadImages();
@@ -214,7 +219,15 @@ public class MainActivity extends Activity {
     void restoreBackup(){Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);i.setType("*/*");startActivityForResult(i,104);}
     void receiveBackup(Uri uri){loading=true;showLoading("Restaurando caderno…");fileWorker.execute(()->{try(InputStream in=getContentResolver().openInputStream(uri)){if(in==null)throw new IOException("Arquivo indisponível");Documents.Doc doc=Backups.restore(store,getCacheDir(),in);main.post(()->{if(isDestroyed())return;loading=false;library.add(0,doc);open(doc);toast("Backup restaurado com anotações editáveis.");});}catch(Exception|OutOfMemoryError e){main.post(()->{loading=false;home();error("Não foi possível restaurar. Escolha um backup .folha válido.",e);});}});}
     void checkUpdates(){updater.check();}
-    String appVersion(){try{return getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(Exception e){return "0.4.0";}}
+    String appVersion(){try{return getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(Exception e){return "0.5.0";}}
+    void showPages(){if(current==null)return;pagePanel=new PagePanel(this);pagePanel.show();}
+    void managePage(int index,int action){
+        if(current==null||current.pdf)return;
+        if(action==0){EditText input=new EditText(this);input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);input.setHint("Posição de 1 a "+current.count);new AlertDialog.Builder(this).setTitle("Mover página "+(index+1)).setView(input).setNegativeButton("Cancelar",null).setPositiveButton("Mover",(d,w)->{try{int target=Integer.parseInt(input.getText().toString())-1;if(target<0||target>=current.count){toast("Informe uma posição válida.");return;}applyPageEdit(index,0,target);}catch(NumberFormatException e){toast("Informe o número da posição.");}}).show();}
+        if(action==1){if(current.count>=10000){toast("Este caderno chegou ao limite de páginas.");return;}applyPageEdit(index,1,0);}
+        if(action==2){if(current.count<=1){toast("O caderno precisa ter ao menos uma página.");return;}new AlertDialog.Builder(this).setTitle("Excluir página "+(index+1)+"?").setMessage("A página e suas anotações serão removidas deste caderno.").setNegativeButton("Cancelar",null).setPositiveButton("Excluir",(d,w)->applyPageEdit(index,2,0)).show();}
+    }
+    void applyPageEdit(int index,int action,int target){canvas.finishInput();canvas.dispose();generation++;if(action==0)current.movePage(index,target);if(action==1)current.duplicatePage(index);if(action==2)current.deletePage(index);page=current.lastPage;editor();saveCurrent();}
     void changePage(int delta){int next=page+delta;if(next<0||next>=current.count)return;canvas.finishInput();saveCurrent();canvas.dispose();generation++;page=next;current.lastPage=page;editor();saveCurrent();}
     void jump(){EditText input=new EditText(this);input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);input.setHint("1 a "+current.count);new AlertDialog.Builder(this).setTitle("Ir para a página").setView(input).setNegativeButton("Cancelar",null).setPositiveButton("Ir",(d,w)->{try{int n=Integer.parseInt(input.getText().toString());if(n>=1&&n<=current.count)changePage(n-1-page);else toast("Informe uma página entre 1 e "+current.count);}catch(Exception e){toast("Informe o número da página.");}}).show();}
     void scheduleSave(){if(saveLabel!=null)saveLabel.setText("Salvando…");main.removeCallbacks(delayedSave);main.postDelayed(delayedSave,450);}
@@ -230,7 +243,7 @@ public class MainActivity extends Activity {
     void options(){String[] choices={"Nome e pasta",touchInk?"Desativar escrita com o dedo":"Ativar escrita com o dedo","Backup editável (.folha)","Atualizar app","Como usar","Sobre esta versão"};
         new AlertDialog.Builder(this).setTitle("Seu caderno").setItems(choices,(d,w)->{if(w==0)editDetails(current);if(w==1){touchInk=!touchInk;canvas.touchInk=touchInk;toast(touchInk?"Escrita com o dedo ativada":"Somente a S Pen escreve");}if(w==2)backup();if(w==3)checkUpdates();if(w==4)help();if(w==5)new AlertDialog.Builder(this).setTitle("Folha · versão "+appVersion()).setMessage("App independente de cadernos e anotações.\n\nUse o backup .folha para guardar anotações editáveis, textos, imagens e o PDF original. O PDF exportado preserva o conteúdo original e acrescenta a escrita como caminhos.\n\nOs arquivos ficam neste tablet. Conta, sincronização e aplicativo para Windows estão planejados. OCR e reconhecimento de escrita ainda não estão incluídos.\n\nPDF: PdfBox-Android / Apache License 2.0. Criptografia: Bouncy Castle / licença MIT.").setPositiveButton("Entendi",null).show();}).show();
     }
-    void help(){new AlertDialog.Builder(this).setTitle("Feito para escrever").setMessage("• A S Pen escreve. Dedos movem e ampliam.\n\n• Segure o ícone da caneta para escolher esferográfica, tinteiro ou pincel e ajustar a pressão e a suavização.\n\n• Segure a borracha para alternar entre apagar uma parte ou o traço inteiro. O botão lateral da S Pen também apaga.\n\n• Com o laço, contorne o que deseja selecionar. Arraste a seleção para mover e a bolinha do canto para redimensionar. As cores recolorem a seleção.\n\n• Use o ícone de folhas sobrepostas para copiar, colar, duplicar, apagar ou editar uma caixa de texto selecionada. As cópias podem ser coladas em outra página do mesmo caderno.\n\n• Use T para inserir texto e o ícone de paisagem para inserir imagem.\n\n• Exporte um PDF pelo ícone no alto. Para preservar a edição e transferir o caderno, use Backup editável nas opções. Restaure pela biblioteca.").setPositiveButton("Vamos lá",null).show();}
+    void help(){new AlertDialog.Builder(this).setTitle("Feito para escrever").setMessage("• A S Pen escreve. Dedos movem e ampliam. Um toque curto e parado com dois dedos desfaz.\n\n• Com o ajuste de formas ligado, desenhe uma linha, círculo ou retângulo e segure a ponta por cerca de 0,6 segundo antes de levantar. O ícone de formas liga ou desliga esse recurso.\n\n• Ligue a régua e arraste suas pontas com um dedo para girar, ou seu corpo para mover. A S Pen traça sobre a linha da régua. Os números correspondem a centímetros na página.\n\n• Toque no ícone de miniaturas ou no número da página para navegar. Segure uma miniatura para marcar. Em cadernos, também é possível mover, duplicar e excluir páginas. PDFs mantêm a organização original. Segure o número da página para ir diretamente a uma posição.\n\n• Segure o ícone da caneta para escolher esferográfica, tinteiro ou pincel e ajustar a pressão e a suavização.\n\n• Segure a borracha para alternar entre apagar uma parte ou o traço inteiro. O botão lateral da S Pen também apaga.\n\n• Com o laço, contorne o que deseja selecionar. Arraste a seleção para mover e a bolinha do canto para redimensionar. As cores recolorem a seleção.\n\n• Use o ícone de folhas sobrepostas para copiar, colar, duplicar, apagar ou editar uma caixa de texto selecionada. As cópias podem ser coladas em outra página do mesmo caderno.\n\n• Use T para inserir texto e o ícone de paisagem para inserir imagem.\n\n• Exporte um PDF pelo ícone no alto. Para preservar a edição e transferir o caderno, use Backup editável nas opções. Restaure pela biblioteca.").setPositiveButton("Vamos lá",null).show();}
     void exportPdf(){
         if(current==null)return;canvas.finishInput();saveCurrent();
         try{exportSnapshot=current.copy();Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType("application/pdf");intent.putExtra(Intent.EXTRA_TITLE,current.name.replaceAll("[\\\\/:*?\"<>|]","_")+" - anotado.pdf");startActivityForResult(intent,101);}catch(Exception e){error("Não foi possível iniciar a exportação.",e);}
@@ -291,6 +304,9 @@ public class MainActivity extends Activity {
                 case "text":path(c,4,5,20,5);path(c,12,5,12,21);path(c,8,21,16,21);break;
                 case "image":c.drawRect(3,4,21,21,p);c.drawCircle(15,9,2,p);path(c,3,17,9,11,15,17,18,14,21,17);break;
                 case "update":c.drawArc(4,4,20,20,35,285,false,p);path(c,20,5,20,12,14,12);break;
+                case "ruler":c.drawRect(2,7,22,17,p);for(int i=0;i<5;i++)path(c,5+i*3,7,5+i*3,i%2==0?12:10);break;
+                case "shapes":c.drawRect(2,2,12,12,p);c.drawCircle(16,16,6,p);break;
+                case "pages":c.drawRect(3,3,10,11,p);c.drawRect(14,3,21,11,p);c.drawRect(3,15,10,23,p);c.drawRect(14,15,21,23,p);break;
                 case "more":p.setStyle(Paint.Style.FILL);for(int i=0;i<3;i++)c.drawCircle(12,5+i*7,1.6f,p);break;
                 case "leaf":path(c,6,3,16,3,20,7,20,22,5,22,5,3);path(c,9,10,16,10);path(c,9,14,16,14);path(c,9,18,13,18);break;
             }
@@ -298,4 +314,3 @@ public class MainActivity extends Activity {
         }
     }
 }
-

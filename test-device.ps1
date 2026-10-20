@@ -1,4 +1,4 @@
-param([string]$ToolchainRoot=(Join-Path $PSScriptRoot '..\toolchain'),[switch]$RequireLegacy)
+param([string]$ToolchainRoot=(Join-Path $PSScriptRoot '..\toolchain'),[switch]$RequireLegacy,[string]$Device='emulator-5554')
 $ErrorActionPreference='Stop'
 $ToolchainRoot=(Resolve-Path -LiteralPath $ToolchainRoot).Path
 $jdk=Get-ChildItem -LiteralPath "$ToolchainRoot\jdk" -Directory | Select-Object -First 1
@@ -24,13 +24,15 @@ try{[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,"$build\
 Assert-Exit
 & "$tools\apksigner.bat" sign --ks "$ToolchainRoot\private\folha.p12" --ks-key-alias folha --ks-pass pass:folha-local-dev --out "$build\tests.apk" "$build\aligned.apk"
 Assert-Exit
-& "$ToolchainRoot\platform-tools\adb.exe" install -r "$build\tests.apk"
+& "$ToolchainRoot\platform-tools\adb.exe" -s $Device install -r "$build\tests.apk"
 Assert-Exit
 if(Test-Path -LiteralPath "$PSScriptRoot\tests\fixtures\fixture-preservar.pdf"){
-    & "$ToolchainRoot\platform-tools\adb.exe" shell mkdir -p /sdcard/Android/data/br.com.folha.notes/files
-    & "$ToolchainRoot\platform-tools\adb.exe" push "$PSScriptRoot\tests\fixtures\fixture-preservar.pdf" /sdcard/Android/data/br.com.folha.notes/files/fixture-preservar.pdf
+    & "$ToolchainRoot\platform-tools\adb.exe" -s $Device shell mkdir -p /sdcard/Android/data/br.com.folha.notes/files
+    & "$ToolchainRoot\platform-tools\adb.exe" -s $Device push "$PSScriptRoot\tests\fixtures\fixture-preservar.pdf" /sdcard/Android/data/br.com.folha.notes/files/fixture-preservar.pdf
     Assert-Exit
 }
-if($RequireLegacy){& "$ToolchainRoot\platform-tools\adb.exe" shell am instrument -w -e requireLegacy true br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
-else{& "$ToolchainRoot\platform-tools\adb.exe" shell am instrument -w br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
+if($RequireLegacy){$taskResults=& "$ToolchainRoot\platform-tools\adb.exe" -s $Device shell am instrument -w -e requireLegacy true br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
+else{$taskResults=& "$ToolchainRoot\platform-tools\adb.exe" -s $Device shell am instrument -w br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
 Assert-Exit
+$taskResults | Write-Output
+if(($taskResults -join "`n") -notmatch 'PASS:' -or ($taskResults -join "`n") -match 'FAIL:|Process crashed'){throw 'Native integration tests did not complete successfully'}

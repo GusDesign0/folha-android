@@ -1,17 +1,15 @@
-FOLHA 0.4.0 — ATUALIZAR PELO APP
+FOLHA 0.5.0 — FORMAS, RÉGUA, PÁGINAS E DOIS DEDOS PARA DESFAZER
 
-Para receber esta versão, abra Folha.apk no tablet e escolha Atualizar, sem desinstalar a versão anterior. Seus cadernos continuam no aparelho.
+Se já estiver na 0.4.0, toque em Atualizar app e baixe esta versão. Também é possível abrir Folha.apk pelo Meus Arquivos e escolher Atualizar. Não desinstale a versão anterior.
 
-Nas próximas versões:
-1. Toque em Atualizar app na biblioteca ou nas opções do caderno.
-2. Se houver uma nova versão, toque em Baixar e atualizar.
-3. Aguarde o download e a verificação; você pode cancelar.
-4. Toque em Instalar. Na primeira vez, permita que o Folha instale apps e volte.
-5. Confirme Atualizar no instalador do Android.
+- Um toque curto e parado com dois dedos desfaz. A pinça continua ampliando; Refazer fica na barra.
+- Desenhe uma linha, círculo/elipse ou retângulo e segure a ponta por cerca de 0,6 segundo antes de levantar. O ícone de formas liga/desliga o ajuste.
+- Ligue a régua. Arraste as pontas com um dedo para girar ou o corpo para mover. A S Pen traça sobre a linha. Números em centímetros da página.
+- Abra as miniaturas pelo ícone de páginas ou pelo contador inferior. Segure uma miniatura para marcar. Em cadernos também pode mover, duplicar e excluir páginas. No PDF a ordem original permanece.
+- Segure o contador de páginas para ir diretamente a um número.
 
-A versão vem do GitHub oficial do projeto. O app verifica tamanho, SHA-256, pacote, versão e assinatura. Não precisa procurar o APK no navegador. Não há verificações contínuas; a rede funciona apenas quando você pede.
+As miniaturas são carregadas em segundo plano, com cache e fila limitados. Os testes foram feitos no Android 16 em emulador; a S Pen física deve ser validada no tablet.
 
-PDFs, anotações, textos, imagens e backups continuam funcionando offline. Windows, conta e sincronização ainda são etapas futuras.
+A versão atual é Android. Uma versão para iPadOS precisará de desenvolvimento próprio, Apple Pencil e acesso ao ambiente Apple; não é possível instalar este APK no iPad. Windows, conta e sincronização ainda são etapas futuras.
 
-Baixar sempre a versão mais recente:
 https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk
