@@ -1,0 +1,12 @@
+{
+  "installed": {
+    "client_id": "YOUR_DESKTOP_CLIENT_ID.apps.googleusercontent.com",
+    "project_id": "YOUR_SHARED_GOOGLE_PROJECT",
+    "client_secret": "YOUR_INSTALLED_APP_CLIENT_VALUE",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "redirect_uris": [
+      "http://localhost"
+    ]
+  }
+}

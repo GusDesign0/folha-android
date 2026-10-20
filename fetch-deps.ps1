@@ -9,7 +9,14 @@ New-Item -ItemType Directory -Force "$PSScriptRoot\libs","$PSScriptRoot\build\pd
 foreach($dep in $deps){$file=Join-Path "$PSScriptRoot\libs" $dep.Name;if(-not(Test-Path -LiteralPath $file)){Invoke-WebRequest -Uri $dep.Url -OutFile $file};if((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLower() -ne $dep.Sha){throw "Invalid checksum for $($dep.Name)"}}
 if(-not(Test-Path -LiteralPath "$PSScriptRoot\libs\pdfbox.jar") -or -not(Test-Path -LiteralPath "$PSScriptRoot\assets\com\tom_roush\pdfbox\resources\ttf\LiberationSans-Regular.ttf")){
     Copy-Item -LiteralPath "$PSScriptRoot\libs\pdfbox.aar" -Destination "$PSScriptRoot\build\pdfbox.zip" -Force
-    Expand-Archive -LiteralPath "$PSScriptRoot\build\pdfbox.zip" -DestinationPath "$PSScriptRoot\build\pdfbox" -Force
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $taskArchive=[System.IO.Compression.ZipFile]::OpenRead("$PSScriptRoot\build\pdfbox.zip")
+    try { foreach($entry in $taskArchive.Entries) {
+        $taskDest=Join-Path "$PSScriptRoot\build\pdfbox" $entry.FullName
+        if($entry.FullName.EndsWith('/')){New-Item -ItemType Directory -Force -Path $taskDest | Out-Null;continue}
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $taskDest) | Out-Null
+        [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry,$taskDest,$true)
+    }}finally{$taskArchive.Dispose()}
     Copy-Item -LiteralPath "$PSScriptRoot\build\pdfbox\classes.jar" -Destination "$PSScriptRoot\libs\pdfbox.jar" -Force
     Copy-Item -Path "$PSScriptRoot\build\pdfbox\assets\*" -Destination "$PSScriptRoot\assets" -Recurse -Force
 }

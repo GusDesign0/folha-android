@@ -1,17 +1,20 @@
 name: Publicar instaladores
 on:
+  push:
+    branches: [main]
+    paths: [dist/SHA256SUMS.txt]
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       tag:
-        description: Tag da versão existente
-        required: true
-        default: v0.5.0
+        description: Tag desta versão
+        required: false
+        default: v0.6.0
 permissions:
   contents: write
 concurrency:
-  group: release-assets-${{ github.event.release.tag_name || inputs.tag }}
+  group: release-assets-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   assets:
@@ -20,22 +23,33 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
       REF: ${{ github.sha }}
-      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      EVENT_TAG: ${{ github.event.release.tag_name }}
+      INPUT_TAG: ${{ inputs.tag }}
     steps:
-      - name: Baixar instaladores já assinados
+      - name: Baixar e conferir os instaladores assinados
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist
-          for name in Folha.apk Folha.zip SHA256SUMS.txt; do
+          for name in Folha.apk Folha.zip Folha-Windows.zip SHA256SUMS.txt RELEASE_NOTES.md; do
             blob=$(gh api -H 'Accept: application/vnd.github.object+json' "repos/$REPO/contents/dist/$name?ref=$REF" --jq '.sha')
             gh api "repos/$REPO/git/blobs/$blob" --jq '.content' | base64 --decode > "dist/$name"
           done
+          gh api "repos/$REPO/contents/version.json?ref=$REF" --jq '.content' | base64 --decode > dist/version.json
           sed -i 's/\r$//' dist/SHA256SUMS.txt
           (cd dist && sha256sum --check SHA256SUMS.txt)
-      - name: Anexar arquivos à versão
+          version=$(jq -r '.version' dist/version.json)
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          tag="${EVENT_TAG:-${INPUT_TAG:-v$version}}"
+          [[ "$tag" == "v$version" ]]
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+      - name: Publicar todos os downloads juntos
         shell: bash
         run: |
           set -euo pipefail
-          gh release upload "$TAG" dist/Folha.apk dist/Folha.zip dist/SHA256SUMS.txt --repo "$REPO" --clobber
-
+          if ! gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            gh release create "$TAG" --target "$REF" --title "Folha $VERSION · Android + Windows" --notes-file dist/RELEASE_NOTES.md --draft --repo "$REPO"
+          fi
+          gh release upload "$TAG" dist/Folha.apk dist/Folha.zip dist/Folha-Windows.zip dist/SHA256SUMS.txt --repo "$REPO" --clobber
+          gh release edit "$TAG" --title "Folha $VERSION · Android + Windows" --notes-file dist/RELEASE_NOTES.md --draft=false --latest --repo "$REPO"

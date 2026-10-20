@@ -9,3 +9,13 @@
 *.pem
 .env
 .env.*
+
+/.gradle/
+/local.properties
+/desktop/vendor/
+/desktop/web/vendor/
+/desktop/google-client.json
+/desktop/release/
+/desktop/qa-build/
+/desktop/build/
+*.bin

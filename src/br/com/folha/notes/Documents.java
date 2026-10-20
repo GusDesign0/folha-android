@@ -89,9 +89,9 @@ final class Documents {
     boolean exists(String id){return new File(new File(root,id),"document.json").exists();}
     File pdf(Doc d){return new File(dir(d.id),"source.pdf");}
     File assets(Doc d){File f=new File(dir(d.id),"assets");f.mkdirs();return f;}
-    Doc read(String id) throws Exception {return Doc.parse(new String(new AtomicFile(new File(dir(id),"document.json")).readFully(),StandardCharsets.UTF_8));}
-    void write(Doc d) throws Exception {atomic(new File(dir(d.id),"document.json"),d.json().toString());atomic(new File(dir(d.id),"metadata.json"),d.metadata().toString());}
-    void write(String id,String json) throws IOException {
+    synchronized Doc read(String id) throws Exception {return Doc.parse(new String(new AtomicFile(new File(dir(id),"document.json")).readFully(),StandardCharsets.UTF_8));}
+    synchronized void write(Doc d) throws Exception {atomic(new File(dir(d.id),"document.json"),d.json().toString());atomic(new File(dir(d.id),"metadata.json"),d.metadata().toString());}
+    synchronized void write(String id,String json) throws IOException {
         atomic(new File(dir(id),"document.json"),json);
         try{Doc d=Doc.parse(json);atomic(new File(dir(id),"metadata.json"),d.metadata().toString());}catch(Exception e){throw new IOException(e);}
     }
@@ -99,7 +99,7 @@ final class Documents {
         AtomicFile atom=new AtomicFile(file);FileOutputStream out=null;
         try{out=atom.startWrite();out.write(json.getBytes(StandardCharsets.UTF_8));atom.finishWrite(out);}catch(IOException e){if(out!=null)atom.failWrite(out);throw e;}
     }
-    List<Doc> load() throws Exception {
+    synchronized List<Doc> load() throws Exception {
         List<Doc> docs=new ArrayList<>();File[] dirs=root.listFiles();if(dirs==null)return docs;
         for(File dir:dirs) {
             if(!dir.isDirectory())continue;

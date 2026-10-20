@@ -9,11 +9,13 @@ $platform="$ToolchainRoot\platform\android-36\android.jar"
 $build="$PSScriptRoot\build\integration"
 New-Item -ItemType Directory -Force "$build\classes","$build\dex" | Out-Null
 function Assert-Exit {if($LASTEXITCODE -ne 0){throw "Command failed: $LASTEXITCODE"}}
-& "$($jdk.FullName)\bin\javac.exe" --release 8 -encoding UTF-8 -cp "$platform;$PSScriptRoot\build\classes;$PSScriptRoot\libs\*" -d "$build\classes" "$PSScriptRoot\tests\FolhaInstrumentation.java"
+& "$($jdk.FullName)\bin\javac.exe" --release 8 -encoding UTF-8 -cp "$platform;$PSScriptRoot\build\intermediates\javac\release\compileReleaseJavaWithJavac\classes;$PSScriptRoot\libs\*" -d "$build\classes" "$PSScriptRoot\tests\FolhaInstrumentation.java"
+Assert-Exit
+& "$($jdk.FullName)\bin\jar.exe" cf "$PSScriptRoot\build\app-classes-tests.jar" -C "$PSScriptRoot\build\intermediates\javac\release\compileReleaseJavaWithJavac\classes" .
 Assert-Exit
 & "$($jdk.FullName)\bin\jar.exe" cf "$build\classes.jar" -C "$build\classes" .
 Assert-Exit
-& "$tools\d8.bat" --release --min-api 29 --lib $platform --classpath "$PSScriptRoot\build\classes.jar" --output "$build\dex" "$build\classes.jar"
+& "$tools\d8.bat" --release --min-api 29 --lib $platform --classpath "$PSScriptRoot\build\intermediates\compile_and_runtime_not_namespaced_r_class_jar\release\processReleaseResources\R.jar" --classpath "$PSScriptRoot\build\app-classes-tests.jar" --output "$build\dex" "$build\classes.jar"
 Assert-Exit
 & "$tools\aapt2.exe" link -I $platform --manifest "$PSScriptRoot\tests\AndroidManifest.xml" -o "$build\unsigned.apk"
 Assert-Exit

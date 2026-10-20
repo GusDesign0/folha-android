@@ -1,0 +1,6 @@
+/build/
+/release/
+/qa-build/
+/vendor/
+/web/vendor/
+google-client.json

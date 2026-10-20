@@ -25,6 +25,8 @@ public class MainActivity extends Activity {
     final ArrayList<Documents.Doc> library=new ArrayList<>();
     Documents store;
     AppUpdater updater;
+    CloudSync cloud;
+    volatile String editingId="";
     PagePanel pagePanel;
     Documents.Doc current;
     Documents.Doc exportSnapshot;
@@ -44,7 +46,7 @@ public class MainActivity extends Activity {
     final Runnable delayedSave=()->saveCurrent();
 
     @Override public void onCreate(Bundle state) {
-        super.onCreate(state);store=new Documents(this);updater=new AppUpdater(this);
+        super.onCreate(state);store=new Documents(this);updater=new AppUpdater(this);cloud=new CloudSync(this);
         PdfFiles.init(this);
         SharedPreferences prefs=getSharedPreferences("pens",0);width=prefs.getFloat("width",2.2f);pen=prefs.getString("pen","fountain");smoothing=prefs.getFloat("smoothing",1);sensitivity=prefs.getFloat("sensitivity",1);partialEraser=prefs.getBoolean("partial",true);
         autoShapes=prefs.getBoolean("shapes",true);
@@ -60,7 +62,7 @@ public class MainActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state){saveCurrent();if(current!=null)state.putString("document",current.id);super.onSaveInstanceState(state);}
     @Override protected void onPause(){super.onPause();if(canvas!=null)canvas.finishInput();saveCurrent();}
     @Override public void onConfigurationChanged(android.content.res.Configuration config){super.onConfigurationChanged(config);if(current==null&&!loading)home();else if(pagePanel!=null)pagePanel.resize();}
-    @Override protected void onDestroy(){main.removeCallbacks(delayedSave);PagePanel panel=pagePanel;if(panel!=null){panel.dialog.dismiss();panel.close();}if(updater!=null)updater.close();if(canvas!=null)canvas.dispose();worker.shutdown();renderWorker.shutdown();fileWorker.shutdown();super.onDestroy();}
+    @Override protected void onDestroy(){main.removeCallbacks(delayedSave);PagePanel panel=pagePanel;if(panel!=null){panel.dialog.dismiss();panel.close();}if(updater!=null)updater.close();if(cloud!=null)cloud.close();if(canvas!=null)canvas.dispose();worker.shutdown();renderWorker.shutdown();fileWorker.shutdown();super.onDestroy();}
     void navigateBack(){if(loading){generation++;loading=false;home();}else if(current!=null){leaveEditor();home();}else finish();}
     @Override public void onBackPressed(){navigateBack();}
     int dp(float v){return Math.round(v*getResources().getDisplayMetrics().density);}
@@ -78,13 +80,13 @@ public class MainActivity extends Activity {
     TextView button(String label,boolean primary,Runnable click){TextView b=text(label,14,primary?Color.WHITE:INK,true);b.setGravity(Gravity.CENTER);b.setPadding(dp(18),dp(12),dp(18),dp(12));b.setBackground(shape(primary?GREEN:0xFFE8EDE7,12));b.setOnClickListener(v->click.run());b.setContentDescription(label);b.setMinHeight(dp(48));return b;}
     void showLoading(String message){base();TextView t=text(message,18,GREEN,true);t.setGravity(Gravity.CENTER);root.addView(t,new LinearLayout.LayoutParams(-1,-1));}
     void home(){
-        current=null;canvas=null;base();toolIcons.clear();
+        current=null;editingId="";canvas=null;base();toolIcons.clear();
         LinearLayout header=row();header.setPadding(dp(28),dp(22),dp(28),dp(18));
         Icon logo=new Icon("leaf");logo.setBackground(shape(GREEN,13));header.addView(logo,new LinearLayout.LayoutParams(dp(48),dp(48)));gap(header,12);
         LinearLayout brand=column();brand.addView(text("folha",28,INK,true));brand.addView(text("Espaço para pensar.",12,MUTED,false));header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
-        header.addView(button("Atualizar app",false,()->checkUpdates()));TextView version=text("  v"+appVersion(),11,MUTED,true);header.addView(version);root.addView(header);line(root);
+        header.addView(button("Conta e sincronização",false,()->cloud.show()));gap(header,8);header.addView(button("Atualizar app",false,()->checkUpdates()));TextView version=text("  v"+appVersion(),11,MUTED,true);header.addView(version);root.addView(header);line(root);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);LinearLayout body=column();body.setPadding(dp(28),dp(28),dp(28),dp(28));scroll.addView(body);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
-        body.addView(text("Sua biblioteca",30,INK,true));gap(body,6);body.addView(text("Ideias à mão. Tudo no seu tablet.",15,MUTED,false));gap(body,24);
+        body.addView(text("Sua biblioteca",30,INK,true));gap(body,6);body.addView(text("Ideias à mão. Do tablet ao computador.",15,MUTED,false));gap(body,24);
         HorizontalScrollView actionScroll=new HorizontalScrollView(this);actionScroll.setHorizontalScrollBarEnabled(false);LinearLayout actions=row();actions.addView(button("+ Novo caderno",true,()->createNotebook()));gap(actions,10);actions.addView(button("Importar PDF",false,()->importPdf()));gap(actions,10);actions.addView(button("Restaurar backup",false,()->restoreBackup()));actionScroll.addView(actions);body.addView(actionScroll);gap(body,24);
         TreeSet<String> folders=new TreeSet<>();for(Documents.Doc d:library)if(!d.folder.isEmpty())folders.add(d.folder);
         HorizontalScrollView filters=new HorizontalScrollView(this);filters.setHorizontalScrollBarEnabled(false);LinearLayout chips=row();ArrayList<String> all=new ArrayList<>();all.add("Todas");all.addAll(folders);
@@ -107,7 +109,7 @@ public class MainActivity extends Activity {
                 body.addView(gridRow);gap(body,20);
             }
         }
-        gap(body,28);body.addView(text("SALVO NO TABLET   ·   SEM CONTA   ·   FUNCIONA OFFLINE",10,MUTED,true));
+        gap(body,28);body.addView(text("SALVO NO TABLET   ·   GOOGLE DRIVE OPCIONAL   ·   FUNCIONA OFFLINE",10,MUTED,true));
     }
     View card(Documents.Doc d){
         LinearLayout card=column();card.setPadding(dp(12),dp(12),dp(12),dp(14));card.setBackground(shape(Color.WHITE,16));
@@ -135,10 +137,10 @@ public class MainActivity extends Activity {
         }).show();
     }
     void importPdf(){Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("application/pdf");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,100);}
-    void open(Documents.Doc d){if(current!=null)leaveEditor();
+    void open(Documents.Doc d){if(current!=null)leaveEditor();editingId=d.id;
         if(!d.loaded){loading=true;showLoading("Abrindo caderno…");final int token=++generation;worker.execute(()->{try{Documents.Doc full=store.read(d.id);main.post(()->{if(token!=generation||isDestroyed())return;loading=false;for(int i=0;i<library.size();i++)if(library.get(i).id.equals(full.id)){library.set(i,full);break;}current=full;page=full.lastPage;editor();});}catch(Exception e){main.post(()->{loading=false;home();error("Não foi possível abrir o caderno.",e);});}});return;}
         current=d;page=d.lastPage;editor();}
-    void leaveEditor(){if(canvas!=null){canvas.finishInput();saveCurrent();canvas.dispose();canvas=null;}if(current!=null)for(int i=0;i<library.size();i++)if(library.get(i).id.equals(current.id)){library.set(i,current.light());break;}generation++;current=null;}
+    void leaveEditor(){if(canvas!=null){canvas.finishInput();saveCurrent();canvas.dispose();canvas=null;}if(current!=null)for(int i=0;i<library.size();i++)if(library.get(i).id.equals(current.id)){library.set(i,current.light());break;}generation++;current=null;editingId="";}
     void editor(){
         base();toolIcons.clear();LinearLayout top=row();top.setPadding(dp(10),dp(8),dp(14),dp(8));
         top.addView(icon("back","Biblioteca",()->{leaveEditor();home();}));gap(top,6);
@@ -237,18 +239,18 @@ public class MainActivity extends Activity {
         pendingWrites.compute(id,(key,previous)->{if(previous!=null&&previous.loaded&&!incoming.loaded){Documents.Doc merged=previous.copy();merged.name=incoming.name;merged.folder=incoming.folder;merged.updated=incoming.updated;merged.revision=incoming.revision;return merged;}return incoming;});
         worker.execute(()->{Documents.Doc snapshot=pendingWrites.remove(id);if(snapshot==null)return;try{
             if(!snapshot.loaded){Documents.Doc full=store.read(id);full.name=snapshot.name;full.folder=snapshot.folder;full.updated=snapshot.updated;full.revision=snapshot.revision;snapshot=full;}
-            store.write(snapshot);final String revision=snapshot.revision;main.post(()->{if(current!=null&&current.id.equals(id)&&current.revision.equals(revision)&&saveLabel!=null)saveLabel.setText("Salvo no tablet");});
+            store.write(snapshot);if(cloud!=null)cloud.edited();final String revision=snapshot.revision;main.post(()->{if(current!=null&&current.id.equals(id)&&current.revision.equals(revision)&&saveLabel!=null)saveLabel.setText("Salvo no tablet");});
         }catch(Exception|OutOfMemoryError e){main.post(()->{if(current!=null&&current.id.equals(id)&&saveLabel!=null)saveLabel.setText("Falha ao salvar");error("Não foi possível salvar. Libere espaço no tablet e tente novamente.",e);});}});
     }
-    void options(){String[] choices={"Nome e pasta",touchInk?"Desativar escrita com o dedo":"Ativar escrita com o dedo","Backup editável (.folha)","Atualizar app","Como usar","Sobre esta versão"};
-        new AlertDialog.Builder(this).setTitle("Seu caderno").setItems(choices,(d,w)->{if(w==0)editDetails(current);if(w==1){touchInk=!touchInk;canvas.touchInk=touchInk;toast(touchInk?"Escrita com o dedo ativada":"Somente a S Pen escreve");}if(w==2)backup();if(w==3)checkUpdates();if(w==4)help();if(w==5)new AlertDialog.Builder(this).setTitle("Folha · versão "+appVersion()).setMessage("App independente de cadernos e anotações.\n\nUse o backup .folha para guardar anotações editáveis, textos, imagens e o PDF original. O PDF exportado preserva o conteúdo original e acrescenta a escrita como caminhos.\n\nOs arquivos ficam neste tablet. Conta, sincronização e aplicativo para Windows estão planejados. OCR e reconhecimento de escrita ainda não estão incluídos.\n\nPDF: PdfBox-Android / Apache License 2.0. Criptografia: Bouncy Castle / licença MIT.").setPositiveButton("Entendi",null).show();}).show();
+    void options(){String[] choices={"Nome e pasta",touchInk?"Desativar escrita com o dedo":"Ativar escrita com o dedo","Backup editável (.folha)","Atualizar app","Como usar","Sobre esta versão","Conta e sincronização"};
+        new AlertDialog.Builder(this).setTitle("Seu caderno").setItems(choices,(d,w)->{if(w==6)cloud.show();if(w==0)editDetails(current);if(w==1){touchInk=!touchInk;canvas.touchInk=touchInk;toast(touchInk?"Escrita com o dedo ativada":"Somente a S Pen escreve");}if(w==2)backup();if(w==3)checkUpdates();if(w==4)help();if(w==5)new AlertDialog.Builder(this).setTitle("Folha · versão "+appVersion()).setMessage("App independente de cadernos e anotações.\n\nUse o backup .folha para guardar anotações editáveis, textos, imagens e o PDF original. O PDF exportado preserva o conteúdo original e acrescenta a escrita como caminhos.\n\nOs arquivos ficam neste tablet. Conta Google e sincronização privada no Drive estão disponíveis em prévia, junto do app para Windows. Feche o caderno para receber alterações do outro aparelho. Edições simultâneas geram cópias de conflito. OCR e reconhecimento de escrita ainda não estão incluídos.\n\nPDF: PdfBox-Android / Apache License 2.0. Criptografia: Bouncy Castle / licença MIT.").setPositiveButton("Entendi",null).show();}).show();
     }
     void help(){new AlertDialog.Builder(this).setTitle("Feito para escrever").setMessage("• A S Pen escreve. Dedos movem e ampliam. Um toque curto e parado com dois dedos desfaz.\n\n• Com o ajuste de formas ligado, desenhe uma linha, círculo ou retângulo e segure a ponta por cerca de 0,6 segundo antes de levantar. O ícone de formas liga ou desliga esse recurso.\n\n• Ligue a régua e arraste suas pontas com um dedo para girar, ou seu corpo para mover. A S Pen traça sobre a linha da régua. Os números correspondem a centímetros na página.\n\n• Toque no ícone de miniaturas ou no número da página para navegar. Segure uma miniatura para marcar. Em cadernos, também é possível mover, duplicar e excluir páginas. PDFs mantêm a organização original. Segure o número da página para ir diretamente a uma posição.\n\n• Segure o ícone da caneta para escolher esferográfica, tinteiro ou pincel e ajustar a pressão e a suavização.\n\n• Segure a borracha para alternar entre apagar uma parte ou o traço inteiro. O botão lateral da S Pen também apaga.\n\n• Com o laço, contorne o que deseja selecionar. Arraste a seleção para mover e a bolinha do canto para redimensionar. As cores recolorem a seleção.\n\n• Use o ícone de folhas sobrepostas para copiar, colar, duplicar, apagar ou editar uma caixa de texto selecionada. As cópias podem ser coladas em outra página do mesmo caderno.\n\n• Use T para inserir texto e o ícone de paisagem para inserir imagem.\n\n• Exporte um PDF pelo ícone no alto. Para preservar a edição e transferir o caderno, use Backup editável nas opções. Restaure pela biblioteca.").setPositiveButton("Vamos lá",null).show();}
     void exportPdf(){
         if(current==null)return;canvas.finishInput();saveCurrent();
         try{exportSnapshot=current.copy();Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType("application/pdf");intent.putExtra(Intent.EXTRA_TITLE,current.name.replaceAll("[\\\\/:*?\"<>|]","_")+" - anotado.pdf");startActivityForResult(intent,101);}catch(Exception e){error("Não foi possível iniciar a exportação.",e);}
     }
-    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==AppUpdater.INSTALL_PERMISSION){updater.permissionResult();return;}if(result!=RESULT_OK||data==null||data.getData()==null){if(request==101||request==103)exportSnapshot=null;return;}Uri uri=data.getData();
+    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==CloudSync.AUTH){cloud.activityResult(result,data);return;}if(request==AppUpdater.INSTALL_PERMISSION){updater.permissionResult();return;}if(result!=RESULT_OK||data==null||data.getData()==null){if(request==101||request==103)exportSnapshot=null;return;}Uri uri=data.getData();
         if(request==102){receiveImage(uri);return;}if(request==104){receiveBackup(uri);return;}
         if(request==103&&exportSnapshot!=null){final Documents.Doc snapshot=exportSnapshot;exportSnapshot=null;toast("Criando backup editável…");fileWorker.execute(()->{try(OutputStream out=getContentResolver().openOutputStream(uri,"wt")){if(out==null)throw new IOException("Destino indisponível");Backups.export(snapshot,store.dir(snapshot.id),out);main.post(()->toast("Backup salvo. Guarde este arquivo para restaurar em outro aparelho."));}catch(Exception|OutOfMemoryError e){main.post(()->error("Não foi possível criar o backup.",e));}});return;}
         if(request==100){

@@ -1,68 +1,38 @@
-# Folha para Android
+# Folha — Android e Windows
 
-Cadernos e anotações em PDF, com foco em tablets Samsung e S Pen.
+Cadernos e anotações em PDF, com foco em tablets Samsung/S Pen e continuidade no computador.
 
-**[Baixar APK mais recente](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk)** · **[Baixar ZIP](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip)** · [Versões anteriores](https://github.com/GusDesign0/folha-android/releases)
+**[Android: baixar APK](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk)** · **[Windows: baixar ZIP](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip)** · [ZIP para envio ao tablet](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip) · [Versões](https://github.com/GusDesign0/folha-android/releases)
 
-## Instalar e atualizar
+## Começar
 
-No tablet, abra o APK pelo **Meus Arquivos** e escolha **Instalar** ou **Atualizar**. Instale por cima da versão anterior, sem desinstalar, para manter os cadernos.
+No tablet, abra o APK pelo **Meus Arquivos** e escolha **Atualizar** por cima da versão anterior. Não desinstale o app, para preservar sua biblioteca. Requer Android 10 ou superior, com alvo Android 16. É um APK independente, fora da Play Store.
 
-A partir da 0.4.0, use **Atualizar app** para as próximas versões. Na primeira vez, o Android poderá pedir que você permita instalar apps pelo Folha. Volte ao app após permitir e confirme a instalação. A confirmação do Android continua necessária. Não há serviço ou consulta periódica: só verifica quando você tocar no botão.
+No Windows, extraia **todo o ZIP** para uma pasta e abra **Folha.exe**. Feche uma prévia anterior antes de abrir este pacote. Requer Windows 10/11 x64, .NET Framework 4.8 e Edge WebView2 Runtime.
 
-Requer Android 10 ou superior. Alvo Android 16. APK independente, fora da Play Store.
+No tablet, use **Conta e sincronização → Conectar Google**, com a mesma conta conectada no PC. Feche o caderno antes de usar **Sincronizar agora** e trocar de aparelho. A sincronização automática ocorre enquanto o app está aberto; o trabalho offline continua disponível.
 
-## Versão 0.5.0
+**Prévia 0.6.0:** login habilitado para a conta de teste cadastrada no projeto Google. Edições simultâneas são preservadas em cópias de conflito. A sincronização real no tablet precisa da autorização do usuário e Google Play Services. [Como funciona, privacidade e limitações](docs/SINCRONIZACAO.md).
 
-- **Rotação automática:** acompanha retrato/paisagem do Android, mantendo a página, a tinta, o histórico e o zoom. O painel de miniaturas adapta largura, altura e número de colunas. Ative a rotação automática no sistema.
-- **Dois dedos para desfazer:** um toque curto e parado desfaz uma edição. Pinça, arraste, terceiro dedo e toques cancelados não acionam o atalho. Refazer continua na barra.
-- **Formas ao segurar:** linhas, círculos/elipses e retângulos são ajustados quando você segura a ponta por cerca de 0,6 s antes de levantar. Pode ser desligado na barra.
-- **Régua:** arraste o corpo ou as pontas com um dedo para mover/girar. A S Pen traça sobre a linha. Escala em centímetros da página, não do tamanho físico da tela.
-- **Miniaturas e marcadores:** toque no ícone de páginas ou no contador. Segure uma miniatura para marcar. Em cadernos, também é possível mover, duplicar e excluir páginas. PDFs permitem navegar e marcar, mantendo a ordem original.
-- **Escrita:** esferográfica, tinteiro, pincel e marca-texto, com cores, espessura, pressão e suavização ajustáveis.
-- **Borracha:** apaga uma parte ou o traço inteiro.
-- **Laço:** seleciona, move, redimensiona, copia, duplica, apaga e recolore. Permite colar em outra página do mesmo caderno.
-- **Texto e imagens:** inserção nas páginas, com seleção, movimento e redimensionamento. Texto pode ser editado depois.
-- **Cadernos:** páginas pautadas, quadriculadas, pontilhadas ou em branco, nomes e pastas.
-- **PDF:** leitura, anotação e exportação que preserva o documento original, incluindo texto selecionável e links. Escrita e marca-texto são acrescentados como caminhos.
-- **Backup editável .folha:** guarda pontos, textos, imagens e PDF original; restaura em outro aparelho e cria uma cópia quando o caderno já existe.
-- **Atualizações:** botão **Atualizar app** na biblioteca ou nas opções do caderno. Consulta o GitHub e baixa o APK com progresso e cancelamento. Confere tamanho, SHA-256, versão, pacote e assinatura antes de abrir o instalador do Android.
-- **Offline:** criação, escrita, organização e leitura funcionam sem rede.
+## O que há no app
 
-Para escolher o tipo da caneta, segure seu ícone. Segure a borracha para trocar o modo. Com o laço, contorne os objetos e arraste a seleção ou a bolinha do canto. O ícone de folhas sobrepostas abre copiar/colar e edição de texto.
+- Android: S Pen com pressão, rejeição de palma, três tipos de caneta, marca-texto, suavização, borracha parcial ou de traço inteiro, laço, texto e imagens.
+- Dois dedos para desfazer, formas ao segurar a ponta, régua móvel/giratória e rotação retrato/paisagem.
+- Miniaturas e marcadores; mover, duplicar e excluir páginas de cadernos. PDFs mantêm sua ordem original.
+- Biblioteca com pastas, salvamento local e backup editável `.folha`.
+- Exportação de PDF preservando o original e acrescentando escrita em caminhos.
+- Windows: biblioteca, PDF, canetas/pressão, marca-texto, borracha de traço inteiro, texto, desfazer/refazer, páginas, zoom, backups, exportação e sincronização. Imagens vindas do tablet são exibidas e preservadas. Ferramentas avançadas do Android ainda não têm todas suas interfaces no Windows.
 
-![Miniaturas e marcadores](docs/images/paginas-0.5.png)
+O Android mantém **Atualizar app**, que busca a versão mais recente no GitHub, verifica tamanho/SHA-256/assinatura e abre a confirmação de instalação do sistema. A verificação só ocorre quando solicitada. O pacote Windows é atualizado baixando o novo ZIP; os cadernos ficam no perfil do Windows, fora da pasta do executável.
 
-![Editor com texto e imagens](docs/images/editor-0.3.png)
+## Escrita e sincronização
 
-## Desempenho e validação
+A escrita e o salvamento funcionam localmente, sem aguardar o Google. PDF/imagens são enviados separadamente das revisões de anotações e reutilizados por SHA-256. Uma edição remota não substitui um caderno aberto. Guarde backups independentes dos arquivos importantes.
 
-A caneta trabalha com a página aberta, reutiliza a geometria pronta e acrescenta traços ao cache sem redesenhar toda a página. Leitura de arquivo, JSON, PDF e backup usam filas de segundo plano. A biblioteca carrega metadados leves e as imagens possuem limites de resolução e memória.
+Os testes incluem atualização sobre cadernos da 0.1.0, gestos, PDF com rotação/corte/links, desenho com pressão, conflitos e ida e volta do protocolo Java → C# → Java. [Validação e limites](docs/VALIDACAO.md).
 
-Foram executados 41 cenários de lógica e testes de integração no Android 16, incluindo gesto de desfazer sem conflito com zoom/palma, formas ao segurar, régua girada, operações de página/marcadores, miniaturas, atualização, pressão, laço, borracha parcial, texto/imagem, backup e PDFs girados/recortados. Em uma cena sintética com 250 traços, a CPU de desenho teve p50 de 1,753 ms e p95 de 2,391 ms no emulador. Isso não mede latência física da S Pen nem garante taxa de quadros no aparelho.
+## Código
 
-[Validação e limites](docs/VALIDACAO.md).
+[Compilar Android e Windows](docs/BUILD.md) · [Formato `.folha`](docs/FORMATO.md) · [Protocolo de sincronização](docs/PROTOCOLO.md).
 
-## Tablet e Windows
-
-O aplicativo Windows, a conta e a sincronização estão planejados; ainda não estão implementados. O backup usa um formato portátil com IDs, revisões, coordenadas de página e imagens relativas, para ser reutilizado nos dois sistemas. A escrita deve continuar offline, e a futura sincronização deverá tratar conflitos sem sobrescrever o trabalho.
-
-[Formato e plano de sincronização](docs/FORMATO.md).
-
-## Compilar
-
-```powershell
-.\setup.ps1
-```
-
-O script obtém JDK e ferramentas oficiais do Android com checksums. Dependências de PDF também são baixadas de fontes oficiais e verificadas. Para recompilar:
-
-```powershell
-.\build.ps1
-```
-
-Resultado: `Folha.apk`. A chave de assinatura fica apenas no ambiente local, fora do repositório. As versões distribuídas usam a mesma chave. Uma compilação com outra chave não atualiza diretamente o APK publicado.
-
-Para executar os testes em um emulador com ADB, instale o APK e execute `test-device.ps1`. A fixture de PDF é enviada pelo script.
-
-[Desenvolvimento e dependências](docs/DESENVOLVIMENTO.md). Projeto independente, sem afiliação com Goodnotes ou Samsung.
+Chaves de assinatura e autorizações pessoais não acompanham o código. Dependências e suas licenças estão descritas nos avisos incluídos em cada aplicativo. Esta versão Windows não é uma versão para macOS, Linux ou iPadOS.
