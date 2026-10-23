@@ -25,3 +25,5 @@
 /desktop/qa-070/
 
 desktop/tests/ui-output/
+
+desktop/tests/glyph-output/

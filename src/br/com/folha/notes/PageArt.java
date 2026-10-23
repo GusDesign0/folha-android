@@ -17,6 +17,7 @@ final class PageArt {
         stroke(c,s,Collections.emptyMap());
     }
     static void stroke(Canvas c,Ink.Stroke s,Map<String,Bitmap> images){
+        if(!s.glyph.isEmpty()){JapaneseGlyph.draw(c,s);return;}
         if(s.kind.equals("text")){Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setColor(s.color);p.setTextSize(s.fontSize);p.setTypeface(Typeface.DEFAULT);int saved=c.save();c.clipRect(s.x,s.y,s.x+s.boxW,s.y+s.boxH);float baseline=s.y-p.ascent(),line=p.getFontSpacing()*1.1f;
             for(String paragraph:s.text.split("\\n",-1)){String remaining=paragraph;if(remaining.isEmpty()){baseline+=line;continue;}while(!remaining.isEmpty()&&baseline<s.y+s.boxH){int n=p.breakText(remaining,true,Math.max(1,s.boxW),null);if(n==0)n=1;String part=remaining.substring(0,n);float offset=s.align.equals("center")?(s.boxW-p.measureText(part))/2:s.align.equals("right")?s.boxW-p.measureText(part):0;c.drawText(part,s.x+Math.max(0,offset),baseline,p);remaining=remaining.substring(n);baseline+=line;}}
             c.restoreToCount(saved);return;

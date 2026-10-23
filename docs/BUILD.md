@@ -1,13 +1,14 @@
-# Compilar o Folha 0.6.0
+# Compilar o Folha 0.8.0
 
 ## Android
 
 - JDK 21, Gradle 8.13, Android SDK Platform 36 e Build Tools 36.0.0.
 - As pastas padrão do SDK devem ser `platforms/android-36` e `build-tools/36.0.0`.
 - `fetch-deps.ps1` baixa PDFBox/Bouncy Castle de Maven Central e verifica seus SHA-256.
-- O Gradle resolve Google Identity Services `play-services-auth:22.0.0` e suas dependências pelos repositórios oficiais Google/Maven Central.
+- O Gradle resolve Google Identity Services `play-services-auth:22.0.0` e `com.google.mlkit:digital-ink-recognition:19.0.0` pelos repositórios oficiais Google/Maven Central.
 - Configure a chave de assinatura em `build.gradle`. A chave usada nos APKs distribuídos é privada e não acompanha o código. Outra chave não atualiza uma instalação existente.
 - O script `build.ps1 -ToolchainRoot CAMINHO_DO_SDK -OutputApk DESTINO.apk` espera JDK e Gradle nas subpastas descritas no script. Para um SDK/JDK instalados separadamente, configure `local.properties`, `JAVA_HOME`, a assinatura e execute `gradle assembleRelease` na raiz.
+- APK público: `build/outputs/apk/release/Folha-arm64-v8a-release.apk`. A variante `Folha-x86_64-release.apk` usa o mesmo Java/recursos para QA no emulador; não acompanha o instalador do Samsung. O Gradle gera as duas com a mesma versão/assinatura.
 - Testes puros: `test-core.ps1`. Integração Android: `test-device.ps1 -Device emulator-5554` após instalar o APK. `-RequireLegacy` exige que a biblioteca de QA das versões anteriores exista no emulador.
 - `tests/SyncTest.java` testa o protocolo sem Android/Google usando JSON-java 20250517 em um diretório de testes separado. A classe Documents de teste não entra no app.
 
@@ -23,3 +24,5 @@ O código fica em `desktop/`.
 4. `Folha.exe --self-test` executa testes de armazenamento, backup e sincronização sem abrir janelas. O resultado fica em `test-results.txt` na pasta do executável.
 
 Nenhum token de usuário, biblioteca pessoal, chave de assinatura ou credencial do navegador deve ser incluído em código, instaladores ou publicações.
+
+O teste de integração baixa o modelo japonês no perfil isolado do emulador e desliga/reabilita Wi-Fi/dados móveis para conferir reconhecimento offline. Use um emulador dedicado. Testes JavaScript: `npm install && npm test`. `npm run test:ui` usa navegador headless, sem perfil pessoal; requer Edge no Windows ou Chromium instalado pelo Playwright em outros sistemas.

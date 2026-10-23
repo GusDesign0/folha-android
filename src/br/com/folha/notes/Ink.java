@@ -13,7 +13,7 @@ public final class Ink {
         }
     }
     public static final class Stroke {
-        public String id=UUID.randomUUID().toString(),kind="ink",pen="fountain",text="",asset="",align="left";
+        public String id=UUID.randomUUID().toString(),kind="ink",pen="fountain",text="",asset="",align="left",glyph="";
         public float x,y,boxW=200,boxH=100,fontSize=24,smoothing=1,sensitivity=1;
         public final List<Point> points=new ArrayList<>();
         public int color;
@@ -35,7 +35,7 @@ public final class Ink {
             return sampled;
         }
         public boolean hit(float x,float y,float radius) {
-            if(!kind.equals("ink"))return x>=this.x-radius&&x<=this.x+boxW+radius&&y>=this.y-radius&&y<=this.y+boxH+radius;
+            if(!kind.equals("ink")||!glyph.isEmpty())return x>=this.x-radius&&x<=this.x+boxW+radius&&y>=this.y-radius&&y<=this.y+boxH+radius;
             List<Point> line=samples();float r=radius+width*(marker?0.5f:1f);
             if(x<minX-r||x>maxX+r||y<minY-r||y>maxY+r)return false;
             for(int i=0;i<line.size();i++) {
@@ -44,8 +44,8 @@ public final class Ink {
             }
             return false;
         }
-        public Stroke copy(boolean newId){Stroke s=new Stroke(color,width,marker);s.id=newId?UUID.randomUUID().toString():id;s.kind=kind;s.pen=pen;s.text=text;s.asset=asset;s.align=align;s.x=x;s.y=y;s.boxW=boxW;s.boxH=boxH;s.fontSize=fontSize;s.smoothing=smoothing;s.sensitivity=sensitivity;s.points.addAll(points);return s;}
-        public float[] bounds(){if(!kind.equals("ink"))return new float[]{x,y,x+boxW,y+boxH};samples();return new float[]{minX-width,minY-width,maxX+width,maxY+width};}
+        public Stroke copy(boolean newId){Stroke s=new Stroke(color,width,marker);s.id=newId?UUID.randomUUID().toString():id;s.kind=kind;s.pen=pen;s.text=text;s.asset=asset;s.align=align;s.glyph=glyph;s.x=x;s.y=y;s.boxW=boxW;s.boxH=boxH;s.fontSize=fontSize;s.smoothing=smoothing;s.sensitivity=sensitivity;s.points.addAll(points);return s;}
+        public float[] bounds(){if(!kind.equals("ink")||!glyph.isEmpty())return new float[]{x,y,x+boxW,y+boxH};samples();return new float[]{minX-width,minY-width,maxX+width,maxY+width};}
         public Stroke transform(float ox,float oy,float dx,float dy,float scale,boolean newId){Stroke s=copy(newId);s.points.clear();for(Point p:points)s.points.add(new Point(ox+(p.x-ox)*scale+dx,oy+(p.y-oy)*scale+dy,p.pressure));s.x=ox+(x-ox)*scale+dx;s.y=oy+(y-oy)*scale+dy;s.boxW=boxW*scale;s.boxH=boxH*scale;s.fontSize=fontSize*scale;s.width=width*scale;return s;}
     }
     private static Point midpoint(Point a,Point b){return new Point((a.x+b.x)/2,(a.y+b.y)/2,(a.pressure+b.pressure)/2);}
@@ -88,7 +88,7 @@ public final class Ink {
     }
     /** Cut the visible centerline against a swept eraser capsule, keeping untouched fragments. */
     public static List<Stroke> cut(Stroke s,float ax,float ay,float bx,float by,float radius){
-        ArrayList<Stroke> result=new ArrayList<>();if(!s.kind.equals("ink")){result.add(s);return result;}
+        ArrayList<Stroke> result=new ArrayList<>();if(!s.glyph.isEmpty()){float left=Math.min(ax,bx)-radius,right=Math.max(ax,bx)+radius,top=Math.min(ay,by)-radius,bottom=Math.max(ay,by)+radius;if(right<s.x||left>s.x+s.boxW||bottom<s.y||top>s.y+s.boxH)result.add(s);return result;}if(!s.kind.equals("ink")){result.add(s);return result;}
         List<Point> line=s.samples();Stroke part=null;Point prev=null;boolean previousInside=false,removed=false;
         for(Point p:line){float r=radius+(s.marker?s.width:penWidth(s,p))/2;boolean inside=distanceSquared(p.x,p.y,ax,ay,bx,by)<=r*r;
             if(prev!=null&&inside!=previousInside){Point cross=boundary(s,prev,p,ax,ay,bx,by,radius,previousInside);

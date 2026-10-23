@@ -1,0 +1,14 @@
+package br.com.folha.notes;
+import android.graphics.*;
+import java.util.*;
+/** Capture the actual device glyph as contours so Windows and PDF do not need a Japanese font. */
+final class JapaneseGlyph {
+ private static final android.util.LruCache<String,Path> cache=new android.util.LruCache<>(96);
+ static Ink.Stroke regular(String text,List<Ink.Stroke> raw,float[] cell){Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);paint.setTypeface(Typeface.create("sans-serif",Typeface.NORMAL));paint.setTextSize(1000);paint.setTextLocale(Locale.JAPANESE);if(!paint.hasGlyph(text))throw new IllegalArgumentException("Fonte japonesa indisponível");Path path=new Path();paint.getTextPath(text,0,text.length(),0,0,path);RectF b=new RectF();path.computeBounds(b,true);if(b.width()<1||b.height()<1)throw new IllegalArgumentException("Caractere sem contorno");float[] approx=path.approximate(.55f);List<List<int[]>> contours=new ArrayList<>();List<int[]> contour=null;float previous=-1;
+  for(int i=0;i<approx.length;i+=3){boolean move=contour==null||(approx[i]==previous&&i>0&&(approx[i+1]!=approx[i-2]||approx[i+2]!=approx[i-1]));if(move){contour=new ArrayList<>();contours.add(contour);}int x=Math.max(0,Math.min(1000,Math.round((approx[i+1]-b.left)/b.width()*1000))),y=Math.max(0,Math.min(1000,Math.round((approx[i+2]-b.top)/b.height()*1000)));if(contour.isEmpty()||contour.get(contour.size()-1)[0]!=x||contour.get(contour.size()-1)[1]!=y)contour.add(new int[]{x,y});previous=approx[i];}
+  StringBuilder data=new StringBuilder();for(List<int[]> line:contours){if(line.size()<3)continue;if(data.length()>0)data.append(';');for(int i=0;i<line.size();i++){if(i>0)data.append(' ');data.append(line.get(i)[0]).append(',').append(line.get(i)[1]);}}GlyphData.contours(data.toString());
+  float[] box=cell==null?JapaneseGeometry.bounds(raw):cell;float availableW=Math.max(8,box[2]-box[0])*(cell==null?1:.78f),availableH=Math.max(8,box[3]-box[1])*(cell==null?1:.78f),scale=Math.min(availableW/b.width(),availableH/b.height());Ink.Stroke s=new Ink.Stroke(raw.get(0).color,raw.get(0).width,false);s.pen="glyph";s.text=text;s.glyph=data.toString();s.boxW=b.width()*scale;s.boxH=b.height()*scale;s.x=(box[0]+box[2]-s.boxW)/2;s.y=(box[1]+box[3]-s.boxH)/2;return s;
+ }
+ static synchronized Path path(String glyph){Path p=cache.get(glyph);if(p!=null)return p;p=new Path();p.setFillType(Path.FillType.WINDING);for(float[] points:GlyphData.contours(glyph)){p.moveTo(points[0],points[1]);for(int i=2;i<points.length;i+=2)p.lineTo(points[i],points[i+1]);p.close();}cache.put(glyph,p);return p;}
+ static void draw(Canvas c,Ink.Stroke s){Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setColor(s.color);p.setStyle(Paint.Style.FILL);int saved=c.save();c.translate(s.x,s.y);c.scale(s.boxW/1000,s.boxH/1000);c.drawPath(path(s.glyph),p);c.restoreToCount(saved);}
+}

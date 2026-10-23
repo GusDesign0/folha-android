@@ -1,0 +1,4 @@
+using System;using System.Collections.Generic;using System.Text.RegularExpressions;
+namespace Folha {static class Glyphs {
+ public static void Validate(Dictionary<string,object> s){var data=J.S(s,"glyph");if(data.Length==0)return;if(J.S(s,"kind","ink")!="ink"||data.Length>120000||!Regex.IsMatch(data,"^[0-9 ,;]+$"))throw new Exception("Contorno japonês inválido.");int count=0;foreach(var line in data.Split(';')){var values=Regex.Split(line.Trim(),"[ ,]+");if(values.Length<6||values.Length%2!=0||(count+=values.Length/2)>10000)throw new Exception("Contorno japonês incompleto.");foreach(var value in values){int n;if(!int.TryParse(value,out n)||n<0||n>1000)throw new Exception("Contorno japonês fora dos limites.");}}foreach(var key in new[]{"x","y","boxW","boxH"}){double n=Convert.ToDouble(s[key]);if(double.IsNaN(n)||double.IsInfinity(n)||Math.Abs(n)>10000000||((key=="boxW"||key=="boxH")&&n<=0))throw new Exception("Dimensões do caractere inválidas.");}}
+}}

@@ -1,0 +1,7 @@
+Google ML Kit Digital Ink Recognition
+Android dependency: com.google.mlkit:digital-ink-recognition:19.0.0
+The Japanese recognition model is downloaded on demand and recognition runs on the device.
+License/terms declared by the Maven artifact: ML Kit Terms of Service
+https://developers.google.com/ml-kit/terms
+Documentation: https://developers.google.com/ml-kit/vision/digital-ink-recognition
+This notice does not change the SDK terms or redistribute the downloaded language model.

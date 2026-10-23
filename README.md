@@ -4,7 +4,15 @@ Cadernos, S Pen e estudo de PDFs, com sincronização privada no Google Drive.
 
 [Baixar Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk) | [Baixar Windows](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip) | [ZIP Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip)
 
-## Versão 0.7.1
+## Versão 0.8.0
+
+Auxílio de escrita japonesa no botão **あ 漢** do tablet: **Desligado / Traços ajustados / Regular**. O ajuste geométrico mantém a caligrafia, curvas, ganchos e pressão. Regular reconhece um kana/kanji por vez, oferece alternativas e conserva uma operação de desfazer. Primeiro uso baixa o modelo japonês (~20 MB); depois funciona offline.
+
+![Comparação dos modos](docs/assistente-japones.png)
+
+Os resultados regulares são contornos, preservados no Windows e no PDF sem fontes japonesas instaladas. **Atualize os dois aplicativos**. [Como usar e limites](docs/ASSISTENTE-JAPONES.md).
+
+### Interface e biblioteca
 
 - Aparência clara, escura ou seguindo o sistema, salva por aparelho. Troca em tempo real sem recriar a página, alterar papel/PDF/tinta ou limpar desfazer/refazer.
 - Biblioteca com ações principais separadas dos filtros, seleção em lote explícita e menu por arquivo. Ferramentas secundárias agrupadas; cabeçalho e rodapé do PC adaptados a janelas menores.
@@ -29,13 +37,13 @@ Tablet: ícone de sol no alto. PC: seletor Aparência. A opção de sistema acom
 
 ## Instalação e atualização
 
-Tablet: Android 10 ou posterior (alvo API 36), Samsung/S Pen recomendado; abra o APK e escolha Atualizar sem desinstalar. É uma versão independente, fora da Play Store. Windows: 10/11 x64 com .NET Framework 4.8 e Edge WebView2; feche prévias anteriores e extraia o ZIP inteiro. Sua biblioteca fica no perfil do Windows, fora da pasta do programa. Atualize ambos para os novos papéis e campos.
+Tablet: Android 10 ou posterior em ARM64 (alvo API 36), Samsung/S Pen recomendado; abra o APK e escolha Atualizar sem desinstalar. É uma versão independente, fora da Play Store. Windows: 10/11 x64 com .NET Framework 4.8 e Edge WebView2; feche prévias anteriores e extraia o ZIP inteiro. Sua biblioteca fica no perfil do Windows, fora da pasta do programa. Atualize ambos para os novos papéis e campos.
 
 Conecte a mesma conta Google nos dois aparelhos. Feche o caderno e use Sincronizar agora antes de trocar de dispositivo. A escrita funciona offline; alterações simultâneas são preservadas em cópias de conflito. Login em prévia com a conta de teste cadastrada; o tablet requer Google Play Services. Conferência de conta/sincronização em dois aparelhos físicos ainda depende do usuário.
 
 ## Limites práticos
 
-A leitura contínua é um modo de consulta; a escrita ocorre no editor por página. Busca retorna até 200 páginas e pode ser cancelada. OCR e reconhecimento automático de escrita não estão incluídos. Os papéis japoneses orientam a escrita manual; não compõem automaticamente texto digitado na vertical. O Windows exporta texto com Helvetica/WinAnsi; japonês digitado e outros caracteres fora dessa cobertura ainda precisam de suporte de fontes. A escrita à mão segue em caminhos PDF.
+A leitura contínua é um modo de consulta; a escrita ocorre no editor por página. Busca retorna até 200 páginas e pode ser cancelada. OCR não está incluído. O reconhecimento Regular é opcional, japonês e por caractere; o ajuste geométrico não corrige o significado de um kanji. Os papéis japoneses orientam a escrita manual; não compõem automaticamente texto digitado na vertical. Os contornos de Regular exportam sem fonte japonesa. O Windows exporta texto digitado com Helvetica/WinAnsi; japonês digitado e outros caracteres fora dessa cobertura ainda precisam de suporte de fontes. A escrita à mão e os caracteres regulares seguem em caminhos PDF.
 
 Papéis reutilizam geometria, a leitura renderiza sob demanda (16 MiB no Android; até cinco páginas no Windows), e busca/histórico rodam fora da entrada da caneta. Resultados de CPU em emulador não medem a latência física da S Pen.
 

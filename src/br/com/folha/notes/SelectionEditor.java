@@ -38,7 +38,7 @@ final class SelectionEditor {
             RectF area=new RectF(polygon.get(0).x,polygon.get(0).y,polygon.get(0).x,polygon.get(0).y);for(PointF p:polygon)area.union(p.x,p.y);
             for(Ink.Stroke s:view.strokes){float[] b=s.bounds();if(!RectF.intersects(area,new RectF(b[0],b[1],b[2],b[3])))continue;
                 boolean hit=inside(b[0],b[1])&&inside(b[2],b[3]);
-                if(!hit&&s.kind.equals("ink")){List<Ink.Point> samples=s.samples();for(int i=0;i<samples.size();i+=4){Ink.Point p=samples.get(i);if(inside(p.x,p.y)){hit=true;break;}}}
+                if(!hit&&s.kind.equals("ink")&&s.glyph.isEmpty()){List<Ink.Point> samples=s.samples();for(int i=0;i<samples.size();i+=4){Ink.Point p=samples.get(i);if(inside(p.x,p.y)){hit=true;break;}}}
                 else if(!hit)hit=inside((b[0]+b[2])/2,(b[1]+b[3])/2);
                 if(hit)selected.add(s);
             }

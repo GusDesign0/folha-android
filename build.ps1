@@ -14,7 +14,7 @@ if(-not(Test-Path -LiteralPath $taskGradle)){throw 'Gradle 8.13 is required. See
 ('sdk.dir='+$ToolchainRoot.Replace('\','/')) | Set-Content -LiteralPath "$PSScriptRoot/local.properties" -Encoding ASCII
 & $taskGradle -p $PSScriptRoot assembleRelease --console=plain
 if($LASTEXITCODE -ne 0){throw 'Android build failed'}
-Copy-Item -LiteralPath "$PSScriptRoot/build/outputs/apk/release/Folha-release.apk" -Destination $OutputApk -Force
+Copy-Item -LiteralPath "$PSScriptRoot/build/outputs/apk/release/Folha-arm64-v8a-release.apk" -Destination $OutputApk -Force
 & "$ToolchainRoot/build-tools/36.0.0/apksigner.bat" verify --verbose --print-certs $OutputApk
 if($LASTEXITCODE -ne 0){throw 'Signature verification failed'}
 Write-Output "APK ready: $OutputApk"

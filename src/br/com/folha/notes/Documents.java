@@ -56,7 +56,7 @@ final class Documents {
         static JSONObject strokeJson(Ink.Stroke s) throws Exception {
                     JSONObject item=new JSONObject();item.put("color",s.color);item.put("width",s.width);item.put("marker",s.marker);
                     item.put("id",s.id);item.put("kind",s.kind);item.put("pen",s.pen);item.put("smoothing",s.smoothing);item.put("sensitivity",s.sensitivity);
-                    item.put("text",s.text);if(!s.align.equals("left"))item.put("align",s.align);item.put("asset",s.asset);item.put("x",s.x);item.put("y",s.y);item.put("boxW",s.boxW);item.put("boxH",s.boxH);item.put("fontSize",s.fontSize);
+                    if(!s.glyph.isEmpty())item.put("glyph",s.glyph);item.put("text",s.text);if(!s.align.equals("left"))item.put("align",s.align);item.put("asset",s.asset);item.put("x",s.x);item.put("y",s.y);item.put("boxW",s.boxW);item.put("boxH",s.boxH);item.put("fontSize",s.fontSize);
                     JSONArray points=new JSONArray();
                     for(Ink.Point pt:s.points){JSONArray q=new JSONArray();q.put((double)pt.x);q.put((double)pt.y);q.put((double)pt.pressure);points.put(q);}
                     item.put("points",points);return item;
@@ -75,7 +75,7 @@ final class Documents {
                 for(int i=0;i<a.length();i++) {
                     JSONObject s=a.getJSONObject(i);Ink.Stroke stroke=new Ink.Stroke(s.getInt("color"),(float)s.getDouble("width"),s.getBoolean("marker"));
                     stroke.id=s.optString("id",stroke.id);stroke.kind=s.optString("kind","ink");stroke.pen=s.optString("pen","fountain");stroke.smoothing=(float)s.optDouble("smoothing",1);stroke.sensitivity=(float)s.optDouble("sensitivity",1);
-                    stroke.text=s.optString("text","");stroke.align=s.optString("align","left");stroke.asset=s.optString("asset","");stroke.x=(float)s.optDouble("x",0);stroke.y=(float)s.optDouble("y",0);stroke.boxW=(float)s.optDouble("boxW",200);stroke.boxH=(float)s.optDouble("boxH",100);stroke.fontSize=(float)s.optDouble("fontSize",24);
+                    stroke.glyph=s.optString("glyph","");if(!stroke.glyph.isEmpty())GlyphData.contours(stroke.glyph);stroke.text=s.optString("text","");stroke.align=s.optString("align","left");stroke.asset=s.optString("asset","");stroke.x=(float)s.optDouble("x",0);stroke.y=(float)s.optDouble("y",0);stroke.boxW=(float)s.optDouble("boxW",200);stroke.boxH=(float)s.optDouble("boxH",100);stroke.fontSize=(float)s.optDouble("fontSize",24);
                     JSONArray points=s.getJSONArray("points");for(int j=0;j<points.length();j++){JSONArray q=points.getJSONArray(j);stroke.points.add(new Ink.Point((float)q.getDouble(0),(float)q.getDouble(1),(float)q.getDouble(2)));}
                     list.add(stroke);
                 }

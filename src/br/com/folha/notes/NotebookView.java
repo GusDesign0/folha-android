@@ -8,6 +8,7 @@ import java.util.*;
 final class NotebookView extends View {
     interface Listener {void changed();void zoom(float value);}
     final Listener listener;
+    JapaneseAssist assist;
     final List<Ink.Stroke> strokes;
     final Ink.History history=new Ink.History();
     String paper;
@@ -79,16 +80,16 @@ final class NotebookView extends View {
     }
     void setPdf(PdfFiles.Rendered image){pdf=image.bitmap;pageW=image.width;pageH=image.height;ruler.reset(pageW,pageH);ready=true;cacheDirty=true;invalidate();}
     void fit(){zoom=1;panX=panY=0;listener.zoom(zoom);invalidate();}
-    void dispose(){removeCallbacks(shapeHold);twoTap.cancel();if(pdf!=null){pdf.recycle();pdf=null;}if(inkCache!=null){inkCache.recycle();inkCache=null;}MediaFiles.recycle(images);}
+    void dispose(){if(assist!=null)assist.detach(this);removeCallbacks(shapeHold);twoTap.cancel();if(pdf!=null){pdf.recycle();pdf=null;}if(inkCache!=null){inkCache.recycle();inkCache=null;}MediaFiles.recycle(images);}
     void setRuler(boolean enabled){finishInput();rulerEnabled=enabled;rulerDrag=-1;twoTap.cancel();invalidate();}
     void setImages(Map<String,Bitmap> next){MediaFiles.recycle(images);images=next;refreshLayer();}
     void refreshLayer(){cacheDirty=true;invalidate();}
     void documentChanged(){changed();}
     void addObject(Ink.Stroke item){history.before(strokes);strokes.add(item);selection.select(item);changed();}
-    void undo(){cancelInput();selection.clear();if(history.undo(strokes)){changed();}}
-    void redo(){cancelInput();selection.clear();if(history.redo(strokes)){changed();}}
+    void undo(){if(assist!=null)assist.cancel();cancelInput();selection.clear();if(history.undo(strokes)){changed();}}
+    void redo(){if(assist!=null)assist.cancel();cancelInput();selection.clear();if(history.redo(strokes)){changed();}}
     void finishInput(){if(pending!=null||erasing||selecting)commit();}
-    private void changed(){cacheDirty=true;listener.changed();invalidate();}
+    private void changed(){if(assist!=null)assist.edited();cacheDirty=true;listener.changed();invalidate();}
     private void appendInk(Ink.Stroke stroke){
         geometry();float scale=base*zoom;
         if(inkCache!=null&&!cacheDirty&&cachedLeft==left&&cachedTop==top&&cachedScale==scale){Canvas c=new Canvas(inkCache);c.scale((float)inkCache.getWidth()/Math.max(1,getWidth()),(float)inkCache.getHeight()/Math.max(1,getHeight()));c.translate(left,top);c.scale(scale,scale);c.clipRect(0,0,pageW,pageH);PageArt.stroke(c,stroke,images);}else cacheDirty=true;
@@ -149,7 +150,7 @@ final class NotebookView extends View {
         float x=e.getX(i),y=e.getY(i),slop=3*density();
         if(start||(x-holdX)*(x-holdX)+(y-holdY)*(y-holdY)>slop*slop){
             if(heldRaw!=null){pending=heldRaw;heldRaw=null;}
-            holdX=x;holdY=y;removeCallbacks(shapeHold);if(autoShapes&&pending!=null&&!drawingWithRuler)postDelayed(shapeHold,600);
+            holdX=x;holdY=y;removeCallbacks(shapeHold);if(autoShapes&&(assist==null||assist.mode==0)&&pending!=null&&!drawingWithRuler)postDelayed(shapeHold,600);
         }
     }
     private boolean rulerTouch(MotionEvent e){
@@ -184,7 +185,7 @@ final class NotebookView extends View {
         if((a==MotionEvent.ACTION_DOWN||a==MotionEvent.ACTION_POINTER_DOWN)&&tool!=3&&(stylus(e,idx)||(touchInk&&e.getPointerCount()==1))) {
             float x=(e.getX(idx)-left)/(base*zoom),y=(e.getY(idx)-top)/(base*zoom);
             if(x<0||y<0||x>pageW||y>pageH)return true;
-            activeId=e.getPointerId(idx);erasing=tool==2||e.getToolType(idx)==MotionEvent.TOOL_TYPE_ERASER||(e.getButtonState()&MotionEvent.BUTTON_STYLUS_PRIMARY)!=0;
+            if(assist!=null)assist.down(x,y,tool==0&&!rulerEnabled&&e.getToolType(idx)!=MotionEvent.TOOL_TYPE_ERASER&&(e.getButtonState()&MotionEvent.BUTTON_STYLUS_PRIMARY)==0);activeId=e.getPointerId(idx);erasing=tool==2||e.getToolType(idx)==MotionEvent.TOOL_TYPE_ERASER||(e.getButtonState()&MotionEvent.BUTTON_STYLUS_PRIMARY)!=0;
             if(stylus(e,idx))requestUnbufferedDispatch(e);
             activeFinger=!stylus(e,idx);
             selecting=tool==4;
@@ -228,11 +229,11 @@ final class NotebookView extends View {
         }
     }
     private void commit(){
-        removeCallbacks(shapeHold);heldRaw=null;drawingWithRuler=false;
+        removeCallbacks(shapeHold);heldRaw=null;boolean ruled=drawingWithRuler;drawingWithRuler=false;Ink.Stroke committed=null;
         if(selecting){selection.end();selecting=false;}
-        if(pending!=null&&!pending.points.isEmpty()){history.before(strokes);Ink.Stroke finished=pending;strokes.add(finished);pending=null;appendInk(finished);}
+        if(pending!=null&&!pending.points.isEmpty()){history.before(strokes);Ink.Stroke finished=pending;committed=finished;strokes.add(finished);pending=null;appendInk(finished);}
         if(erasing&&eraseChanged){history.before(beforeErase);changed();}
-        pending=null;erasing=false;eraseChanged=false;beforeErase=null;activeId=-1;dragging=false;invalidate();
+        pending=null;erasing=false;eraseChanged=false;beforeErase=null;activeId=-1;dragging=false;invalidate();if(assist!=null&&committed!=null&&!ruled)assist.committed(committed);
     }
     private void cancelInput(){removeCallbacks(shapeHold);heldRaw=null;drawingWithRuler=false;if(selecting){selection.cancel();selecting=false;}if(erasing&&beforeErase!=null){strokes.clear();strokes.addAll(beforeErase);cacheDirty=true;}pending=null;beforeErase=null;erasing=false;activeId=-1;eraseChanged=false;invalidate();}
     @Override public boolean performClick(){super.performClick();return true;}

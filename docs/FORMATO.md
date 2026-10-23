@@ -31,3 +31,7 @@ O campo opcional `deleted: true` mantém o caderno e seus arquivos na lixeira. A
 ## Campos 0.7.0
 
 Papéis novos: tategaki, genko200, genko400, kanji e kana. Genko400 usa 842x595 pontos; demais, 595x842. Metadados opcionais: favorite, cover (sage/sand/blue/rose/lavender), lastOpened. Texto pode ter align (left/center/right). _localHash existe apenas no metadata.json local e não é sincronizado. Cada aparelho mantém até 12 snapshots JSON locais; recuperar cria outro id e preserva os arquivos originais.
+
+## Contornos japoneses 0.8.0
+
+Schema continua 2. Objetos kind=ink podem ter pen=glyph, points=[] e glyph: contornos normalizados a 1000 unidades, preenchidos pela regra nonzero. Cada ponto é x,y inteiro de 0 a 1000, separado por espaço; ponto e vírgula separa contornos fechados. Limites: 120000 caracteres e 10000 pontos. x/y/boxW/boxH posicionam o objeto na página; text guarda o caractere Unicode reconhecido. Não é texto editável pelo teclado do Windows. Cópia, transformação, laço e PDF mantêm os contornos; a borracha remove o objeto inteiro. Atualize ambos os clientes: leitores anteriores não conhecem glyph. O modo do auxílio e o modelo baixado não entram nos documentos, backups ou manifesto de sync.

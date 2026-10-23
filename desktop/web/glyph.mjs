@@ -1,0 +1,3 @@
+// Filled contours captured on the tablet. No installed Japanese font is needed for display/export.
+const cache=new Map();
+export function glyphContours(data){if(cache.has(data))return cache.get(data);if(typeof data!=='string'||data.length>120000||!/^[0-9 ,;]+$/.test(data))throw Error('Contorno japonês inválido.');let count=0;const lines=data.split(';').map(line=>{const n=line.trim().split(/[ ,]+/).map(Number);if(n.length<6||n.length%2||n.some(v=>!Number.isInteger(v)||v<0||v>1000)||(count+=n.length/2)>10000)throw Error('Contorno japonês fora dos limites.');return Array.from({length:n.length/2},(_,i)=>[n[i*2],n[i*2+1]]);});if(cache.size>=96)cache.delete(cache.keys().next().value);cache.set(data,lines);return lines;}
