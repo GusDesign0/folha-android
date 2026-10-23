@@ -1,4 +1,4 @@
-param([string]$ToolchainRoot=(Join-Path $PSScriptRoot '..\toolchain'),[switch]$RequireLegacy,[string]$Device='emulator-5554')
+param([string]$ToolchainRoot=(Join-Path $PSScriptRoot '..\toolchain'),[switch]$RequireLegacy,[switch]$UpdaterOnly,[string]$Device='emulator-5554')
 $ErrorActionPreference='Stop'
 $ToolchainRoot=(Resolve-Path -LiteralPath $ToolchainRoot).Path
 $jdk=Get-ChildItem -LiteralPath "$ToolchainRoot\jdk" -Directory | Select-Object -First 1
@@ -33,7 +33,19 @@ if(Test-Path -LiteralPath "$PSScriptRoot\tests\fixtures\fixture-preservar.pdf"){
     & "$ToolchainRoot\platform-tools\adb.exe" -s $Device push "$PSScriptRoot\tests\fixtures\fixture-preservar.pdf" /sdcard/Android/data/br.com.folha.notes/files/fixture-preservar.pdf
     Assert-Exit
 }
-if($RequireLegacy){$taskResults=& "$ToolchainRoot\platform-tools\adb.exe" -s $Device shell am instrument -w -e requireLegacy true br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
+# The future-version APK is parsed and intercepted by an instrumentation monitor; it is NEVER installed.
+& "$tools/aapt2.exe" link -I $platform --manifest "$PSScriptRoot/tests/fixtures/update-next.xml" -o "$build/update-next-unsigned.apk"
+Assert-Exit
+& "$tools/zipalign.exe" -f 4 "$build/update-next-unsigned.apk" "$build/update-next-aligned.apk"
+Assert-Exit
+& "$tools/apksigner.bat" sign --ks "$ToolchainRoot/private/folha.p12" --ks-key-alias folha --ks-pass pass:folha-local-dev --out "$build/update-next.apk" "$build/update-next-aligned.apk"
+Assert-Exit
+& "$ToolchainRoot/platform-tools/adb.exe" -s $Device push "$build/update-next.apk" /sdcard/Android/data/br.com.folha.notes/files/update-next.apk
+Assert-Exit
+& "$ToolchainRoot/platform-tools/adb.exe" -s $Device shell appops set br.com.folha.notes REQUEST_INSTALL_PACKAGES allow
+Assert-Exit
+if($UpdaterOnly){$taskResults=& "$ToolchainRoot/platform-tools/adb.exe" -s $Device shell am instrument -w -e updaterOnly true br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
+elseif($RequireLegacy){$taskResults=& "$ToolchainRoot\platform-tools\adb.exe" -s $Device shell am instrument -w -e requireLegacy true br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
 else{$taskResults=& "$ToolchainRoot\platform-tools\adb.exe" -s $Device shell am instrument -w br.com.folha.notes.tests/br.com.folha.notes.FolhaInstrumentation}
 Assert-Exit
 $taskResults | Write-Output

@@ -4,7 +4,13 @@ Cadernos, S Pen e estudo de PDFs, com sincronização privada no Google Drive.
 
 [Baixar Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk) | [Baixar Windows](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip) | [ZIP Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip)
 
-## Versão 0.8.3
+## Versão 0.8.4
+
+Atualização Android com menos confirmações: depois de **Baixar e instalar** e conferir o arquivo, o Folha abre diretamente o instalador do sistema. Toques duplicados são bloqueados; cancelar permite tentar novamente com o mesmo arquivo verificado. Quando já está atualizado, aparece somente uma mensagem breve.
+
+O Android e o Google Play Protect continuam responsáveis pelas próprias telas e análises. [Fluxo, limites e testes](docs/ATUALIZACOES.md).
+
+### Conteúdos offline
 
 Aba **Conteúdos**, no tablet e PC: dois materiais de kanji já incluídos, disponíveis offline. **Adicionar e abrir** cria sua cópia para anotar; depois, **Abrir na biblioteca** reutiliza a cópia e preserva o progresso. Se estiver na lixeira, **Restaurar e abrir** recupera suas anotações.
 

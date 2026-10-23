@@ -52,6 +52,7 @@ public class FolhaInstrumentation extends Instrumentation {
             Intent i=new Intent(Intent.ACTION_MAIN);i.setClassName(getTargetContext(),"br.com.folha.notes.MainActivity");i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);activity=(MainActivity)startActivitySync(i);waitForIdleSync();
             // Drain initial asynchronous library loading before starting interaction.
             activity.worker.submit(()->{}).get();waitForIdleSync();ui(()->activity.japanese.setMode(0));
+            if("true".equals(options.getString("updaterOnly"))){updaterChecks();report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);return;}
             if("true".equals(options.getString("requireLegacy"))){
                 int preserved=0;for(Documents.Doc meta:activity.library){Documents.Doc d=activity.store.read(meta.id);if(d.name.equals("Caderno de teste")&&d.strokes(0).size()>=2)preserved++;}
                 check(preserved>0,"Updating the APK must preserve notebooks and raw strokes created by version 0.1.0");results.add("In-place 0.1.0 upgrade preserves notebooks");
@@ -248,7 +249,31 @@ public class FolhaInstrumentation extends Instrumentation {
         rejected=false;try{activity.getContentResolver().openFileDescriptor(UpdateProvider.URI,"w");}catch(SecurityException expected){rejected=true;}check(rejected,"Update provider is read-only");
         rejected=false;try{UpdateProvider.requireUri(android.net.Uri.parse("content://br.com.folha.notes.updates/../document.json"));}catch(IllegalArgumentException expected){rejected=true;}check(rejected,"Update provider exposes only the single APK");
         Intent install=AppUpdater.installIntent();check(UpdateProvider.URI.equals(install.getData())&&(install.getFlags()&Intent.FLAG_GRANT_READ_URI_PERMISSION)!=0&&install.getClipData()!=null,"Installer receives content URI and read grant");ready.delete();
+        updaterFlowChecks();
         results.add("Updater: real GitHub APK download and checksum, version/signature checks, cancel, truncated/corrupted downloads, read-only content URI");
+    }
+    void updaterFlowChecks() throws Exception {
+        AppUpdater updater=activity.updater;File ready=UpdateProvider.apk(activity),fixture=new File(activity.getExternalFilesDir(null),"update-next.apk");
+        check(fixture.isFile(),"Signed future-version fixture must be supplied by test-device.ps1");
+        try(InputStream in=new FileInputStream(fixture);OutputStream out=new FileOutputStream(ready)){Documents.copy(in,out);}
+        UpdateChecker.verifyApk(activity,ready,"999.0.0");
+        android.content.IntentFilter filter=new android.content.IntentFilter(Intent.ACTION_VIEW);filter.addDataScheme("content");filter.addDataType(UpdateProvider.TYPE);
+        ActivityMonitor monitor=addMonitor(filter,new ActivityResult(android.app.Activity.RESULT_CANCELED,null),true);
+        try{
+            check(activity.getPackageManager().canRequestPackageInstalls(),"Updater flow QA needs REQUEST_INSTALL_PACKAGES app-op allowed on dedicated emulator");
+            UpdateChecker.Result result=new UpdateChecker.Result();result.version="999.0.0";
+            ui(()->{updater.dismiss();updater.pending=result;updater.busy=false;updater.ready();updater.ready();});
+            updater.worker.submit(()->{}).get();waitForIdleSync();
+            check(monitor.getHits()==1,"Verified download opens installer once without a second Folha dialog");
+            check(updater.dialog==null||!updater.dialog.isShowing(),"No extra ready-to-install confirmation");
+            ui(()->updater.installResult());check(!updater.busy&&updater.pending==result,"Canceling installer unlocks retry and retains verified download");
+            ui(()->updater.ready());updater.worker.submit(()->{}).get();waitForIdleSync();check(monitor.getHits()==2,"Explicit retry reuses downloaded APK");
+            UpdateChecker.Result stale=new UpdateChecker.Result();stale.version=activity.appVersion();
+            ui(()->{updater.installResult();updater.pending=stale;updater.ready();});check(updater.pending==null&&monitor.getHits()==2,"Already-installed version is not offered again");
+            check(AppUpdater.installIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT,false),"System installation result requested");
+            results.add("Updater UX: one installer launch, no redundant Folha confirmation, duplicate taps ignored, canceled install retry, stale version cleared");
+        }finally{removeMonitor(monitor);ui(()->{updater.busy=false;updater.pending=null;updater.dismiss();});ready.delete();}
+        ui(()->updater.check());updater.worker.submit(()->{}).get();waitForIdleSync();check(!updater.busy&&(updater.dialog==null||!updater.dialog.isShowing()),"Already up-to-date shows a nonblocking message without confirmation");
     }
     void qualityArtifacts() throws Exception {
         Documents.Doc demo=new Documents.Doc();demo.name="Escrita em caminhos";demo.paper="dots";

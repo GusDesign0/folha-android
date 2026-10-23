@@ -1,4 +1,4 @@
-# Compilar o Folha 0.8.3
+# Compilar o Folha 0.8.4
 
 ## Android
 
