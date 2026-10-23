@@ -1,14 +1,14 @@
-Folha 0.8.0 - auxílio de kana e kanji
+Folha 0.8.1 - cadernos de estudo e identificação na biblioteca
 
-No tablet, toque em あ 漢 na barra da caneta: Desligado / Traços ajustados / Regular.
+- Dez modelos: Cornell, caderno de erros, exercícios, vocabulário japonês, estudo de kanji, gramática japonesa, perguntas e respostas, fichas de resumo, planejamento e tradução.
+- Ícone, cor de identificação e nome do tipo na biblioteca, incluindo os papéis anteriores. A cor de capa escolhida continua disponível.
+- Prévia e orientação ao criar; 19 tipos de caderno no total.
+- Guias e títulos preservados no PDF e nos dois aplicativos.
+- Estudo de kanji tem quadrículas reconhecidas pelo auxílio japonês.
+- Fundos nativos em caminhos reutilizados por cache; nada de rede, IA ou processamento de correção adicionado ao movimento da caneta.
 
-- Traços ajustados suaviza e endireita segmentos quase retos, preservando curvas, ganchos e pressão. Não reconhece o significado do kanji.
-- Regular reconhece um kana ou kanji após uma pausa de 1,8 s. Oferece alternativas e Original; dois dedos desfazem.
-- Primeiro uso de Regular baixa o modelo japonês (~20 MB). Reconhecimento offline, em executor serial de prioridade baixa, com fila limitada e resultados verificados antes de alterar a página.
-- Prefira papéis Kanji, Kana ou Genkō yōshi; fora de quadrículas, escreva um caractere isolado por vez.
-- Regular salva contornos: abre no PC, sincroniza e exporta como caminhos PDF, sem fonte japonesa instalada no Windows.
-- APK público ARM64 para o Samsung; x86_64 gerado separadamente só para testes.
+Os modelos são folhas para preencher manualmente. Caderno de erros não corrige sozinho; revisões e planejamento não criam lembretes.
 
-Atualize tablet e PC. No tablet, não desinstale. No PC, feche a versão anterior e extraia o ZIP inteiro.
+Atualize tablet e PC. Tablet: instale por cima, sem desinstalar. Windows: feche a versão anterior e extraia o ZIP inteiro.
 
-Testes: modelo real reconheceu 水 com Wi-Fi/dados desligados; modos ao vivo, Original, undo/redo, cancelamento; Java/C# ida e volta com contornos; PDF nativo e Windows com vazados preservados. Android API 36, renderização WebView2 e regressões de biblioteca/temas passaram. A precisão com sua caligrafia e latência física ainda precisam de teste no tablet.
+Validação: 19 geometrias Java/JS iguais; 10 modelos com escrita, desfazer/refazer, salvar/reabrir, backup e PDF no Android API 36; persistência/sincronização no Windows; biblioteca clara/escura e criação em janela de 850 px. Testes do auxílio japonês e atualizador preservados. Latência física da S Pen ainda depende de teste no seu tablet.

@@ -4,7 +4,17 @@ Cadernos, S Pen e estudo de PDFs, com sincronização privada no Google Drive.
 
 [Baixar Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk) | [Baixar Windows](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip) | [ZIP Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip)
 
-## Versão 0.8.0
+## Versão 0.8.1
+
+Dez cadernos de estudo: Cornell, caderno de erros, exercícios, vocabulário japonês, estudo de kanji, gramática japonesa, perguntas e respostas, fichas de resumo, planejamento e tradução. Escolha em **Novo caderno → Tipo de caderno**. Cada tipo tem um ícone, uma cor na lombada e seu nome na biblioteca; a capa continua personalizável. São 19 tipos no total.
+
+![Biblioteca de estudos](docs/cadernos-biblioteca.png)
+
+[Modelos de estudo (PDF)](docs/cadernos-estudo.pdf) | [Como usar](docs/CADERNOS-DE-ESTUDO.md)
+
+Os modelos são preenchidos manualmente. Não há correção de questões, gabarito, notificações ou recorte automático incluído.
+
+### Auxílio japonês preservado
 
 Auxílio de escrita japonesa no botão **あ 漢** do tablet: **Desligado / Traços ajustados / Regular**. O ajuste geométrico mantém a caligrafia, curvas, ganchos e pressão. Regular reconhece um kana/kanji por vez, oferece alternativas e conserva uma operação de desfazer. Primeiro uso baixa o modelo japonês (~20 MB); depois funciona offline.
 

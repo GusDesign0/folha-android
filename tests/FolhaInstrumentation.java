@@ -72,6 +72,7 @@ public class FolhaInstrumentation extends Instrumentation {
             newToolsChecks();
             rotationChecks();
             studyChecks();
+            studyTemplateChecks();
             themeChecks();
             japaneseChecks();
             trashChecks();
@@ -122,6 +123,22 @@ public class FolhaInstrumentation extends Instrumentation {
         }finally{if(activity.pagePanel!=null)ui(()->activity.pagePanel.dialog.dismiss());shell(rotation.matches("[0-3]")?"settings put system user_rotation "+rotation:"settings delete system user_rotation");shell(sensor.matches("[01]")?"settings put system accelerometer_rotation "+sensor:"settings delete system accelerometer_rotation");}
         results.add("Physical emulator rotation: portrait/landscape, same page and ink, undo/redo, zoom and responsive open thumbnails");
     }
+
+    void studyTemplateChecks() throws Exception {
+        Bitmap preview=Bitmap.createBitmap(1500,1030,Bitmap.Config.ARGB_8888);Canvas c=new Canvas(preview);c.drawColor(0xFFF4F5EF);Paint text=new Paint(Paint.ANTI_ALIAS_FLAG);text.setColor(MainActivity.INK);text.setTextSize(32);c.drawText("Folha · cadernos de estudo",30,48,text);int index=0;
+        for(String type:Paper.IDS){if(!StudyPaper.LINES.containsKey(type))continue;
+            final Documents.Doc d=new Documents.Doc();d.paper=type;d.name=StudyPaper.name(type);d.folder="Estudos 081";d.cover="blue";
+            ui(()->{activity.library.add(d);activity.open(d);activity.japanese.setMode(0);activity.selectTool(0);activity.canvas.setRuler(false);});ui(()->{NotebookView v=activity.canvas;check(v.getWidth()>0,"Measured template editor");float x=v.getWidth()/2f,y=v.getHeight()/2f;pen(v,MotionEvent.ACTION_DOWN,x-20,y,.3f);pen(v,MotionEvent.ACTION_MOVE,x+20,y+10,1);pen(v,MotionEvent.ACTION_UP,x+20,y+10,1);check(d.strokes(0).size()==1,"Writing on "+type);v.undo();check(d.strokes(0).isEmpty(),"Undo on "+type);v.redo();activity.saveCurrent();});
+            activity.worker.submit(()->{}).get();Documents.Doc loaded=activity.store.read(d.id);check(loaded.paper.equals(type)&&loaded.cover.equals("blue")&&loaded.strokes(0).size()==1,"Template identity/ink persisted "+type);
+            File backup=new File(activity.getCacheDir(),"study-"+type+".folha");try(OutputStream out=new FileOutputStream(backup)){Backups.export(loaded,activity.store.dir(loaded.id),out);}try(InputStream in=new FileInputStream(backup)){Documents.Doc restored=Backups.restore(activity.store,activity.getCacheDir(),in);check(restored.paper.equals(type)&&restored.strokes(0).size()==1,"Template backup "+type);}
+            File pdf=new File(activity.getExternalFilesDir(null),"study-"+type+".pdf");try(OutputStream out=new FileOutputStream(pdf)){PdfFiles.export(loaded,activity.store.pdf(loaded),out);}PdfFiles.Rendered rendered=PdfFiles.render(pdf,0,842);check(rendered.width==595&&rendered.height==842,"Template PDF dimensions "+type);rendered.bitmap.recycle();
+            float x=20+(index%5)*298,y=90+(index/5)*460;text.setColor(StudyPaper.color(type));text.setTextSize(19);c.drawText(StudyPaper.name(type),x,y,text);int saved=c.save();c.translate(x,y+20);c.scale(275f/595,275f/595);c.clipRect(0,0,595,842);PageArt.paper(c,595,842,type);c.restoreToCount(saved);index++;
+        }
+        check(index==10,"Ten study templates");try(OutputStream out=new FileOutputStream(new File(activity.getExternalFilesDir(null),"folha-study-081.png"))){preview.compress(Bitmap.CompressFormat.PNG,100,out);}finally{preview.recycle();}
+        ui(()->{activity.leaveEditor();activity.folderFilter="Estudos 081";activity.home();check(activity.current==null,"Study library opens");MainActivity.Cover cover=activity.new Cover(activity.library.get(activity.library.size()-1));cover.layout(0,0,300,220);Bitmap b=Bitmap.createBitmap(300,220,Bitmap.Config.ARGB_8888);cover.draw(new Canvas(b));b.recycle();activity.folderFilter="Todas";});
+        ui(()->activity.open(notebook));results.add("10 study templates: native pen/undo/redo, identity and ink after reload/backup, PDF export/render, cover and preview");
+    }
+
     void studyChecks() throws Exception {
         for(String type:new String[]{"tategaki","genko200","genko400","kanji","kana"}){Documents.Doc d=new Documents.Doc();d.name="Papel "+type;d.paper=type;Ink.Stroke mark=new Ink.Stroke(MainActivity.INK,2,false);mark.points.add(new Ink.Point(110,120,.4f));mark.points.add(new Ink.Point(110,200,1));d.strokes(0).add(mark);File exported=new File(activity.getCacheDir(),type+".pdf");try(OutputStream out=new FileOutputStream(exported)){PdfFiles.export(d,activity.store.pdf(d),out);}PdfFiles.Rendered r=PdfFiles.render(exported,0,800);check(r.width==Paper.width(type)&&r.height==Paper.height(type),"Japanese template export must preserve aspect ratio");r.bitmap.recycle();}
         results.add("Japanese vertical, 200/400-character manuscript, kanji/kana papers export at matching dimensions");

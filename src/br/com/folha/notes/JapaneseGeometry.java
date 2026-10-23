@@ -5,6 +5,7 @@ import java.util.*;
 final class JapaneseGeometry {
  static float[] bounds(List<Ink.Stroke> strokes){float l=Float.MAX_VALUE,t=l,r=-l,b=-l;for(Ink.Stroke s:strokes)for(Ink.Point p:s.points){l=Math.min(l,p.x);t=Math.min(t,p.y);r=Math.max(r,p.x);b=Math.max(b,p.y);}return new float[]{l,t,r,b};}
  static float[] cell(String paper,float w,float h,float x,float y){
+  if(StudyPaper.CELLS.containsKey(paper))return StudyPaper.cell(paper,x,y);
   boolean gen=paper.startsWith("genko");if(!gen&&!paper.equals("kanji")&&!paper.equals("kana"))return null;
   int cols=gen?(paper.equals("genko400")?20:10):(paper.equals("kanji")?9:6),rows=gen?20:(paper.equals("kanji")?12:8);float split=paper.equals("genko400")?18:0;
   float size=Math.min((w-68-split)/(cols*(gen?1.25f:1)),(h-100)/rows),gap=gen?size*.25f:0,x0=(w-cols*(size+gap)-split)/2,y0=(h-rows*size)/2;int row=(int)Math.floor((y-y0)/size);if(row<0||row>=rows)return null;

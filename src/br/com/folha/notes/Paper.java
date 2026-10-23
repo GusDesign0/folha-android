@@ -2,12 +2,12 @@ package br.com.folha.notes;
 import java.util.*;
 /** Geometry in PDF points; no font, network or bitmap dependency. */
 final class Paper {
- static final String[] IDS={"lines","grid","dots","blank","tategaki","genko200","genko400","kanji","kana"};
- static final String[] NAMES={"Pautado","Quadriculado","Pontilhado","Em branco","Japonês · colunas verticais","Genkō yōshi · 200 caracteres","Genkō yōshi · 400 caracteres (paisagem)","Kanji · quadrículas com guias","Kana · quadrículas grandes"};
+ static final String[] IDS=StudyPaper.IDS;
+ static final String[] NAMES=StudyPaper.NAMES;
  static int width(String t){return t.equals("genko400")?842:595;}static int height(String t){return t.equals("genko400")?595:842;}
  static boolean japanese(String t){return t.equals("tategaki")||t.startsWith("genko")||t.equals("kanji")||t.equals("kana");}
  static void line(List<float[]> a,float x,float y,float X,float Y,int guide){a.add(new float[]{x,y,X,Y,guide});}
- static List<float[]> lines(float w,float h,String t){List<float[]> a=new ArrayList<>();
+ static List<float[]> lines(float w,float h,String t){List<float[]> a=new ArrayList<>();if(StudyPaper.LINES.containsKey(t)){Collections.addAll(a,StudyPaper.LINES.get(t));return a;}
   if(t.equals("lines")){for(float y=66;y<h-24;y+=24)line(a,34,y,w-34,y,0);}
   else if(t.equals("grid")){for(float y=24;y<h;y+=20)line(a,0,y,w,y,0);for(float x=24;x<w;x+=20)line(a,x,0,x,h,0);}
   else if(t.equals("tategaki")){float step=(w-68)/14;for(int i=0;i<=14;i++){float x=34+i*step;line(a,x,50,x,h-50,0);if(i<14)line(a,x+step*.78f,50,x+step*.78f,h-50,1);}line(a,34,50,w-34,50,0);line(a,34,h-50,w-34,h-50,0);}

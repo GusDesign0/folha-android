@@ -1,19 +1,17 @@
-# Validação 0.8.0
+# Validação 0.8.1
 
-Executada em 23/10/2026. Dados sintéticos ou PDFs locais somente para leitura; nenhum documento pessoal foi publicado.
+Executada em 23/10/2026 com dados sintéticos e emulador dedicado sem janela.
 
-- Android release/R8/lint: 21 cenários de tinta, 20 de gestos/formas/régua e 9 de papéis, mais cenários de ajuste japonês, pressão, curvas/ganchos, quadrículas, contornos, transformação e borracha passaram.
-- Integração API 36: atualização de dados antigos, pressão, palma/cancelamento, dedos, salvar/reabrir, imagens/texto, PDF/backup, laço, rotação, miniaturas, temas, histórico e atualização passaram.
-- Modelo real `ja` do ML Kit baixou no emulador AOSP e reconheceu os quatro traços de 水. O teste desligou Wi-Fi/dados móveis e confirmou reconhecimento e conversão Regular, reutilização do modelo, alternativas e Original. Não foi um reconhecedor simulado.
-- Pipeline após pausa: Traços ajustados substituiu objetos mantendo os originais no histórico; Regular criou contorno de 水; desfazer recuperou os quatro traços e refazer recuperou o contorno. Desligar cancelou trabalho pendente.
-- Glyphs nativos de 水, 木 e 日 são diferentes, preservam vazados, cópia, JSON, laço/transformação e PDF. PDFs Android e Windows foram renderizados e conferidos lado a lado; Windows não depende de fontes CJK instaladas.
-- C#: validação de contornos, armazenamento, backup e preservação dos caracteres através da interface de texto passaram, incluindo fixture gerada no Android.
-- Interoperabilidade Java -> C# -> Java: contornos japoneses, metadados, pressão e PDF original preservados. Conflitos, idempotência, documento aberto, lixeira e restauração continuam verificados.
-- Editor JS, exportação do PDF original com rotação/crop/links, busca/sumário e leitura limitada/cancelável passaram. Renderização de contornos manteve vazados e limites; exportação independente de fonte passou.
-- WebView2 real: primeira/última página de PDFs de 111, 192 e 23 páginas renderizaram. Dados privados seguem em folha-data.local.
-- Chromium/Edge headless isolado: aparência clara/escura, pixels da página preservados, preferência persistente, sistema e layout de 850 px passaram.
-- APK público ARM64; variante x86_64 com o mesmo Java/recursos testada no emulador. Assinatura original, alinhamento ZIP e ELF de 16 KB conferidos. O modelo é baixado separadamente.
-- CPU de desenho em página com 250 traços: em uma execução mediana 1,7 ms e p95 2,1 ms. Execuções anteriores variaram com a carga do host, até cerca de 5 ms no p95. Não mede a latência física da S Pen.
+- Android release/R8 e lintRelease passaram (0 erros; avisos existentes). Assinatura anterior preservada. APK público ARM64; variante x86_64 com mesmo Java/recursos testada.
+- 21 cenários de tinta, 20 de gestos/formas/régua, 19 modelos de papel e cenários japoneses passaram.
+- Comparação numérica Java/JS dos 19 fundos; comparação dos títulos de dez modelos; limites e exportação PDF com texto na orientação correta passaram.
+- Dez modelos no Android: caneta com pressão, desfazer/refazer, salvar/reabrir, identidade/capa, backup editável, exportar/renderizar PDF passaram.
+- Regressão API 36: atualização in-place de dados antigos, palma, cancelamento, dedos, seleção, texto/imagens, PDFs com rotação/crop, miniaturas, rotação, temas e histórico passaram.
+- Modelo real japonês reconheceu 水 com Wi-Fi/dados desligados; modos, Original, alternativas e histórico preservados. Atualizador validou download, integridade e assinatura.
+- CPU de desenho da regressão com 250 traços: mediana 1,8 ms e p95 2,4 ms em uma execução; repetição sob carga chegou a 3,4 / 6,1 ms no emulador. Não mede latência física e não é promessa para o tablet. Os novos fundos reutilizam caminhos, sem trabalho adicional em MOVE.
+- Windows C#: dez tipos preservados em armazenamento/backup/sincronização com texto; proteção de tinta, conflitos, lixeira, versões e integridade passaram.
+- Interface real em Edge headless: dez ícones e cores, nomes dos tipos, 19 opções, criação e abertura de todos os modelos, modo claro/escuro e diálogo em 850 px passaram.
+- Editor JS: texto, salvar/repetir sem duplicação, mover/cancelar, desfazer/refazer e fechar após salvar passaram; busca/leitura e contornos japoneses preservados.
+- PDFs de erros gerados no Android e Windows foram renderizados e inspecionados.
 
-O ajuste geométrico não reconhece o significado do kanji. Regular é por caractere e pode interpretar outro símbolo: alternativas/Original/Desfazer permitem corrigir. Ainda precisam de teste no tablet físico a precisão com a caligrafia do usuário e a latência da S Pen. Atualize ambos os apps para preservar contornos. OCR e composição vertical de texto digitado não estão incluídos; japonês digitado no Windows continua limitado pelas fontes da exportação de texto.
-
+Precisão/latência física com S Pen e sincronização em dois dispositivos reais ainda dependem do usuário. Modelos são de preenchimento manual, sem correção, gabarito ou lembretes.

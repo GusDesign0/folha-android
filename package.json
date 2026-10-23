@@ -1,9 +1,9 @@
 {
   "name": "folha-development-tests",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": true,
   "scripts": {
-    "test": "node desktop/tests/editor.cjs && node desktop/tests/study.cjs && node desktop/tests/export.cjs && node desktop/tests/theme.cjs && node desktop/tests/glyph.cjs",
+    "test": "node desktop/tests/editor.cjs && node desktop/tests/study.cjs && node desktop/tests/export.cjs && node desktop/tests/theme.cjs && node desktop/tests/glyph.cjs && node desktop/tests/papers.cjs",
     "test:ui": "node desktop/tests/ui.cjs"
   },
   "devDependencies": {

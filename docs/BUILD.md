@@ -1,4 +1,4 @@
-# Compilar o Folha 0.8.0
+# Compilar o Folha 0.8.1
 
 ## Android
 
@@ -26,3 +26,7 @@ O código fica em `desktop/`.
 Nenhum token de usuário, biblioteca pessoal, chave de assinatura ou credencial do navegador deve ser incluído em código, instaladores ou publicações.
 
 O teste de integração baixa o modelo japonês no perfil isolado do emulador e desliga/reabilita Wi-Fi/dados móveis para conferir reconhecimento offline. Use um emulador dedicado. Testes JavaScript: `npm install && npm test`. `npm run test:ui` usa navegador headless, sem perfil pessoal; requer Edge no Windows ou Chromium instalado pelo Playwright em outros sistemas.
+
+## Modelos de estudo
+
+Edite papers.json e execute node generate-papers.cjs para atualizar as constantes Java/JS. Ambos os arquivos gerados são versionados.
