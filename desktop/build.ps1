@@ -15,4 +15,11 @@ if(Test-Path -LiteralPath "$PSScriptRoot/google-client.json"){Copy-Item -Literal
 @'
 <?xml version="1.0" encoding="utf-8"?><configuration><startup useLegacyV2RuntimeActivationPolicy="true"><supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8"/></startup><runtime><AppContextSwitchOverrides value="Switch.System.Net.DontEnableSystemDefaultTlsVersions=false"/></runtime></configuration>
 '@ | Set-Content -LiteralPath (Join-Path $OutputDir 'Folha.exe.config') -Encoding UTF8
+$taskContent=Join-Path $PSScriptRoot '../assets/content'
+if(-not(Test-Path -LiteralPath $taskContent)){$taskContent=Join-Path $PSScriptRoot '../app/assets/content'}
+if(Test-Path -LiteralPath $taskContent){
+ Copy-Item -LiteralPath $taskContent -Destination $OutputDir -Recurse -Force
+ New-Item -ItemType Directory -Force (Join-Path $OutputDir 'web/content') | Out-Null
+ Get-ChildItem -LiteralPath $taskContent -Filter '*.png' | Copy-Item -Destination (Join-Path $OutputDir 'web/content') -Force
+}
 Write-Output "Folha pronto em $OutputDir"

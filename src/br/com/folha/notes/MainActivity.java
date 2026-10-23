@@ -43,12 +43,12 @@ public class MainActivity extends Activity {
     float smoothing=1,sensitivity=1;
     boolean partialEraser=true;
     boolean autoShapes=true,rulerOn=false;
-    boolean touchInk=false,loading=false,trashView=false;
+    boolean touchInk=false,loading=false,trashView=false,contentView=false;
     final Runnable delayedSave=()->saveCurrent();
 
     @Override public void onCreate(Bundle state) {
         dark=UiTheme.resolve(this);setTheme(dark?R.style.AppThemeDark:R.style.AppTheme);super.onCreate(state);store=new Documents(this);updater=new AppUpdater(this);cloud=new CloudSync(this);japanese=new JapaneseAssist(this);
-        PdfFiles.init(this);
+        PdfFiles.init(this);contentView=state!=null&&state.getBoolean("contentView",false);
         SharedPreferences prefs=getSharedPreferences("pens",0);width=prefs.getFloat("width",2.2f);pen=prefs.getString("pen","fountain");smoothing=prefs.getFloat("smoothing",1);sensitivity=prefs.getFloat("sensitivity",1);partialEraser=prefs.getBoolean("partial",true);
         autoShapes=prefs.getBoolean("shapes",true);
         if(Build.VERSION.SDK_INT>=33)getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,()->navigateBack());
@@ -59,11 +59,11 @@ public class MainActivity extends Activity {
             if(found!=null&&!found.deleted)open(found);else home();
         });}catch(Exception e){main.post(()->{home();error("Não foi possível ler a biblioteca. Os arquivos locais foram preservados.",e);});}});
     }
-    @Override protected void onSaveInstanceState(Bundle state){saveCurrent();if(current!=null)state.putString("document",current.id);super.onSaveInstanceState(state);}
+    @Override protected void onSaveInstanceState(Bundle state){state.putBoolean("contentView",contentView);saveCurrent();if(current!=null)state.putString("document",current.id);super.onSaveInstanceState(state);}
     @Override protected void onPause(){super.onPause();if(canvas!=null)canvas.finishInput();saveCurrent();}
     @Override public void onConfigurationChanged(android.content.res.Configuration config){super.onConfigurationChanged(config);applyAppearance();if(current==null&&!loading)home();else if(pagePanel!=null)pagePanel.resize();if(readingPanel!=null)readingPanel.resize();}
     @Override protected void onDestroy(){main.removeCallbacks(delayedSave);PagePanel panel=pagePanel;if(panel!=null){panel.dialog.dismiss();panel.close();}if(readingPanel!=null){readingPanel.close();}if(japanese!=null)japanese.close();if(updater!=null)updater.close();if(cloud!=null)cloud.close();if(canvas!=null)canvas.dispose();worker.shutdown();renderWorker.shutdown();fileWorker.shutdown();super.onDestroy();}
-    void navigateBack(){if(loading){generation++;loading=false;home();}else if(current!=null){leaveEditor();home();}else finish();}
+    void navigateBack(){if(loading){generation++;loading=false;home();}else if(current!=null){leaveEditor();home();}else if(contentView){contentView=false;home();}else finish();}
     // API 33+ uses the dispatcher registered in onCreate; this handles Android 10–12.
     @android.annotation.SuppressLint("GestureBackNavigation")
     @Override public void onBackPressed(){navigateBack();}
@@ -87,6 +87,8 @@ public class MainActivity extends Activity {
         Icon logo=new Icon("leaf");logo.setBackground(shape(GREEN,13));header.addView(logo,new LinearLayout.LayoutParams(dp(48),dp(48)));gap(header,12);
         LinearLayout brand=column();brand.addView(text("folha",28,INK,true));brand.addView(text("Espaço para pensar.",12,MUTED,false));header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
         header.addView(button("Conta",false,()->cloud.show()));gap(header,8);header.addView(icon("theme","Aparência: claro, escuro ou sistema",()->chooseAppearance()));header.addView(icon("more","Opções da biblioteca",()->libraryOptions()));root.addView(header);line(root);
+        LinearLayout tabs=row();tabs.setPadding(dp(24),dp(12),dp(24),dp(6));TextView libraryTab=button("Biblioteca",!contentView,()->{contentView=false;home();});libraryTab.setSelected(!contentView);tabs.addView(libraryTab);gap(tabs,8);TextView contentTab=button("Conteúdos",contentView,()->{contentView=true;home();});contentTab.setSelected(contentView);tabs.addView(contentTab);root.addView(tabs);
+        if(contentView){ContentCatalog.show(this);return;}
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);LinearLayout body=column();body.setPadding(dp(24),dp(20),dp(24),dp(24));scroll.addView(body);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         body.addView(text(trashView?"Lixeira":"Sua biblioteca",30,INK,true));gap(body,6);body.addView(text("Ideias à mão. Do tablet ao computador.",15,MUTED,false));gap(body,24);
         HorizontalScrollView actionScroll=new HorizontalScrollView(this);actionScroll.setHorizontalScrollBarEnabled(false);LinearLayout actions=row();actions.addView(button("+ Novo caderno",true,()->createNotebook()));gap(actions,8);actions.addView(button("Importar PDF",false,()->importPdf()));gap(actions,8);actions.addView(button(selectionMode?"Concluir":"Selecionar",false,()->{selectionMode=!selectionMode;selectedDocs.clear();home();}));actionScroll.addView(actions);body.addView(actionScroll);gap(body,16);
@@ -144,13 +146,18 @@ public class MainActivity extends Activity {
         }).show();
     }
     void importPdf(){Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("application/pdf");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,100);}
+    void openContent(org.json.JSONObject entry){
+        if(loading)return;loading=true;final int token=++generation;showLoading("Preparando seu material…");
+        worker.execute(()->{try{Documents.Doc d=ContentCatalog.add(this,store,entry);main.post(()->{if(isDestroyed())return;library.removeIf(old->old.id.equals(d.id));library.add(0,d);cloud.edited();if(token!=generation){if(current==null)home();return;}loading=false;open(d);});}
+        catch(Exception|OutOfMemoryError e){main.post(()->{if(isDestroyed()||token!=generation)return;loading=false;home();error("Não foi possível preparar o material. Suas anotações foram preservadas.",e);});}});
+    }
     void open(Documents.Doc d){if(d.deleted)return;if(current!=null)leaveEditor();editingId=d.id;
         if(!d.loaded){loading=true;showLoading("Abrindo caderno…");final int token=++generation;worker.execute(()->{try{Documents.Doc full=store.read(d.id);main.post(()->{if(token!=generation||isDestroyed())return;loading=false;for(int i=0;i<library.size();i++)if(library.get(i).id.equals(full.id)){library.set(i,full);break;}current=full;current.lastOpened=System.currentTimeMillis();page=full.lastPage;editor();saveCurrent();});}catch(Exception e){main.post(()->{loading=false;home();error("Não foi possível abrir o caderno.",e);});}});return;}
         current=d;current.lastOpened=System.currentTimeMillis();page=d.lastPage;editor();saveCurrent();}
     void leaveEditor(){if(canvas!=null){canvas.finishInput();saveCurrent();canvas.dispose();canvas=null;}if(current!=null)for(int i=0;i<library.size();i++)if(library.get(i).id.equals(current.id)){library.set(i,current.light());break;}generation++;current=null;editingId="";}
     void editor(){
         base();toolIcons.clear();LinearLayout top=row();top.setPadding(dp(10),dp(8),dp(14),dp(8));
-        top.addView(icon("back","Biblioteca",()->{leaveEditor();home();}));gap(top,6);
+        top.addView(icon("back",contentView?"Conteúdos":"Biblioteca",()->{leaveEditor();home();}));gap(top,6);
         LinearLayout names=column();documentTitle=text(current.name,18,INK,true);documentTitle.setSingleLine();documentTitle.setEllipsize(android.text.TextUtils.TruncateAt.END);names.addView(documentTitle);
         saveLabel=text("Salvo no tablet",11,MUTED,false);names.addView(saveLabel);syncLabel=text(cloud.badge(current),10,GREEN,false);names.addView(syncLabel);names.setOnClickListener(v->editDetails(current));top.addView(names,new LinearLayout.LayoutParams(0,-2,1));
         top.addView(icon("theme","Aparência",()->chooseAppearance()));top.addView(icon("export","Exportar PDF",()->exportPdf()));top.addView(icon("more","Opções e ajuda",()->options()));root.addView(top);line(root);

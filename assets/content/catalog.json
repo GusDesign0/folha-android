@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "kanji-250-apostila",
+      "documentId": "a3ca1903-ed0a-5480-bd55-8dfe9a48738e",
+      "edition": 1,
+      "title": "Kanji para a vida diária",
+      "description": "25 lições com 250 kanji, leituras em português, 500 exemplos, exercícios e gabaritos.",
+      "category": "Japonês · Kanji",
+      "pages": 238,
+      "file": "kanji-250-apostila.pdf",
+      "cover": "kanji-250-apostila.png",
+      "bytes": 3269381,
+      "sha256": "92e79fa168b4921902c964b66eb1613b6aa7f8e9776c1c4f1fce0ccccc570203",
+      "license": "CC BY-SA 4.0"
+    },
+    {
+      "id": "kanji-250-caderno",
+      "documentId": "7ebf2ddc-0daa-52fe-b928-db2371ca9cd9",
+      "edition": 1,
+      "title": "Kanji · caderno guiado",
+      "description": "Cinco kanji por folha, ordem dos traços, modelos para contornar e espaço para repetir.",
+      "category": "Japonês · Kanji",
+      "pages": 53,
+      "file": "kanji-250-caderno.pdf",
+      "cover": "kanji-250-caderno.png",
+      "bytes": 2495790,
+      "sha256": "035f8d20825d2c9806122dc871041d40b36b535bf6ab8b1fd31a3d6654c505db",
+      "license": "CC BY-SA 4.0"
+    }
+  ]
+}

@@ -1,15 +1,16 @@
-Folha 0.8.2 - hiragana e katakana para estudo e repetição
+Folha 0.8.3 - Conteúdos offline
 
-- Dois cadernos novos, cada um com 27 páginas prontas.
-- Tabelas dos 46 kana básicos, 25 sons com marcas e 33 combinações; treino de kana pequenos e formas parecidas.
-- Modelo, duas cópias claras para contornar, quatro espaços para repetir e dois para tentar de memória.
-- Ícone e cor próprios; 21 tipos de caderno no total.
-- Lições acompanham as anotações ao mover, duplicar, apagar, salvar, restaurar backup e sincronizar. + Página repete o fundo da página atual.
-- Modelos vetoriais derivados de Klee One (SIL OFL 1.1), já incorporados; PC e PDF não precisam instalar fontes japonesas.
-- Fundos em cache; nenhum reconhecedor ou download adicional necessário para usar os cadernos.
+- Nova aba Conteúdos no tablet e Windows, com capas, descrição e acesso dentro do app.
+- Kanji para a vida diária: 238 páginas, 250 kanji, 25 lições, 500 exemplos, exercícios e gabaritos.
+- Kanji · caderno guiado: 53 páginas, cinco kanji por folha, ordem dos traços e repetição.
+- Materiais rediagramados e incluídos nos instaladores, sem baixar PDFs à parte.
+- Adicionar e abrir cria sua cópia; reabrir preserva as anotações e não duplica. Restaurar e abrir recupera a cópia na lixeira.
+- Cópias usam o fluxo normal de PDF anotado, backup .folha e Drive.
+- Catálogo, PDFs e documentação de autoria/licenças versionados em assets/content e docs/CONTEUDOS.md.
+- Importação/hash em segundo plano, sem alterar o caminho de entrada da caneta.
 
-Escolha Novo caderno -> Tipo de caderno -> Hiragana ou Katakana. Os cadernos existentes continuam com o papel original. Atualize tablet e PC.
+Atualize pelo botão Atualizar app no Android ou instale Folha.apk por cima, sem desinstalar. No Windows, feche o programa e extraia o ZIP inteiro, incluindo content. Sua biblioteca pessoal fica fora da pasta do programa.
 
-A prática é manual. Não há avaliação automática de acerto, ordem dos traços ou pronúncia. O auxílio japonês Regular continua por caractere; para escrever combinações livremente, prefira Desligado ou Traços ajustados.
+Materiais originais, independentes do livro comercial PRACTICAL KANJI. Créditos EDRDG, KanjiVG e Klee One nos PDFs e na documentação. Não há avaliação automática da escrita nem áudio.
 
-Testado: Android API 36, escrita/desfazer, 27 páginas e PDF por alfabeto, mover/duplicar/apagar, backup, Java-C#-Java, fundo de cada página no PC e repetição por + Página.
+Testado: Android API 36, escrita/pressão, reabrir/restaurar/backup/exportar; PC real em navegador headless com PDF.js, claro/escuro, janela menor e preservação de texto.

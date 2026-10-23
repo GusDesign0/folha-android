@@ -24,6 +24,29 @@ public class FolhaInstrumentation extends Instrumentation {
         long time=SystemClock.uptimeMillis();MotionEvent e=MotionEvent.obtain(time-16,time,action,ids.length,props,coords,0,0,1,1,0,0,android.view.InputDevice.SOURCE_STYLUS,flags);v.dispatchTouchEvent(e);e.recycle();
     }
     void pen(NotebookView v,int action,float x,float y,float pressure){event(v,action,new int[]{MotionEvent.TOOL_TYPE_STYLUS},new int[]{7},new float[]{x},new float[]{y},new float[]{pressure},0);}
+    TextView findText(View root,String text){if(root instanceof TextView&&((TextView)root).getText().toString().equals(text))return (TextView)root;if(root instanceof android.view.ViewGroup)for(int i=0;i<((android.view.ViewGroup)root).getChildCount();i++){TextView found=findText(((android.view.ViewGroup)root).getChildAt(i),text);if(found!=null)return found;}return null;}
+    void contentChecks() throws Exception {
+        java.util.List<org.json.JSONObject> entries=ContentCatalog.items(activity);check(entries.size()==2,"Two bundled materials");
+        ui(()->{activity.leaveEditor();activity.contentView=true;activity.home();});
+        for(org.json.JSONObject entry:entries){
+            check(findText(activity.root,entry.getString("title"))!=null,"Title visible in Contents");
+            Documents.Doc d=ContentCatalog.add(activity,activity.store,entry);check(d.count==entry.getInt("pages"),"Native page count");
+            check(DriveSync.hashFile(activity.store.pdf(d)).equals(entry.getString("sha256")),"Native content checksum");
+            d.name="Content annotation preserved";d.lastPage=3;d.strokes(0).clear();Ink.Stroke ink=new Ink.Stroke(0xFF263C32,2.2f,false);ink.points.add(new Ink.Point(15,15,.5f));ink.points.add(new Ink.Point(80,80,.9f));d.strokes(0).add(ink);activity.store.write(d);
+            String before=d.json().toString();Documents.Doc again=ContentCatalog.add(activity,activity.store,entry);check(before.equals(again.json().toString()),"Repeated add keeps ink and metadata");
+            d.deleted=true;activity.store.write(d);Documents.Doc restored=ContentCatalog.add(activity,activity.store,entry);check(!restored.deleted&&restored.strokes(0).size()==1&&restored.lastPage==3,"Restore preserves ink and reading progress");
+            PdfFiles.Rendered first=PdfFiles.render(activity.store.pdf(restored),0,1000);check(first.bitmap.getWidth()>400,"Bundled PDF renders");first.bitmap.recycle();
+            ByteArrayOutputStream out=new ByteArrayOutputStream();PdfFiles.export(restored,activity.store.pdf(restored),out);File exported=new File(activity.getCacheDir(),entry.getString("id")+"-annotated.pdf");try(FileOutputStream file=new FileOutputStream(exported)){file.write(out.toByteArray());}check(PdfFiles.count(exported)==restored.count,"Annotated export count");
+            File backup=new File(activity.getCacheDir(),entry.getString("id")+".folha");try(FileOutputStream file=new FileOutputStream(backup)){Backups.export(restored,activity.store.dir(restored.id),file);}check(backup.length()>1000000,"Editable backup created");
+            ui(()->{activity.library.removeIf(old->old.id.equals(restored.id));activity.library.add(restored);activity.open(restored);});activity.worker.submit(()->{}).get();activity.renderWorker.submit(()->{}).get();waitForIdleSync();check(activity.current.id.equals(d.id),"Content opens in normal editor");
+            ui(()->{activity.leaveEditor();activity.home();});
+        }
+        ui(()->{activity.contentView=true;activity.home();});check(findText(activity.root,"Conteúdos")!=null,"Contents after editor");
+        try(FileOutputStream screenshot=new FileOutputStream(new File(activity.getExternalFilesDir(null),"contents-083.png"))){Bitmap image=getUiAutomation().takeScreenshot();image.compress(Bitmap.CompressFormat.PNG,100,screenshot);image.recycle();}
+        ui(()->{activity.navigateBack();});check(!activity.contentView,"Back from Contents returns to library");
+        results.add("Bundled content: tab, 2 offline PDFs, SHA-256, add/reopen, ink preservation, restore, page render, annotated export and editable backup");
+    }
+
     @Override public void onStart(){
         Bundle report=new Bundle();try{
             Intent i=new Intent(Intent.ACTION_MAIN);i.setClassName(getTargetContext(),"br.com.folha.notes.MainActivity");i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);activity=(MainActivity)startActivitySync(i);waitForIdleSync();
@@ -34,6 +57,7 @@ public class FolhaInstrumentation extends Instrumentation {
                 check(preserved>0,"Updating the APK must preserve notebooks and raw strokes created by version 0.1.0");results.add("In-place 0.1.0 upgrade preserves notebooks");
             }
             if("true".equals(options.getString("kanaOnly"))){notebook=new Documents.Doc();notebook.name="Kana focused QA";kanaChecks();File roundtrip=new File(activity.getExternalFilesDir(null),"kana-roundtrip-082.json");if(roundtrip.exists()){Documents.Doc rt=Documents.Doc.parse(new String(java.nio.file.Files.readAllBytes(roundtrip.toPath()),"UTF-8"));check(rt.count==27&&rt.pagePapers.size()==27&&rt.paperAt(1).equals("hiragana-p1")&&rt.strokes(1).size()==1,"Java to C# to Java retains lessons and pressure ink");results.add("Java-C#-Java kana roundtrip preserves all backgrounds and ink");}kanaPerformance();report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);return;}
+            contentChecks();
             notebook=new Documents.Doc();notebook.name="Caderno de teste";notebook.folder="Integração";
             ui(()->{activity.library.add(notebook);activity.open(notebook);});
             ui(()->{

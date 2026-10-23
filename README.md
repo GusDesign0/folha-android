@@ -4,7 +4,15 @@ Cadernos, S Pen e estudo de PDFs, com sincronização privada no Google Drive.
 
 [Baixar Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk) | [Baixar Windows](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip) | [ZIP Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip)
 
-## Versão 0.8.2
+## Versão 0.8.3
+
+Aba **Conteúdos**, no tablet e PC: dois materiais de kanji já incluídos, disponíveis offline. **Adicionar e abrir** cria sua cópia para anotar; depois, **Abrir na biblioteca** reutiliza a cópia e preserva o progresso. Se estiver na lixeira, **Restaurar e abrir** recupera suas anotações.
+
+![Conteúdos](docs/conteudos.png)
+
+[Materiais, licenças e atualização do catálogo](docs/CONTEUDOS.md) | [Catálogo versionado](assets/content/catalog.json)
+
+### Hiragana e katakana
 
 **Hiragana e Katakana · estudo e repetição**, com 27 páginas prontas por caderno. Consulte as tabelas, contorne modelos claros, repita e tente de memória. Inclui básicos, sons com marcas, combinações, sinais pequenos e formas parecidas. Os modelos não avaliam acertos nem ordem dos traços.
 

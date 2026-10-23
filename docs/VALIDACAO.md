@@ -1,15 +1,12 @@
-# Validação 0.8.2
+# Validação 0.8.3
 
-23/10/2026; dados sintéticos, sem perfil pessoal ou janelas do usuário.
+23/10/2026. Testes em perfis sintéticos e navegador/emulador sem janelas do usuário.
 
-- Release Android/R8 e lintRelease: 0 erros, 34 avisos. Assinatura original e alinhamento 16 KB preservados; ARM64 público e x86_64 no emulador API 36.
-- Core: tinta, gestos, formas/régua, 21 modelos públicos, auxílio japonês, 54 lições e 151 contornos passaram.
-- JS: todos os 54 layouts dentro da página, 151 contornos portáteis, títulos compatíveis com PDF, 27 páginas exportadas por alfabeto. Os dez modelos anteriores mantêm geometria e títulos em Java/JS.
-- Integração nativa: cada sequência com 27 páginas, caneta/desfazer/refazer, salvar/reabrir, backup, fundos por página, mover/duplicar/apagar junto da tinta, miniaturas e PDF renderizado passaram.
-- Interoperabilidade Java → C# → Java com fixture nativa preservou as 27 lições e tinta com pressão. C#: inicialização, cópia/backup/sincronização e bloqueio da alteração de fundos existentes passaram.
-- Interface real em Edge headless: 21 opções, criação com sequência, mudança do fundo ao avançar, restauração da última página, + Página repetindo a lição atual e identidade na biblioteca passaram.
-- Editor JS, busca/leitura e contornos japoneses passaram; regressão completa do Android incluiu palma, rotação, temas, histórico, auxílio japonês real offline e atualizador.
-- PDF do Android e do Windows da mesma lição foi renderizado e inspecionado. Modelos japoneses são caminhos e não dependem de fonte CJK instalada no PC.
-- CPU de fundos em cache (bitmap 595×842, emulador): mediana ~1,2–2,0 ms e p95 ~1,4–2,6 ms nos quatro casos medidos. A regressão com 250 traços ficou ~1,7 ms de mediana e ~2,4–3,2 ms no p95. Não mede latência física da S Pen.
+- Android release/R8 e lintRelease: 0 erros, 34 avisos anteriores. Atualização sobre a instalação antiga preservou cadernos.
+- Nova aba nativa: dois materiais locais; conferência SHA-256 e contagem de 238/53 páginas; criação, reabertura sem duplicar, preservação de tinta/metadados, restauração da lixeira, renderização, PDF anotado e backup editável passaram.
+- Regressão completa Android: S Pen/pressão, palma, cancelamento, desfazer/refazer, gestos, rotação, salvar/reabrir, papéis japoneses, kana, temas, reconhecimento japonês real offline e atualizador passaram. Página com 250 traços no emulador: CPU p50 1,726 ms e p95 2,686 ms; não mede latência física da S Pen.
+- C#: catálogo offline, SHA-256, reutilização de cópia, restauração/progresso, deduplicação ao restaurar backup e ID inexistente passaram; regressão de persistência, sincronização, conflitos, histórico e texto imutável em relação à tinta passou.
+- Interface real em Edge headless: capas, claro/escuro e janela 880×760; os dois PDFs abertos pelo PDF.js; anotação digitada preservada ao reabrir, dois materiais sem duplicatas, navegação e ausência de erros JavaScript passaram.
+- As 291 páginas dos PDFs foram renderizadas e inspecionadas; 500 pares de vocabulário por PDF e 75 textos/leituras/traduções da apostila preservados após a revisão visual.
 
-Precisão, conforto e latência no Samsung físico ainda dependem do teste do usuário. Não há avaliação automática de escrita, ordem dos traços ou áudio.
+Os PDFs originais são imutáveis. O catálogo só lê metadados/capas quando aberto, e prepara a cópia fora da thread de entrada. Não há consulta ao catálogo em MOVE da caneta. Sincronização física PC/tablet e conforto no Samsung ainda dependem do teste do usuário.

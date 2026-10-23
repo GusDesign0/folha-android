@@ -1,4 +1,5 @@
 import {setupTheme} from './theme.mjs';
+import {setupContents} from './content.mjs';
 import {setupStudy} from './study.mjs';
 import {drawPaper,paperSize,papers,paperInfo,paperIcon,pagePaper} from './paper.mjs';
 import {exportPdf} from './pdf-export.mjs';
@@ -31,7 +32,7 @@ $('new').onclick=$('first').onclick=newDialog;$('cancelNew').onclick=()=>$('newD
 $('newForm').onsubmit=async e=>{e.preventDefault();try{const d=await rpc('new',{name:$('name').value.trim()||'Sem título',paper:$('paper').value});$('newDialog').close();await open(d.id);}catch(e){fail(e);}};
 $('import').onclick=async()=>{try{const d=await rpc('import');if(d)await open(d.id);}catch(e){fail(e);}};
 async function open(id){if(opening)return;opening=true;try{await openDocument(id);}finally{opening=false;}}
-async function openDocument(id){await flush();finish();const d=await rpc('open',{id});doc=d;page=clamp(d.lastPage||0,0,d.count-1);undo=[];redo=[];pdf=null;images.clear();$('library').hidden=true;$('editor').hidden=false;$('title').textContent=d.name;$('syncBadge').textContent=syncText(d);$('save').textContent=d.pdf?'Abrindo PDF…':'Salvo neste PC';if(d.pdf){try{pdfTask=pdfjs.getDocument({url:`https://folha-data.local/data/${id}/source.pdf`,cMapUrl:'./vendor/cmaps/',cMapPacked:true,standardFontDataUrl:'./vendor/standard_fonts/',wasmUrl:'./vendor/wasm/',isEvalSupported:false});pdf=await pdfTask.promise;if(pdf.numPages!==d.count||d.pdfPending){d.count=pdf.numPages;await rpc('pdfCount',{id,count:d.count});delete d.pdfPending;page=clamp(page,0,d.count-1);}}catch(e){await home();throw Error('Não foi possível abrir este PDF. PDFs protegidos por senha não são suportados. '+e.message);}}
+async function openDocument(id){contents.hide();await flush();finish();const d=await rpc('open',{id});doc=d;page=clamp(d.lastPage||0,0,d.count-1);undo=[];redo=[];pdf=null;images.clear();$('library').hidden=true;$('editor').hidden=false;$('title').textContent=d.name;$('syncBadge').textContent=syncText(d);$('save').textContent=d.pdf?'Abrindo PDF…':'Salvo neste PC';if(d.pdf){try{pdfTask=pdfjs.getDocument({url:`https://folha-data.local/data/${id}/source.pdf`,cMapUrl:'./vendor/cmaps/',cMapPacked:true,standardFontDataUrl:'./vendor/standard_fonts/',wasmUrl:'./vendor/wasm/',isEvalSupported:false});pdf=await pdfTask.promise;if(pdf.numPages!==d.count||d.pdfPending){d.count=pdf.numPages;await rpc('pdfCount',{id,count:d.count});delete d.pdfPending;page=clamp(page,0,d.count-1);}}catch(e){await home();throw Error('Não foi possível abrir este PDF. PDFs protegidos por senha não são suportados. '+e.message);}}
 await loadImages();await renderPage(true);$('save').textContent='Salvo neste PC';}
 async function loadImages(){const wanted=(doc.pages[String(page)]||[]).filter(s=>s.kind==='image');images.clear();for(const s of wanted){if(images.has(s.asset))continue;const image=new Image();image.src=`https://folha-data.local/data/${doc.id}/assets/${s.asset}`;try{await image.decode();images.set(s.asset,image);}catch{toast('Uma imagem não pôde ser carregada. O arquivo do caderno foi preservado.');}}}
 function queue(data){$('save').textContent='Salvando…';$('syncBadge').textContent='Salvando…';saveOps.push(structuredClone({id:doc.id,page,...data}));saveChain=pump();saveChain.catch(()=>{});}
@@ -39,8 +40,8 @@ function pump(){if(pumpTask)return pumpTask;pumpTask=(async()=>{try{while(saveOp
 $('save').onclick=()=>pump().catch(fail);
 async function flush(){finish();await pump();}
 window.folhaClose=async()=>{await flush();};
-async function home(){studies.close();await flush();await rpc('close');doc=null;renderEpoch++;const render=pdfRender;pdfRender=null;render?.cancel();await render?.promise.catch(()=>{});await pdfTask?.destroy();pdfTask=null;pdf=null;images.clear();$('editor').hidden=true;$('library').hidden=false;await refresh();}
-$('back').onclick=$('libraryButton').onclick=()=>{if(doc)home().catch(fail);};
+async function home(){contents.hide();studies.close();await flush();await rpc('close');doc=null;renderEpoch++;const render=pdfRender;pdfRender=null;render?.cancel();await render?.promise.catch(()=>{});await pdfTask?.destroy();pdfTask=null;pdf=null;images.clear();$('editor').hidden=true;$('library').hidden=false;await refresh();}
+$('back').onclick=$('libraryButton').onclick=()=>home().catch(fail);
 const objects=()=>doc.pages[String(page)]||(doc.pages[String(page)]=[]);
 function before(){undo.push(objects().slice());if(undo.length>50)undo.shift();redo=[];historyButtons();}
 function historyButtons(){$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;}
@@ -79,6 +80,7 @@ $('title').onclick=()=>{const name=prompt('Nome do caderno',doc.name);if(name?.t
 $('backup').onclick=async()=>{try{await flush();if(await rpc('backup',{id:doc.id}))toast('Backup editável salvo.');}catch(e){fail(e);}};
 $('export').onclick=async()=>{try{await flush();$('export').disabled=true;$('export').textContent='Preparando…';const snapshot=structuredClone(doc);const bytes=await exportPdf(snapshot);let binary='';for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.subarray(i,i+32768));if(await rpc('savePdf',{bytes:btoa(binary)}))toast('PDF exportado com a escrita em caminhos.');}catch(e){fail(e);}finally{$('export').disabled=false;$('export').textContent='Exportar PDF';}};
 document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)||document.querySelector('dialog[open]'))return;if(!doc)return;if(e.code==='Space'){e.preventDefault();space=true;}if(e.ctrlKey&&(e.key.toLowerCase()==='z'||e.key.toLowerCase()==='y')){e.preventDefault();e.key.toLowerCase()==='y'||e.shiftKey?redoEdit():undoEdit();}if(!e.ctrlKey&&e.key.toLowerCase()==='t')selectTool('text');if(e.key==='Escape')selectTool('hand');});document.addEventListener('keyup',e=>{if(e.code==='Space')space=false;});window.addEventListener('blur',()=>{space=false;finish();});
+const contents=setupContents({rpc,open,home,fail});
 try{const initial=await rpc('init');library=initial.library;cloud(initial.cloud);cards();}catch(e){fail(e);}
 
 $('paper').replaceChildren(...papers.map(([id,name])=>{const o=document.createElement('option');o.value=id;o.textContent=name;return o;}));$('paper').value='lines';function previewPaper(){const c=$('paperPreview'),ctx=c.getContext('2d'),[w,h]=paperSize($('paper').value),s=Math.min(c.width/w,c.height/h);ctx.resetTransform();ctx.clearRect(0,0,c.width,c.height);ctx.translate((c.width-w*s)/2,0);ctx.scale(s,s);drawPaper(ctx,w,h,$('paper').value);$('paperHint').textContent=paperInfo($('paper').value).hint;} $('paper').onchange=previewPaper;previewPaper();
