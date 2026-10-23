@@ -1,6 +1,6 @@
 import {setupTheme} from './theme.mjs';
 import {setupStudy} from './study.mjs';
-import {drawPaper,paperSize,papers,paperInfo,paperIcon} from './paper.mjs';
+import {drawPaper,paperSize,papers,paperInfo,paperIcon,pagePaper} from './paper.mjs';
 import {exportPdf} from './pdf-export.mjs';
 import * as pdfjs from './vendor/pdf.mjs';
 import {stroke,paint,hit,argb,colorCss,clamp,textLines} from './ink.mjs';
@@ -53,11 +53,11 @@ async function renderPage(reset=false){if(!doc)return;const epoch=++renderEpoch;
 function sizeCanvases(){ratio=Math.min(devicePixelRatio*zoom,Math.sqrt(8e6/(pw*ph)),3);for(const c of [bg,ink]){c.width=Math.ceil(pw*ratio);c.height=Math.ceil(ph*ratio);}const sheet=$('sheet');sheet.style.width=pw*zoom+'px';sheet.style.height=ph*zoom+'px';$('zoomFit').textContent=Math.round(zoom*100)+'%';}
 function context(c){const ctx=c.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);return ctx;}
 function clear(c){const ctx=c.getContext('2d');ctx.resetTransform();ctx.clearRect(0,0,c.width,c.height);}
-function paintPaper(){if(pdf){const ctx=context(bg);ctx.fillStyle='#fff';ctx.fillRect(0,0,pw,ph);}else drawPaper(context(bg),pw,ph,doc.paper);}
+function paintPaper(){if(pdf){const ctx=context(bg);ctx.fillStyle='#fff';ctx.fillRect(0,0,pw,ph);}else drawPaper(context(bg),pw,ph,pagePaper(doc,page));}
 function repaint(){if(!doc)return;clear(ink);const ctx=context(ink);for(const s of objects()){paint(ctx,s,images);if(tool==='moveText'&&s.kind==='text'){ctx.save();ctx.strokeStyle='#326b56';ctx.lineWidth=.8;ctx.setLineDash([3,3]);ctx.strokeRect(s.x,s.y,s.boxW,s.boxH);ctx.fillStyle='#326b56';ctx.fillRect(s.x+s.boxW-8,s.y+s.boxH-8,8,8);ctx.restore();}}}
 function updatePages(){const nav=$('pages');nav.replaceChildren();const start=Math.max(0,page-25),end=Math.min(doc.count,start+51);for(let i=start;i<end;i++){const b=document.createElement('button');b.textContent=String(i+1)+(doc.bookmarks?.includes(i)?' ★':'');b.setAttribute('aria-label',`Abrir página ${i+1}`);b.className=i===page?'active':'';b.onclick=()=>go(i).catch(fail);nav.append(b);}$('pageLabel').textContent=`Página ${page+1} de ${doc.count}`;$('prev').disabled=page===0;$('next').disabled=page===doc.count-1;$('addPage').hidden=doc.pdf;historyButtons();}
 async function go(n){if(opening)return;await flush();page=clamp(n,0,doc.count-1);doc.lastPage=page;undo=[];redo=[];queue({op:'meta',lastPage:page});await loadImages();await renderPage();scroller.scrollTop=0;}
-$('prev').onclick=()=>go(page-1).catch(fail);$('next').onclick=()=>go(page+1).catch(fail);$('addPage').onclick=async()=>{if(doc.pdf||doc.count>=10000)return;doc.count++;queue({op:'meta',count:doc.count});await go(doc.count-1);};
+$('prev').onclick=()=>go(page-1).catch(fail);$('next').onclick=()=>go(page+1).catch(fail);$('addPage').onclick=async()=>{if(doc.pdf||doc.count>=10000)return;const repeated=pagePaper(doc,page);doc.count++;if(doc.pagePapers){doc.pagePapers[String(doc.count-1)]=repeated;queue({op:'meta',count:doc.count,pagePapers:doc.pagePapers});}else queue({op:'meta',count:doc.count});await go(doc.count-1);};
 async function zoomTo(v,manual=true){if(manual)autoFit=false;finish();zoom=clamp(v,.2,4);await renderPage();}
 $('zoomIn').onclick=()=>zoomTo(zoom*1.2);$('zoomOut').onclick=()=>zoomTo(zoom/1.2);$('zoomFit').onclick=()=>{autoFit=true;return zoomTo(fit(),false);};
 if(typeof ResizeObserver!=='undefined'){let resizeFrame=0;new ResizeObserver(()=>{if(!doc||opening||!autoFit)return;cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>zoomTo(fit(),false).catch(fail));}).observe(scroller);}

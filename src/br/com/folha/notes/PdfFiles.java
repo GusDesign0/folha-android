@@ -70,7 +70,7 @@ final class PdfFiles {
             for(int i=0;i<doc.count;i++) {
                 int w=Paper.width(doc.paper),h=Paper.height(doc.paper);if(renderer!=null){try(PdfRenderer.Page p=renderer.openPage(i)){w=p.getWidth();h=p.getHeight();}}
                 PdfDocument.Page page=pdf.startPage(new PdfDocument.PageInfo.Builder(w,h,i+1).create());Canvas c=page.getCanvas();
-                if(!transparent)PageArt.paper(c,w,h,doc.paper);
+                if(!transparent)PageArt.paper(c,w,h,doc.paperAt(i));
                 Map<String,Bitmap> images=MediaFiles.page(source.getParentFile(),doc.strokes(i),2400);
                 try{PageArt.ink(c,doc.strokes(i),images);pdf.finishPage(page);}finally{MediaFiles.recycle(images);}
             }

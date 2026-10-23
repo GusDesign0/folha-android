@@ -10,7 +10,7 @@ on:
       tag:
         description: Tag desta versão
         required: false
-        default: v0.8.1
+        default: v0.8.2
 permissions:
   contents: write
 concurrency:

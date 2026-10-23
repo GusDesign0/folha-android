@@ -1,14 +1,15 @@
-Folha 0.8.1 - cadernos de estudo e identificação na biblioteca
+Folha 0.8.2 - hiragana e katakana para estudo e repetição
 
-- Dez modelos: Cornell, caderno de erros, exercícios, vocabulário japonês, estudo de kanji, gramática japonesa, perguntas e respostas, fichas de resumo, planejamento e tradução.
-- Ícone, cor de identificação e nome do tipo na biblioteca, incluindo os papéis anteriores. A cor de capa escolhida continua disponível.
-- Prévia e orientação ao criar; 19 tipos de caderno no total.
-- Guias e títulos preservados no PDF e nos dois aplicativos.
-- Estudo de kanji tem quadrículas reconhecidas pelo auxílio japonês.
-- Fundos nativos em caminhos reutilizados por cache; nada de rede, IA ou processamento de correção adicionado ao movimento da caneta.
+- Dois cadernos novos, cada um com 27 páginas prontas.
+- Tabelas dos 46 kana básicos, 25 sons com marcas e 33 combinações; treino de kana pequenos e formas parecidas.
+- Modelo, duas cópias claras para contornar, quatro espaços para repetir e dois para tentar de memória.
+- Ícone e cor próprios; 21 tipos de caderno no total.
+- Lições acompanham as anotações ao mover, duplicar, apagar, salvar, restaurar backup e sincronizar. + Página repete o fundo da página atual.
+- Modelos vetoriais derivados de Klee One (SIL OFL 1.1), já incorporados; PC e PDF não precisam instalar fontes japonesas.
+- Fundos em cache; nenhum reconhecedor ou download adicional necessário para usar os cadernos.
 
-Os modelos são folhas para preencher manualmente. Caderno de erros não corrige sozinho; revisões e planejamento não criam lembretes.
+Escolha Novo caderno -> Tipo de caderno -> Hiragana ou Katakana. Os cadernos existentes continuam com o papel original. Atualize tablet e PC.
 
-Atualize tablet e PC. Tablet: instale por cima, sem desinstalar. Windows: feche a versão anterior e extraia o ZIP inteiro.
+A prática é manual. Não há avaliação automática de acerto, ordem dos traços ou pronúncia. O auxílio japonês Regular continua por caractere; para escrever combinações livremente, prefira Desligado ou Traços ajustados.
 
-Validação: 19 geometrias Java/JS iguais; 10 modelos com escrita, desfazer/refazer, salvar/reabrir, backup e PDF no Android API 36; persistência/sincronização no Windows; biblioteca clara/escura e criação em janela de 850 px. Testes do auxílio japonês e atualizador preservados. Latência física da S Pen ainda depende de teste no seu tablet.
+Testado: Android API 36, escrita/desfazer, 27 páginas e PDF por alfabeto, mover/duplicar/apagar, backup, Java-C#-Java, fundo de cada página no PC e repetição por + Página.

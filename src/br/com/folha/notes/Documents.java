@@ -17,24 +17,29 @@ final class Documents {
         int count=1,lastPage=0;
         long updated=System.currentTimeMillis();
         final Map<Integer,List<Ink.Stroke>> pages=new HashMap<>();
+        final Map<Integer,String> pagePapers=new HashMap<>();
+        String paperAt(int index){return pagePapers.containsKey(index)?pagePapers.get(index):paper;}
+        void initializeKana(){if(!paper.equals("hiragana")&&!paper.equals("katakana"))return;count=27;for(int i=0;i<count;i++)pagePapers.put(i,paper+"-p"+i);}
         final TreeSet<Integer> bookmarks=new TreeSet<>();
         List<Ink.Stroke> strokes(int page){return pages.computeIfAbsent(page,k->new ArrayList<>());}
         void movePage(int from,int to){
             if(pdf||from<0||to<0||from>=count||to>=count||from==to)return;
-            Map<Integer,List<Ink.Stroke>> next=new HashMap<>();TreeSet<Integer> marks=new TreeSet<>();
-            for(int i=0;i<count;i++){int target=i==from?to:from<to&&i>from&&i<=to?i-1:from>to&&i>=to&&i<from?i+1:i;if(pages.containsKey(i))next.put(target,pages.get(i));if(bookmarks.contains(i))marks.add(target);}
-            pages.clear();pages.putAll(next);bookmarks.clear();bookmarks.addAll(marks);lastPage=to;
+            Map<Integer,List<Ink.Stroke>> next=new HashMap<>();Map<Integer,String> nextPaper=new HashMap<>();TreeSet<Integer> marks=new TreeSet<>();
+            for(int i=0;i<count;i++){int target=i==from?to:from<to&&i>from&&i<=to?i-1:from>to&&i>=to&&i<from?i+1:i;if(pagePapers.containsKey(i))nextPaper.put(target,pagePapers.get(i));if(pages.containsKey(i))next.put(target,pages.get(i));if(bookmarks.contains(i))marks.add(target);}
+            pagePapers.clear();pagePapers.putAll(nextPaper);pages.clear();pages.putAll(next);bookmarks.clear();bookmarks.addAll(marks);lastPage=to;
         }
         void duplicatePage(int index){
             if(pdf||index<0||index>=count||count>=10000)return;Map<Integer,List<Ink.Stroke>> next=new HashMap<>();TreeSet<Integer> marks=new TreeSet<>();
             for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())next.put(e.getKey()>index?e.getKey()+1:e.getKey(),e.getValue());
+            Map<Integer,String> nextPaper=new HashMap<>();for(Map.Entry<Integer,String> e:pagePapers.entrySet())nextPaper.put(e.getKey()>index?e.getKey()+1:e.getKey(),e.getValue());if(pagePapers.containsKey(index))nextPaper.put(index+1,pagePapers.get(index));
             List<Ink.Stroke> copy=new ArrayList<>();for(Ink.Stroke s:strokes(index))copy.add(s.copy(true));next.put(index+1,copy);
             for(int i:bookmarks)marks.add(i>index?i+1:i);if(bookmarks.contains(index))marks.add(index+1);
-            pages.clear();pages.putAll(next);bookmarks.clear();bookmarks.addAll(marks);count++;lastPage=index+1;
+            pagePapers.clear();pagePapers.putAll(nextPaper);pages.clear();pages.putAll(next);bookmarks.clear();bookmarks.addAll(marks);count++;lastPage=index+1;
         }
         void deletePage(int index){
             if(pdf||count<=1||index<0||index>=count)return;Map<Integer,List<Ink.Stroke>> next=new HashMap<>();TreeSet<Integer> marks=new TreeSet<>();
             for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())if(e.getKey()!=index)next.put(e.getKey()>index?e.getKey()-1:e.getKey(),e.getValue());for(int i:bookmarks)if(i!=index)marks.add(i>index?i-1:i);
+            Map<Integer,String> nextPaper=new HashMap<>();for(Map.Entry<Integer,String> e:pagePapers.entrySet())if(e.getKey()!=index)nextPaper.put(e.getKey()>index?e.getKey()-1:e.getKey(),e.getValue());pagePapers.clear();pagePapers.putAll(nextPaper);
             pages.clear();pages.putAll(next);bookmarks.clear();bookmarks.addAll(marks);count--;lastPage=Math.min(index,count-1);
         }
         JSONObject json() throws Exception {
@@ -50,6 +55,7 @@ final class Documents {
         JSONObject metadata() throws Exception {
             JSONObject o=new JSONObject();o.put("version",2);o.put("id",id);o.put("name",name);o.put("folder",folder);o.put("revision",revision);o.put("originId",originId);
             o.put("pdf",pdf);o.put("paper",paper);o.put("count",count);o.put("lastPage",lastPage);o.put("updated",updated);
+            if(!pagePapers.isEmpty()){JSONObject backgrounds=new JSONObject();for(Map.Entry<Integer,String> e:pagePapers.entrySet())backgrounds.put(String.valueOf(e.getKey()),e.getValue());o.put("pagePapers",backgrounds);}
             o.put("bookmarks",new JSONArray(bookmarks));if(deleted)o.put("deleted",true);if(favorite)o.put("favorite",true);if(!cover.equals("sage"))o.put("cover",cover);if(lastOpened>0)o.put("lastOpened",lastOpened);
             return o;
         }
@@ -61,7 +67,7 @@ final class Documents {
                     for(Ink.Point pt:s.points){JSONArray q=new JSONArray();q.put((double)pt.x);q.put((double)pt.y);q.put((double)pt.pressure);points.put(q);}
                     item.put("points",points);return item;
         }
-        Doc copy(){Doc d=new Doc();d.id=id;d.name=name;d.folder=folder;d.paper=paper;d.pdf=pdf;d.deleted=deleted;d.favorite=favorite;d.cover=cover;d.localHash=localHash;d.lastOpened=lastOpened;d.count=count;d.lastPage=lastPage;d.updated=updated;d.revision=revision;d.originId=originId;d.loaded=loaded;d.bookmarks.addAll(bookmarks);for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())d.pages.put(e.getKey(),new ArrayList<>(e.getValue()));return d;}
+        Doc copy(){Doc d=new Doc();d.id=id;d.name=name;d.folder=folder;d.paper=paper;d.pdf=pdf;d.deleted=deleted;d.favorite=favorite;d.cover=cover;d.localHash=localHash;d.lastOpened=lastOpened;d.count=count;d.lastPage=lastPage;d.updated=updated;d.revision=revision;d.originId=originId;d.loaded=loaded;d.bookmarks.addAll(bookmarks);d.pagePapers.putAll(pagePapers);for(Map.Entry<Integer,List<Ink.Stroke>> e:pages.entrySet())d.pages.put(e.getKey(),new ArrayList<>(e.getValue()));return d;}
         Doc light(){Doc d=copy();d.pages.clear();d.loaded=false;return d;}
         static Doc parse(String text) throws Exception {
             JSONObject o=new JSONObject(text);Doc d=new Doc();d.id=o.getString("id");d.name=o.getString("name");
@@ -69,6 +75,7 @@ final class Documents {
             d.lastPage=Math.max(0,Math.min(d.count-1,o.optInt("lastPage",0)));d.updated=o.optLong("updated",0);
             d.revision=o.optString("revision",d.revision);d.originId=o.optString("originId","");
             JSONArray marks=o.optJSONArray("bookmarks");if(marks!=null)for(int i=0;i<marks.length();i++){int value=marks.optInt(i,-1);if(value>=0&&value<d.count)d.bookmarks.add(value);}
+            JSONObject backgrounds=o.optJSONObject("pagePapers");if(backgrounds!=null){Iterator<String> positions=backgrounds.keys();while(positions.hasNext()){String key=positions.next();int index=Integer.parseInt(key);String value=backgrounds.getString(key);if(index<0||index>=d.count||value.length()>80)throw new IOException("Modelo de página inválido");d.pagePapers.put(index,value);}}
             JSONObject p=o.optJSONObject("pages");if(p==null)return d;
             Iterator<String> keys=p.keys();while(keys.hasNext()) {
                 String key=keys.next();JSONArray a=p.getJSONArray(key);List<Ink.Stroke> list=d.strokes(Integer.parseInt(key));

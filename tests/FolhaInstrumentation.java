@@ -33,6 +33,7 @@ public class FolhaInstrumentation extends Instrumentation {
                 int preserved=0;for(Documents.Doc meta:activity.library){Documents.Doc d=activity.store.read(meta.id);if(d.name.equals("Caderno de teste")&&d.strokes(0).size()>=2)preserved++;}
                 check(preserved>0,"Updating the APK must preserve notebooks and raw strokes created by version 0.1.0");results.add("In-place 0.1.0 upgrade preserves notebooks");
             }
+            if("true".equals(options.getString("kanaOnly"))){notebook=new Documents.Doc();notebook.name="Kana focused QA";kanaChecks();File roundtrip=new File(activity.getExternalFilesDir(null),"kana-roundtrip-082.json");if(roundtrip.exists()){Documents.Doc rt=Documents.Doc.parse(new String(java.nio.file.Files.readAllBytes(roundtrip.toPath()),"UTF-8"));check(rt.count==27&&rt.pagePapers.size()==27&&rt.paperAt(1).equals("hiragana-p1")&&rt.strokes(1).size()==1,"Java to C# to Java retains lessons and pressure ink");results.add("Java-C#-Java kana roundtrip preserves all backgrounds and ink");}kanaPerformance();report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);return;}
             notebook=new Documents.Doc();notebook.name="Caderno de teste";notebook.folder="Integração";
             ui(()->{activity.library.add(notebook);activity.open(notebook);});
             ui(()->{
@@ -73,6 +74,7 @@ public class FolhaInstrumentation extends Instrumentation {
             rotationChecks();
             studyChecks();
             studyTemplateChecks();
+            kanaChecks();
             themeChecks();
             japaneseChecks();
             trashChecks();
@@ -124,9 +126,25 @@ public class FolhaInstrumentation extends Instrumentation {
         results.add("Physical emulator rotation: portrait/landscape, same page and ink, undo/redo, zoom and responsive open thumbnails");
     }
 
+
+    void kanaPerformance(){Bitmap b=Bitmap.createBitmap(595,842,Bitmap.Config.ARGB_8888);Canvas c=new Canvas(b);try{for(String type:new String[]{"hiragana-p0","hiragana-p1","katakana-p18","katakana-p26"}){PageArt.paper(c,595,842,type);long[] times=new long[60];for(int i=0;i<times.length;i++){long start=System.nanoTime();PageArt.paper(c,595,842,type);times[i]=System.nanoTime()-start;}Arrays.sort(times);results.add(type+" cached background CPU p50="+times[30]/1000+"us p95="+times[57]/1000+"us (emulator bitmap, no physical pen measurement)");}}finally{b.recycle();}}
+    void kanaChecks() throws Exception {
+        for(String type:new String[]{"hiragana","katakana"}){
+            final Documents.Doc d=new Documents.Doc();d.paper=type;d.name=type;d.initializeKana();check(d.count==27&&d.pagePapers.size()==27,"Kana curriculum initial pages");
+            ui(()->{activity.library.add(d);activity.open(d);activity.japanese.setMode(0);activity.selectTool(0);});ui(()->activity.changePage(1));
+            ui(()->{NotebookView v=activity.canvas;check(v.paper.equals(type+"-p1"),"Correct lesson visible");float x=v.getWidth()/2f,y=v.getHeight()/2f;pen(v,MotionEvent.ACTION_DOWN,x-20,y,.3f);pen(v,MotionEvent.ACTION_MOVE,x+20,y+10,1);pen(v,MotionEvent.ACTION_UP,x+20,y+10,1);check(d.strokes(1).size()==1,"Kana writing");v.undo();check(d.strokes(1).isEmpty(),"Kana undo");v.redo();activity.saveCurrent();});activity.worker.submit(()->{}).get();
+            Documents.Doc copy=Documents.Doc.parse(d.json().toString());copy.movePage(1,5);check(copy.paperAt(5).equals(type+"-p1")&&copy.strokes(5).size()==1,"Lesson moves with ink");copy.duplicatePage(5);check(copy.paperAt(6).equals(type+"-p1")&&copy.strokes(6).size()==1&&copy.count==28,"Duplicated lesson keeps background");copy.deletePage(5);check(copy.paperAt(5).equals(type+"-p1")&&copy.strokes(5).size()==1&&copy.count==27,"Deletion shifts lessons and ink together");
+            Documents.Doc loaded=activity.store.read(d.id);check(loaded.pagePapers.equals(d.pagePapers)&&loaded.strokes(1).size()==1,"Kana store/reload");File folder=activity.getExternalFilesDir(null);File backup=new File(folder,type+"-082.folha");try(OutputStream out=new FileOutputStream(backup)){Backups.export(d,activity.store.dir(d.id),out);}try(InputStream in=new FileInputStream(backup)){Documents.Doc restored=Backups.restore(activity.store,activity.getCacheDir(),in);check(restored.pagePapers.equals(d.pagePapers)&&restored.strokes(1).size()==1,"Kana backup restore");}
+            try(OutputStream out=new FileOutputStream(new File(folder,type+"-082.json"))){out.write(d.json().toString().getBytes("UTF-8"));}File pdf=new File(folder,type+"-082.pdf");try(OutputStream out=new FileOutputStream(pdf)){PdfFiles.export(d,activity.store.pdf(d),out);}check(PdfFiles.count(pdf)==27,"Kana PDF pages");for(int page:new int[]{0,1,17,18,26}){PdfFiles.Rendered r=PdfFiles.render(pdf,page,842);check(r.width==595&&r.height==842,"Kana export dimensions");r.bitmap.recycle();Bitmap thumb=PagePanel.thumbnail(d,activity.store.dir(d.id),page);check(thumb.getWidth()>0,"Kana thumbnail");thumb.recycle();}
+            float[] cell=JapaneseGeometry.cell(type+"-p1",595,842,230,150);check(cell!=null,"Japanese assistance recognizes practice cells");
+            ui(()->{activity.changePage(26-activity.page);check(activity.canvas.paper.equals(type+"-p26"),"Last lesson accessible");});
+        }
+        ui(()->activity.open(notebook));results.add("Kana: 27 lessons per script, pen/undo, page-specific native background, move/duplicate/delete with ink, JSON/store/backup, 27-page PDF and thumbnails");
+    }
+
     void studyTemplateChecks() throws Exception {
         Bitmap preview=Bitmap.createBitmap(1500,1030,Bitmap.Config.ARGB_8888);Canvas c=new Canvas(preview);c.drawColor(0xFFF4F5EF);Paint text=new Paint(Paint.ANTI_ALIAS_FLAG);text.setColor(MainActivity.INK);text.setTextSize(32);c.drawText("Folha · cadernos de estudo",30,48,text);int index=0;
-        for(String type:Paper.IDS){if(!StudyPaper.LINES.containsKey(type))continue;
+        for(String type:Paper.IDS){if(!StudyPaper.LINES.containsKey(type)||type.equals("hiragana")||type.equals("katakana"))continue;
             final Documents.Doc d=new Documents.Doc();d.paper=type;d.name=StudyPaper.name(type);d.folder="Estudos 081";d.cover="blue";
             ui(()->{activity.library.add(d);activity.open(d);activity.japanese.setMode(0);activity.selectTool(0);activity.canvas.setRuler(false);});ui(()->{NotebookView v=activity.canvas;check(v.getWidth()>0,"Measured template editor");float x=v.getWidth()/2f,y=v.getHeight()/2f;pen(v,MotionEvent.ACTION_DOWN,x-20,y,.3f);pen(v,MotionEvent.ACTION_MOVE,x+20,y+10,1);pen(v,MotionEvent.ACTION_UP,x+20,y+10,1);check(d.strokes(0).size()==1,"Writing on "+type);v.undo();check(d.strokes(0).isEmpty(),"Undo on "+type);v.redo();activity.saveCurrent();});
             activity.worker.submit(()->{}).get();Documents.Doc loaded=activity.store.read(d.id);check(loaded.paper.equals(type)&&loaded.cover.equals("blue")&&loaded.strokes(0).size()==1,"Template identity/ink persisted "+type);

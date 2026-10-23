@@ -1,0 +1,2276 @@
+{
+  "source": "https://www.erin.jpf.go.jp/en/extra/syllabary/",
+  "scripts": {
+    "hiragana": [
+      {
+        "title": "Consulta · 46 kana básicos",
+        "items": [
+          {
+            "kana": "あ",
+            "reading": "a"
+          },
+          {
+            "kana": "い",
+            "reading": "i"
+          },
+          {
+            "kana": "う",
+            "reading": "u"
+          },
+          {
+            "kana": "え",
+            "reading": "e"
+          },
+          {
+            "kana": "お",
+            "reading": "o"
+          },
+          {
+            "kana": "か",
+            "reading": "ka"
+          },
+          {
+            "kana": "き",
+            "reading": "ki"
+          },
+          {
+            "kana": "く",
+            "reading": "ku"
+          },
+          {
+            "kana": "け",
+            "reading": "ke"
+          },
+          {
+            "kana": "こ",
+            "reading": "ko"
+          },
+          {
+            "kana": "さ",
+            "reading": "sa"
+          },
+          {
+            "kana": "し",
+            "reading": "shi"
+          },
+          {
+            "kana": "す",
+            "reading": "su"
+          },
+          {
+            "kana": "せ",
+            "reading": "se"
+          },
+          {
+            "kana": "そ",
+            "reading": "so"
+          },
+          {
+            "kana": "た",
+            "reading": "ta"
+          },
+          {
+            "kana": "ち",
+            "reading": "chi"
+          },
+          {
+            "kana": "つ",
+            "reading": "tsu"
+          },
+          {
+            "kana": "て",
+            "reading": "te"
+          },
+          {
+            "kana": "と",
+            "reading": "to"
+          },
+          {
+            "kana": "な",
+            "reading": "na"
+          },
+          {
+            "kana": "に",
+            "reading": "ni"
+          },
+          {
+            "kana": "ぬ",
+            "reading": "nu"
+          },
+          {
+            "kana": "ね",
+            "reading": "ne"
+          },
+          {
+            "kana": "の",
+            "reading": "no"
+          },
+          {
+            "kana": "は",
+            "reading": "ha"
+          },
+          {
+            "kana": "ひ",
+            "reading": "hi"
+          },
+          {
+            "kana": "ふ",
+            "reading": "fu"
+          },
+          {
+            "kana": "へ",
+            "reading": "he"
+          },
+          {
+            "kana": "ほ",
+            "reading": "ho"
+          },
+          {
+            "kana": "ま",
+            "reading": "ma"
+          },
+          {
+            "kana": "み",
+            "reading": "mi"
+          },
+          {
+            "kana": "む",
+            "reading": "mu"
+          },
+          {
+            "kana": "め",
+            "reading": "me"
+          },
+          {
+            "kana": "も",
+            "reading": "mo"
+          },
+          {
+            "kana": "や",
+            "reading": "ya"
+          },
+          {
+            "kana": "ゆ",
+            "reading": "yu"
+          },
+          {
+            "kana": "よ",
+            "reading": "yo"
+          },
+          {
+            "kana": "ら",
+            "reading": "ra"
+          },
+          {
+            "kana": "り",
+            "reading": "ri"
+          },
+          {
+            "kana": "る",
+            "reading": "ru"
+          },
+          {
+            "kana": "れ",
+            "reading": "re"
+          },
+          {
+            "kana": "ろ",
+            "reading": "ro"
+          },
+          {
+            "kana": "わ",
+            "reading": "wa"
+          },
+          {
+            "kana": "を",
+            "reading": "wo"
+          },
+          {
+            "kana": "ん",
+            "reading": "n"
+          }
+        ],
+        "chart": true,
+        "note": "Pronúncia: は / へ / を, como partículas, leem-se wa / e / o."
+      },
+      {
+        "title": "Básicos · grupo 1",
+        "items": [
+          {
+            "kana": "あ",
+            "reading": "a"
+          },
+          {
+            "kana": "い",
+            "reading": "i"
+          },
+          {
+            "kana": "う",
+            "reading": "u"
+          },
+          {
+            "kana": "え",
+            "reading": "e"
+          },
+          {
+            "kana": "お",
+            "reading": "o"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 2",
+        "items": [
+          {
+            "kana": "か",
+            "reading": "ka"
+          },
+          {
+            "kana": "き",
+            "reading": "ki"
+          },
+          {
+            "kana": "く",
+            "reading": "ku"
+          },
+          {
+            "kana": "け",
+            "reading": "ke"
+          },
+          {
+            "kana": "こ",
+            "reading": "ko"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 3",
+        "items": [
+          {
+            "kana": "さ",
+            "reading": "sa"
+          },
+          {
+            "kana": "し",
+            "reading": "shi"
+          },
+          {
+            "kana": "す",
+            "reading": "su"
+          },
+          {
+            "kana": "せ",
+            "reading": "se"
+          },
+          {
+            "kana": "そ",
+            "reading": "so"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 4",
+        "items": [
+          {
+            "kana": "た",
+            "reading": "ta"
+          },
+          {
+            "kana": "ち",
+            "reading": "chi"
+          },
+          {
+            "kana": "つ",
+            "reading": "tsu"
+          },
+          {
+            "kana": "て",
+            "reading": "te"
+          },
+          {
+            "kana": "と",
+            "reading": "to"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 5",
+        "items": [
+          {
+            "kana": "な",
+            "reading": "na"
+          },
+          {
+            "kana": "に",
+            "reading": "ni"
+          },
+          {
+            "kana": "ぬ",
+            "reading": "nu"
+          },
+          {
+            "kana": "ね",
+            "reading": "ne"
+          },
+          {
+            "kana": "の",
+            "reading": "no"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 6",
+        "items": [
+          {
+            "kana": "は",
+            "reading": "ha"
+          },
+          {
+            "kana": "ひ",
+            "reading": "hi"
+          },
+          {
+            "kana": "ふ",
+            "reading": "fu"
+          },
+          {
+            "kana": "へ",
+            "reading": "he"
+          },
+          {
+            "kana": "ほ",
+            "reading": "ho"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 7",
+        "items": [
+          {
+            "kana": "ま",
+            "reading": "ma"
+          },
+          {
+            "kana": "み",
+            "reading": "mi"
+          },
+          {
+            "kana": "む",
+            "reading": "mu"
+          },
+          {
+            "kana": "め",
+            "reading": "me"
+          },
+          {
+            "kana": "も",
+            "reading": "mo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 8",
+        "items": [
+          {
+            "kana": "や",
+            "reading": "ya"
+          },
+          {
+            "kana": "ゆ",
+            "reading": "yu"
+          },
+          {
+            "kana": "よ",
+            "reading": "yo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 9",
+        "items": [
+          {
+            "kana": "ら",
+            "reading": "ra"
+          },
+          {
+            "kana": "り",
+            "reading": "ri"
+          },
+          {
+            "kana": "る",
+            "reading": "ru"
+          },
+          {
+            "kana": "れ",
+            "reading": "re"
+          },
+          {
+            "kana": "ろ",
+            "reading": "ro"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 10",
+        "items": [
+          {
+            "kana": "わ",
+            "reading": "wa"
+          },
+          {
+            "kana": "を",
+            "reading": "wo"
+          },
+          {
+            "kana": "ん",
+            "reading": "n"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Consulta · dakuten e handakuten",
+        "items": [
+          {
+            "kana": "が",
+            "reading": "ga"
+          },
+          {
+            "kana": "ぎ",
+            "reading": "gi"
+          },
+          {
+            "kana": "ぐ",
+            "reading": "gu"
+          },
+          {
+            "kana": "げ",
+            "reading": "ge"
+          },
+          {
+            "kana": "ご",
+            "reading": "go"
+          },
+          {
+            "kana": "ざ",
+            "reading": "za"
+          },
+          {
+            "kana": "じ",
+            "reading": "ji"
+          },
+          {
+            "kana": "ず",
+            "reading": "zu"
+          },
+          {
+            "kana": "ぜ",
+            "reading": "ze"
+          },
+          {
+            "kana": "ぞ",
+            "reading": "zo"
+          },
+          {
+            "kana": "だ",
+            "reading": "da"
+          },
+          {
+            "kana": "ぢ",
+            "reading": "ji(di)"
+          },
+          {
+            "kana": "づ",
+            "reading": "zu(du)"
+          },
+          {
+            "kana": "で",
+            "reading": "de"
+          },
+          {
+            "kana": "ど",
+            "reading": "do"
+          },
+          {
+            "kana": "ば",
+            "reading": "ba"
+          },
+          {
+            "kana": "び",
+            "reading": "bi"
+          },
+          {
+            "kana": "ぶ",
+            "reading": "bu"
+          },
+          {
+            "kana": "べ",
+            "reading": "be"
+          },
+          {
+            "kana": "ぼ",
+            "reading": "bo"
+          },
+          {
+            "kana": "ぱ",
+            "reading": "pa"
+          },
+          {
+            "kana": "ぴ",
+            "reading": "pi"
+          },
+          {
+            "kana": "ぷ",
+            "reading": "pu"
+          },
+          {
+            "kana": "ぺ",
+            "reading": "pe"
+          },
+          {
+            "kana": "ぽ",
+            "reading": "po"
+          }
+        ],
+        "chart": true,
+        "note": "ぢ / づ: leituras ji / zu; di / du identificam sua série na digitação."
+      },
+      {
+        "title": "Sons com marcas · grupo 1",
+        "items": [
+          {
+            "kana": "が",
+            "reading": "ga"
+          },
+          {
+            "kana": "ぎ",
+            "reading": "gi"
+          },
+          {
+            "kana": "ぐ",
+            "reading": "gu"
+          },
+          {
+            "kana": "げ",
+            "reading": "ge"
+          },
+          {
+            "kana": "ご",
+            "reading": "go"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Sons com marcas · grupo 2",
+        "items": [
+          {
+            "kana": "ざ",
+            "reading": "za"
+          },
+          {
+            "kana": "じ",
+            "reading": "ji"
+          },
+          {
+            "kana": "ず",
+            "reading": "zu"
+          },
+          {
+            "kana": "ぜ",
+            "reading": "ze"
+          },
+          {
+            "kana": "ぞ",
+            "reading": "zo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Sons com marcas · grupo 3",
+        "items": [
+          {
+            "kana": "だ",
+            "reading": "da"
+          },
+          {
+            "kana": "ぢ",
+            "reading": "ji(di)"
+          },
+          {
+            "kana": "づ",
+            "reading": "zu(du)"
+          },
+          {
+            "kana": "で",
+            "reading": "de"
+          },
+          {
+            "kana": "ど",
+            "reading": "do"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Sons com marcas · grupo 4",
+        "items": [
+          {
+            "kana": "ば",
+            "reading": "ba"
+          },
+          {
+            "kana": "び",
+            "reading": "bi"
+          },
+          {
+            "kana": "ぶ",
+            "reading": "bu"
+          },
+          {
+            "kana": "べ",
+            "reading": "be"
+          },
+          {
+            "kana": "ぼ",
+            "reading": "bo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Sons com marcas · grupo 5",
+        "items": [
+          {
+            "kana": "ぱ",
+            "reading": "pa"
+          },
+          {
+            "kana": "ぴ",
+            "reading": "pi"
+          },
+          {
+            "kana": "ぷ",
+            "reading": "pu"
+          },
+          {
+            "kana": "ぺ",
+            "reading": "pe"
+          },
+          {
+            "kana": "ぽ",
+            "reading": "po"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Consulta · combinações com ya, yu e yo pequenos",
+        "items": [
+          {
+            "kana": "きゃ",
+            "reading": "kya"
+          },
+          {
+            "kana": "きゅ",
+            "reading": "kyu"
+          },
+          {
+            "kana": "きょ",
+            "reading": "kyo"
+          },
+          {
+            "kana": "ぎゃ",
+            "reading": "gya"
+          },
+          {
+            "kana": "ぎゅ",
+            "reading": "gyu"
+          },
+          {
+            "kana": "ぎょ",
+            "reading": "gyo"
+          },
+          {
+            "kana": "しゃ",
+            "reading": "sha"
+          },
+          {
+            "kana": "しゅ",
+            "reading": "shu"
+          },
+          {
+            "kana": "しょ",
+            "reading": "sho"
+          },
+          {
+            "kana": "じゃ",
+            "reading": "ja"
+          },
+          {
+            "kana": "じゅ",
+            "reading": "ju"
+          },
+          {
+            "kana": "じょ",
+            "reading": "jo"
+          },
+          {
+            "kana": "ちゃ",
+            "reading": "cha"
+          },
+          {
+            "kana": "ちゅ",
+            "reading": "chu"
+          },
+          {
+            "kana": "ちょ",
+            "reading": "cho"
+          },
+          {
+            "kana": "にゃ",
+            "reading": "nya"
+          },
+          {
+            "kana": "にゅ",
+            "reading": "nyu"
+          },
+          {
+            "kana": "にょ",
+            "reading": "nyo"
+          },
+          {
+            "kana": "ひゃ",
+            "reading": "hya"
+          },
+          {
+            "kana": "ひゅ",
+            "reading": "hyu"
+          },
+          {
+            "kana": "ひょ",
+            "reading": "hyo"
+          },
+          {
+            "kana": "びゃ",
+            "reading": "bya"
+          },
+          {
+            "kana": "びゅ",
+            "reading": "byu"
+          },
+          {
+            "kana": "びょ",
+            "reading": "byo"
+          },
+          {
+            "kana": "ぴゃ",
+            "reading": "pya"
+          },
+          {
+            "kana": "ぴゅ",
+            "reading": "pyu"
+          },
+          {
+            "kana": "ぴょ",
+            "reading": "pyo"
+          },
+          {
+            "kana": "みゃ",
+            "reading": "mya"
+          },
+          {
+            "kana": "みゅ",
+            "reading": "myu"
+          },
+          {
+            "kana": "みょ",
+            "reading": "myo"
+          },
+          {
+            "kana": "りゃ",
+            "reading": "rya"
+          },
+          {
+            "kana": "りゅ",
+            "reading": "ryu"
+          },
+          {
+            "kana": "りょ",
+            "reading": "ryo"
+          }
+        ],
+        "chart": true,
+        "note": "O segundo kana é pequeno; a combinação ocupa uma mora."
+      },
+      {
+        "title": "Combinações · grupo 1",
+        "items": [
+          {
+            "kana": "きゃ",
+            "reading": "kya"
+          },
+          {
+            "kana": "きゅ",
+            "reading": "kyu"
+          },
+          {
+            "kana": "きょ",
+            "reading": "kyo"
+          },
+          {
+            "kana": "ぎゃ",
+            "reading": "gya"
+          },
+          {
+            "kana": "ぎゅ",
+            "reading": "gyu"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 2",
+        "items": [
+          {
+            "kana": "ぎょ",
+            "reading": "gyo"
+          },
+          {
+            "kana": "しゃ",
+            "reading": "sha"
+          },
+          {
+            "kana": "しゅ",
+            "reading": "shu"
+          },
+          {
+            "kana": "しょ",
+            "reading": "sho"
+          },
+          {
+            "kana": "じゃ",
+            "reading": "ja"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 3",
+        "items": [
+          {
+            "kana": "じゅ",
+            "reading": "ju"
+          },
+          {
+            "kana": "じょ",
+            "reading": "jo"
+          },
+          {
+            "kana": "ちゃ",
+            "reading": "cha"
+          },
+          {
+            "kana": "ちゅ",
+            "reading": "chu"
+          },
+          {
+            "kana": "ちょ",
+            "reading": "cho"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 4",
+        "items": [
+          {
+            "kana": "にゃ",
+            "reading": "nya"
+          },
+          {
+            "kana": "にゅ",
+            "reading": "nyu"
+          },
+          {
+            "kana": "にょ",
+            "reading": "nyo"
+          },
+          {
+            "kana": "ひゃ",
+            "reading": "hya"
+          },
+          {
+            "kana": "ひゅ",
+            "reading": "hyu"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 5",
+        "items": [
+          {
+            "kana": "ひょ",
+            "reading": "hyo"
+          },
+          {
+            "kana": "びゃ",
+            "reading": "bya"
+          },
+          {
+            "kana": "びゅ",
+            "reading": "byu"
+          },
+          {
+            "kana": "びょ",
+            "reading": "byo"
+          },
+          {
+            "kana": "ぴゃ",
+            "reading": "pya"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 6",
+        "items": [
+          {
+            "kana": "ぴゅ",
+            "reading": "pyu"
+          },
+          {
+            "kana": "ぴょ",
+            "reading": "pyo"
+          },
+          {
+            "kana": "みゃ",
+            "reading": "mya"
+          },
+          {
+            "kana": "みゅ",
+            "reading": "myu"
+          },
+          {
+            "kana": "みょ",
+            "reading": "myo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 7",
+        "items": [
+          {
+            "kana": "りゃ",
+            "reading": "rya"
+          },
+          {
+            "kana": "りゅ",
+            "reading": "ryu"
+          },
+          {
+            "kana": "りょ",
+            "reading": "ryo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Kana pequenos e sinais",
+        "items": [
+          {
+            "kana": "ゃ",
+            "reading": "ya pequeno"
+          },
+          {
+            "kana": "ゅ",
+            "reading": "yu pequeno"
+          },
+          {
+            "kana": "ょ",
+            "reading": "yo pequeno"
+          },
+          {
+            "kana": "っ",
+            "reading": "tsu pequeno"
+          }
+        ],
+        "chart": false,
+        "note": "O tsu pequeno indica geminação; não se lê como tsu inteiro."
+      },
+      {
+        "title": "Formas parecidas · observe e repita",
+        "items": [
+          {
+            "kana": "さ",
+            "reading": "sa"
+          },
+          {
+            "kana": "き",
+            "reading": "ki"
+          },
+          {
+            "kana": "め",
+            "reading": "me"
+          },
+          {
+            "kana": "ぬ",
+            "reading": "nu"
+          },
+          {
+            "kana": "ね",
+            "reading": "ne"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      }
+    ],
+    "katakana": [
+      {
+        "title": "Consulta · 46 kana básicos",
+        "items": [
+          {
+            "kana": "ア",
+            "reading": "a"
+          },
+          {
+            "kana": "イ",
+            "reading": "i"
+          },
+          {
+            "kana": "ウ",
+            "reading": "u"
+          },
+          {
+            "kana": "エ",
+            "reading": "e"
+          },
+          {
+            "kana": "オ",
+            "reading": "o"
+          },
+          {
+            "kana": "カ",
+            "reading": "ka"
+          },
+          {
+            "kana": "キ",
+            "reading": "ki"
+          },
+          {
+            "kana": "ク",
+            "reading": "ku"
+          },
+          {
+            "kana": "ケ",
+            "reading": "ke"
+          },
+          {
+            "kana": "コ",
+            "reading": "ko"
+          },
+          {
+            "kana": "サ",
+            "reading": "sa"
+          },
+          {
+            "kana": "シ",
+            "reading": "shi"
+          },
+          {
+            "kana": "ス",
+            "reading": "su"
+          },
+          {
+            "kana": "セ",
+            "reading": "se"
+          },
+          {
+            "kana": "ソ",
+            "reading": "so"
+          },
+          {
+            "kana": "タ",
+            "reading": "ta"
+          },
+          {
+            "kana": "チ",
+            "reading": "chi"
+          },
+          {
+            "kana": "ツ",
+            "reading": "tsu"
+          },
+          {
+            "kana": "テ",
+            "reading": "te"
+          },
+          {
+            "kana": "ト",
+            "reading": "to"
+          },
+          {
+            "kana": "ナ",
+            "reading": "na"
+          },
+          {
+            "kana": "ニ",
+            "reading": "ni"
+          },
+          {
+            "kana": "ヌ",
+            "reading": "nu"
+          },
+          {
+            "kana": "ネ",
+            "reading": "ne"
+          },
+          {
+            "kana": "ノ",
+            "reading": "no"
+          },
+          {
+            "kana": "ハ",
+            "reading": "ha"
+          },
+          {
+            "kana": "ヒ",
+            "reading": "hi"
+          },
+          {
+            "kana": "フ",
+            "reading": "fu"
+          },
+          {
+            "kana": "ヘ",
+            "reading": "he"
+          },
+          {
+            "kana": "ホ",
+            "reading": "ho"
+          },
+          {
+            "kana": "マ",
+            "reading": "ma"
+          },
+          {
+            "kana": "ミ",
+            "reading": "mi"
+          },
+          {
+            "kana": "ム",
+            "reading": "mu"
+          },
+          {
+            "kana": "メ",
+            "reading": "me"
+          },
+          {
+            "kana": "モ",
+            "reading": "mo"
+          },
+          {
+            "kana": "ヤ",
+            "reading": "ya"
+          },
+          {
+            "kana": "ユ",
+            "reading": "yu"
+          },
+          {
+            "kana": "ヨ",
+            "reading": "yo"
+          },
+          {
+            "kana": "ラ",
+            "reading": "ra"
+          },
+          {
+            "kana": "リ",
+            "reading": "ri"
+          },
+          {
+            "kana": "ル",
+            "reading": "ru"
+          },
+          {
+            "kana": "レ",
+            "reading": "re"
+          },
+          {
+            "kana": "ロ",
+            "reading": "ro"
+          },
+          {
+            "kana": "ワ",
+            "reading": "wa"
+          },
+          {
+            "kana": "ヲ",
+            "reading": "wo"
+          },
+          {
+            "kana": "ン",
+            "reading": "n"
+          }
+        ],
+        "chart": true,
+        "note": "Pronúncia: ハ / ヘ / ヲ, como partículas, leem-se wa / e / o."
+      },
+      {
+        "title": "Básicos · grupo 1",
+        "items": [
+          {
+            "kana": "ア",
+            "reading": "a"
+          },
+          {
+            "kana": "イ",
+            "reading": "i"
+          },
+          {
+            "kana": "ウ",
+            "reading": "u"
+          },
+          {
+            "kana": "エ",
+            "reading": "e"
+          },
+          {
+            "kana": "オ",
+            "reading": "o"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 2",
+        "items": [
+          {
+            "kana": "カ",
+            "reading": "ka"
+          },
+          {
+            "kana": "キ",
+            "reading": "ki"
+          },
+          {
+            "kana": "ク",
+            "reading": "ku"
+          },
+          {
+            "kana": "ケ",
+            "reading": "ke"
+          },
+          {
+            "kana": "コ",
+            "reading": "ko"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 3",
+        "items": [
+          {
+            "kana": "サ",
+            "reading": "sa"
+          },
+          {
+            "kana": "シ",
+            "reading": "shi"
+          },
+          {
+            "kana": "ス",
+            "reading": "su"
+          },
+          {
+            "kana": "セ",
+            "reading": "se"
+          },
+          {
+            "kana": "ソ",
+            "reading": "so"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 4",
+        "items": [
+          {
+            "kana": "タ",
+            "reading": "ta"
+          },
+          {
+            "kana": "チ",
+            "reading": "chi"
+          },
+          {
+            "kana": "ツ",
+            "reading": "tsu"
+          },
+          {
+            "kana": "テ",
+            "reading": "te"
+          },
+          {
+            "kana": "ト",
+            "reading": "to"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 5",
+        "items": [
+          {
+            "kana": "ナ",
+            "reading": "na"
+          },
+          {
+            "kana": "ニ",
+            "reading": "ni"
+          },
+          {
+            "kana": "ヌ",
+            "reading": "nu"
+          },
+          {
+            "kana": "ネ",
+            "reading": "ne"
+          },
+          {
+            "kana": "ノ",
+            "reading": "no"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 6",
+        "items": [
+          {
+            "kana": "ハ",
+            "reading": "ha"
+          },
+          {
+            "kana": "ヒ",
+            "reading": "hi"
+          },
+          {
+            "kana": "フ",
+            "reading": "fu"
+          },
+          {
+            "kana": "ヘ",
+            "reading": "he"
+          },
+          {
+            "kana": "ホ",
+            "reading": "ho"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 7",
+        "items": [
+          {
+            "kana": "マ",
+            "reading": "ma"
+          },
+          {
+            "kana": "ミ",
+            "reading": "mi"
+          },
+          {
+            "kana": "ム",
+            "reading": "mu"
+          },
+          {
+            "kana": "メ",
+            "reading": "me"
+          },
+          {
+            "kana": "モ",
+            "reading": "mo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 8",
+        "items": [
+          {
+            "kana": "ヤ",
+            "reading": "ya"
+          },
+          {
+            "kana": "ユ",
+            "reading": "yu"
+          },
+          {
+            "kana": "ヨ",
+            "reading": "yo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 9",
+        "items": [
+          {
+            "kana": "ラ",
+            "reading": "ra"
+          },
+          {
+            "kana": "リ",
+            "reading": "ri"
+          },
+          {
+            "kana": "ル",
+            "reading": "ru"
+          },
+          {
+            "kana": "レ",
+            "reading": "re"
+          },
+          {
+            "kana": "ロ",
+            "reading": "ro"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Básicos · grupo 10",
+        "items": [
+          {
+            "kana": "ワ",
+            "reading": "wa"
+          },
+          {
+            "kana": "ヲ",
+            "reading": "wo"
+          },
+          {
+            "kana": "ン",
+            "reading": "n"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Consulta · dakuten e handakuten",
+        "items": [
+          {
+            "kana": "ガ",
+            "reading": "ga"
+          },
+          {
+            "kana": "ギ",
+            "reading": "gi"
+          },
+          {
+            "kana": "グ",
+            "reading": "gu"
+          },
+          {
+            "kana": "ゲ",
+            "reading": "ge"
+          },
+          {
+            "kana": "ゴ",
+            "reading": "go"
+          },
+          {
+            "kana": "ザ",
+            "reading": "za"
+          },
+          {
+            "kana": "ジ",
+            "reading": "ji"
+          },
+          {
+            "kana": "ズ",
+            "reading": "zu"
+          },
+          {
+            "kana": "ゼ",
+            "reading": "ze"
+          },
+          {
+            "kana": "ゾ",
+            "reading": "zo"
+          },
+          {
+            "kana": "ダ",
+            "reading": "da"
+          },
+          {
+            "kana": "ヂ",
+            "reading": "ji(di)"
+          },
+          {
+            "kana": "ヅ",
+            "reading": "zu(du)"
+          },
+          {
+            "kana": "デ",
+            "reading": "de"
+          },
+          {
+            "kana": "ド",
+            "reading": "do"
+          },
+          {
+            "kana": "バ",
+            "reading": "ba"
+          },
+          {
+            "kana": "ビ",
+            "reading": "bi"
+          },
+          {
+            "kana": "ブ",
+            "reading": "bu"
+          },
+          {
+            "kana": "ベ",
+            "reading": "be"
+          },
+          {
+            "kana": "ボ",
+            "reading": "bo"
+          },
+          {
+            "kana": "パ",
+            "reading": "pa"
+          },
+          {
+            "kana": "ピ",
+            "reading": "pi"
+          },
+          {
+            "kana": "プ",
+            "reading": "pu"
+          },
+          {
+            "kana": "ペ",
+            "reading": "pe"
+          },
+          {
+            "kana": "ポ",
+            "reading": "po"
+          }
+        ],
+        "chart": true,
+        "note": "ヂ / ヅ: leituras ji / zu; di / du identificam sua série na digitação."
+      },
+      {
+        "title": "Sons com marcas · grupo 1",
+        "items": [
+          {
+            "kana": "ガ",
+            "reading": "ga"
+          },
+          {
+            "kana": "ギ",
+            "reading": "gi"
+          },
+          {
+            "kana": "グ",
+            "reading": "gu"
+          },
+          {
+            "kana": "ゲ",
+            "reading": "ge"
+          },
+          {
+            "kana": "ゴ",
+            "reading": "go"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Sons com marcas · grupo 2",
+        "items": [
+          {
+            "kana": "ザ",
+            "reading": "za"
+          },
+          {
+            "kana": "ジ",
+            "reading": "ji"
+          },
+          {
+            "kana": "ズ",
+            "reading": "zu"
+          },
+          {
+            "kana": "ゼ",
+            "reading": "ze"
+          },
+          {
+            "kana": "ゾ",
+            "reading": "zo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Sons com marcas · grupo 3",
+        "items": [
+          {
+            "kana": "ダ",
+            "reading": "da"
+          },
+          {
+            "kana": "ヂ",
+            "reading": "ji(di)"
+          },
+          {
+            "kana": "ヅ",
+            "reading": "zu(du)"
+          },
+          {
+            "kana": "デ",
+            "reading": "de"
+          },
+          {
+            "kana": "ド",
+            "reading": "do"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Sons com marcas · grupo 4",
+        "items": [
+          {
+            "kana": "バ",
+            "reading": "ba"
+          },
+          {
+            "kana": "ビ",
+            "reading": "bi"
+          },
+          {
+            "kana": "ブ",
+            "reading": "bu"
+          },
+          {
+            "kana": "ベ",
+            "reading": "be"
+          },
+          {
+            "kana": "ボ",
+            "reading": "bo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Sons com marcas · grupo 5",
+        "items": [
+          {
+            "kana": "パ",
+            "reading": "pa"
+          },
+          {
+            "kana": "ピ",
+            "reading": "pi"
+          },
+          {
+            "kana": "プ",
+            "reading": "pu"
+          },
+          {
+            "kana": "ペ",
+            "reading": "pe"
+          },
+          {
+            "kana": "ポ",
+            "reading": "po"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Consulta · combinações com ya, yu e yo pequenos",
+        "items": [
+          {
+            "kana": "キャ",
+            "reading": "kya"
+          },
+          {
+            "kana": "キュ",
+            "reading": "kyu"
+          },
+          {
+            "kana": "キョ",
+            "reading": "kyo"
+          },
+          {
+            "kana": "ギャ",
+            "reading": "gya"
+          },
+          {
+            "kana": "ギュ",
+            "reading": "gyu"
+          },
+          {
+            "kana": "ギョ",
+            "reading": "gyo"
+          },
+          {
+            "kana": "シャ",
+            "reading": "sha"
+          },
+          {
+            "kana": "シュ",
+            "reading": "shu"
+          },
+          {
+            "kana": "ショ",
+            "reading": "sho"
+          },
+          {
+            "kana": "ジャ",
+            "reading": "ja"
+          },
+          {
+            "kana": "ジュ",
+            "reading": "ju"
+          },
+          {
+            "kana": "ジョ",
+            "reading": "jo"
+          },
+          {
+            "kana": "チャ",
+            "reading": "cha"
+          },
+          {
+            "kana": "チュ",
+            "reading": "chu"
+          },
+          {
+            "kana": "チョ",
+            "reading": "cho"
+          },
+          {
+            "kana": "ニャ",
+            "reading": "nya"
+          },
+          {
+            "kana": "ニュ",
+            "reading": "nyu"
+          },
+          {
+            "kana": "ニョ",
+            "reading": "nyo"
+          },
+          {
+            "kana": "ヒャ",
+            "reading": "hya"
+          },
+          {
+            "kana": "ヒュ",
+            "reading": "hyu"
+          },
+          {
+            "kana": "ヒョ",
+            "reading": "hyo"
+          },
+          {
+            "kana": "ビャ",
+            "reading": "bya"
+          },
+          {
+            "kana": "ビュ",
+            "reading": "byu"
+          },
+          {
+            "kana": "ビョ",
+            "reading": "byo"
+          },
+          {
+            "kana": "ピャ",
+            "reading": "pya"
+          },
+          {
+            "kana": "ピュ",
+            "reading": "pyu"
+          },
+          {
+            "kana": "ピョ",
+            "reading": "pyo"
+          },
+          {
+            "kana": "ミャ",
+            "reading": "mya"
+          },
+          {
+            "kana": "ミュ",
+            "reading": "myu"
+          },
+          {
+            "kana": "ミョ",
+            "reading": "myo"
+          },
+          {
+            "kana": "リャ",
+            "reading": "rya"
+          },
+          {
+            "kana": "リュ",
+            "reading": "ryu"
+          },
+          {
+            "kana": "リョ",
+            "reading": "ryo"
+          }
+        ],
+        "chart": true,
+        "note": "O segundo kana é pequeno; a combinação ocupa uma mora."
+      },
+      {
+        "title": "Combinações · grupo 1",
+        "items": [
+          {
+            "kana": "キャ",
+            "reading": "kya"
+          },
+          {
+            "kana": "キュ",
+            "reading": "kyu"
+          },
+          {
+            "kana": "キョ",
+            "reading": "kyo"
+          },
+          {
+            "kana": "ギャ",
+            "reading": "gya"
+          },
+          {
+            "kana": "ギュ",
+            "reading": "gyu"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 2",
+        "items": [
+          {
+            "kana": "ギョ",
+            "reading": "gyo"
+          },
+          {
+            "kana": "シャ",
+            "reading": "sha"
+          },
+          {
+            "kana": "シュ",
+            "reading": "shu"
+          },
+          {
+            "kana": "ショ",
+            "reading": "sho"
+          },
+          {
+            "kana": "ジャ",
+            "reading": "ja"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 3",
+        "items": [
+          {
+            "kana": "ジュ",
+            "reading": "ju"
+          },
+          {
+            "kana": "ジョ",
+            "reading": "jo"
+          },
+          {
+            "kana": "チャ",
+            "reading": "cha"
+          },
+          {
+            "kana": "チュ",
+            "reading": "chu"
+          },
+          {
+            "kana": "チョ",
+            "reading": "cho"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 4",
+        "items": [
+          {
+            "kana": "ニャ",
+            "reading": "nya"
+          },
+          {
+            "kana": "ニュ",
+            "reading": "nyu"
+          },
+          {
+            "kana": "ニョ",
+            "reading": "nyo"
+          },
+          {
+            "kana": "ヒャ",
+            "reading": "hya"
+          },
+          {
+            "kana": "ヒュ",
+            "reading": "hyu"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 5",
+        "items": [
+          {
+            "kana": "ヒョ",
+            "reading": "hyo"
+          },
+          {
+            "kana": "ビャ",
+            "reading": "bya"
+          },
+          {
+            "kana": "ビュ",
+            "reading": "byu"
+          },
+          {
+            "kana": "ビョ",
+            "reading": "byo"
+          },
+          {
+            "kana": "ピャ",
+            "reading": "pya"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 6",
+        "items": [
+          {
+            "kana": "ピュ",
+            "reading": "pyu"
+          },
+          {
+            "kana": "ピョ",
+            "reading": "pyo"
+          },
+          {
+            "kana": "ミャ",
+            "reading": "mya"
+          },
+          {
+            "kana": "ミュ",
+            "reading": "myu"
+          },
+          {
+            "kana": "ミョ",
+            "reading": "myo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Combinações · grupo 7",
+        "items": [
+          {
+            "kana": "リャ",
+            "reading": "rya"
+          },
+          {
+            "kana": "リュ",
+            "reading": "ryu"
+          },
+          {
+            "kana": "リョ",
+            "reading": "ryo"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      },
+      {
+        "title": "Kana pequenos e sinais",
+        "items": [
+          {
+            "kana": "ャ",
+            "reading": "ya pequeno"
+          },
+          {
+            "kana": "ュ",
+            "reading": "yu pequeno"
+          },
+          {
+            "kana": "ョ",
+            "reading": "yo pequeno"
+          },
+          {
+            "kana": "ッ",
+            "reading": "tsu pequeno"
+          },
+          {
+            "kana": "ー",
+            "reading": "vogal longa"
+          }
+        ],
+        "chart": false,
+        "note": "O traço ー prolonga a vogal anterior; ッ indica geminação."
+      },
+      {
+        "title": "Formas parecidas · observe e repita",
+        "items": [
+          {
+            "kana": "シ",
+            "reading": "shi"
+          },
+          {
+            "kana": "ツ",
+            "reading": "tsu"
+          },
+          {
+            "kana": "ソ",
+            "reading": "so"
+          },
+          {
+            "kana": "ン",
+            "reading": "n"
+          }
+        ],
+        "chart": false,
+        "note": ""
+      }
+    ]
+  },
+  "characters": [
+    "あ",
+    "い",
+    "う",
+    "え",
+    "お",
+    "か",
+    "が",
+    "き",
+    "ぎ",
+    "く",
+    "ぐ",
+    "け",
+    "げ",
+    "こ",
+    "ご",
+    "さ",
+    "ざ",
+    "し",
+    "じ",
+    "す",
+    "ず",
+    "せ",
+    "ぜ",
+    "そ",
+    "ぞ",
+    "た",
+    "だ",
+    "ち",
+    "ぢ",
+    "っ",
+    "つ",
+    "づ",
+    "て",
+    "で",
+    "と",
+    "ど",
+    "な",
+    "に",
+    "ぬ",
+    "ね",
+    "の",
+    "は",
+    "ば",
+    "ぱ",
+    "ひ",
+    "び",
+    "ぴ",
+    "ふ",
+    "ぶ",
+    "ぷ",
+    "へ",
+    "べ",
+    "ぺ",
+    "ほ",
+    "ぼ",
+    "ぽ",
+    "ま",
+    "み",
+    "む",
+    "め",
+    "も",
+    "ゃ",
+    "や",
+    "ゅ",
+    "ゆ",
+    "ょ",
+    "よ",
+    "ら",
+    "り",
+    "る",
+    "れ",
+    "ろ",
+    "わ",
+    "を",
+    "ん",
+    "ア",
+    "イ",
+    "ウ",
+    "エ",
+    "オ",
+    "カ",
+    "ガ",
+    "キ",
+    "ギ",
+    "ク",
+    "グ",
+    "ケ",
+    "ゲ",
+    "コ",
+    "ゴ",
+    "サ",
+    "ザ",
+    "シ",
+    "ジ",
+    "ス",
+    "ズ",
+    "セ",
+    "ゼ",
+    "ソ",
+    "ゾ",
+    "タ",
+    "ダ",
+    "チ",
+    "ヂ",
+    "ッ",
+    "ツ",
+    "ヅ",
+    "テ",
+    "デ",
+    "ト",
+    "ド",
+    "ナ",
+    "ニ",
+    "ヌ",
+    "ネ",
+    "ノ",
+    "ハ",
+    "バ",
+    "パ",
+    "ヒ",
+    "ビ",
+    "ピ",
+    "フ",
+    "ブ",
+    "プ",
+    "ヘ",
+    "ベ",
+    "ペ",
+    "ホ",
+    "ボ",
+    "ポ",
+    "マ",
+    "ミ",
+    "ム",
+    "メ",
+    "モ",
+    "ャ",
+    "ヤ",
+    "ュ",
+    "ユ",
+    "ョ",
+    "ヨ",
+    "ラ",
+    "リ",
+    "ル",
+    "レ",
+    "ロ",
+    "ワ",
+    "ヲ",
+    "ン",
+    "ー"
+  ]
+}

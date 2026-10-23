@@ -4,9 +4,19 @@ Cadernos, S Pen e estudo de PDFs, com sincronização privada no Google Drive.
 
 [Baixar Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk) | [Baixar Windows](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip) | [ZIP Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip)
 
-## Versão 0.8.1
+## Versão 0.8.2
 
-Dez cadernos de estudo: Cornell, caderno de erros, exercícios, vocabulário japonês, estudo de kanji, gramática japonesa, perguntas e respostas, fichas de resumo, planejamento e tradução. Escolha em **Novo caderno → Tipo de caderno**. Cada tipo tem um ícone, uma cor na lombada e seu nome na biblioteca; a capa continua personalizável. São 19 tipos no total.
+**Hiragana e Katakana · estudo e repetição**, com 27 páginas prontas por caderno. Consulte as tabelas, contorne modelos claros, repita e tente de memória. Inclui básicos, sons com marcas, combinações, sinais pequenos e formas parecidas. Os modelos não avaliam acertos nem ordem dos traços.
+
+![Treino de kana](docs/kana.png)
+
+[Como usar](docs/KANA.md) | [Hiragana em PDF](docs/hiragana.pdf) | [Katakana em PDF](docs/katakana.pdf)
+
+Fundos de cada lição acompanham suas anotações ao organizar páginas, exportar, fazer backup e sincronizar. Atualize tablet e PC. Novos cadernos são criados com a sequência; os anteriores mantêm seu modelo.
+
+### Modelos de estudo preservados
+
+Dez cadernos de estudo: Cornell, caderno de erros, exercícios, vocabulário japonês, estudo de kanji, gramática japonesa, perguntas e respostas, fichas de resumo, planejamento e tradução. Escolha em **Novo caderno → Tipo de caderno**. Cada tipo tem um ícone, uma cor na lombada e seu nome na biblioteca; a capa continua personalizável. São 21 tipos no total, incluindo hiragana e katakana.
 
 ![Biblioteca de estudos](docs/cadernos-biblioteca.png)
 

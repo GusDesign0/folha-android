@@ -1,4 +1,4 @@
-# Compilar o Folha 0.8.1
+# Compilar o Folha 0.8.2
 
 ## Android
 
@@ -30,3 +30,5 @@ O teste de integração baixa o modelo japonês no perfil isolado do emulador e 
 ## Modelos de estudo
 
 Edite papers.json e execute node generate-papers.cjs para atualizar as constantes Java/JS. Ambos os arquivos gerados são versionados.
+
+Kana: papers.json + kana-glyphs.json + kana-curriculum.json são fontes versionadas. node generate-papers.cjs regenera Java/JS. Para refazer contornos, instale FontTools 4.60.1 num ambiente de ferramentas e execute python generate-kana.py CAMINHO/KleeOne-Regular.ttf. O script confere SHA-256 do TTF; fonte/licença oficiais em https://github.com/google/fonts/tree/main/ofl/kleeone.
