@@ -53,7 +53,7 @@ final class NotebookView extends View {
     private float hoverX=-1,hoverY=-1;
 
     NotebookView(Context c,List<Ink.Stroke> strokes,String paper,Listener listener) {
-        super(c);this.strokes=strokes;this.paper=paper;this.listener=listener;selection=new SelectionEditor(this);
+        super(c);this.strokes=strokes;this.paper=paper;pageW=Paper.width(paper);pageH=Paper.height(paper);this.listener=listener;selection=new SelectionEditor(this);
         twoTap=new TwoFingerTap(ViewConfiguration.get(c).getScaledTouchSlop());ruler.reset(pageW,pageH);
         setBackgroundColor(Color.rgb(230,234,231));setContentDescription("Página do caderno. S Pen escreve. Dois dedos ampliam; um toque curto com dois dedos desfaz.");
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -68,6 +68,7 @@ final class NotebookView extends View {
             }
         });
     }
+    boolean writing(){return activeId>=0||pending!=null||erasing;}
     private float density(){return getResources().getDisplayMetrics().density;}
     @Override protected void onSizeChanged(int w,int h,int oldW,int oldH){
         super.onSizeChanged(w,h,oldW,oldH);if(oldW>0&&oldH>0){

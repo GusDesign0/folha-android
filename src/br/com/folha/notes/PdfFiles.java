@@ -68,7 +68,7 @@ final class PdfFiles {
             ParcelFileDescriptor fd=doc.pdf?ParcelFileDescriptor.open(source,ParcelFileDescriptor.MODE_READ_ONLY):null;PdfRenderer renderer=fd==null?null:new PdfRenderer(fd);
             try {
             for(int i=0;i<doc.count;i++) {
-                int w=595,h=842;if(renderer!=null){try(PdfRenderer.Page p=renderer.openPage(i)){w=p.getWidth();h=p.getHeight();}}
+                int w=Paper.width(doc.paper),h=Paper.height(doc.paper);if(renderer!=null){try(PdfRenderer.Page p=renderer.openPage(i)){w=p.getWidth();h=p.getHeight();}}
                 PdfDocument.Page page=pdf.startPage(new PdfDocument.PageInfo.Builder(w,h,i+1).create());Canvas c=page.getCanvas();
                 if(!transparent)PageArt.paper(c,w,h,doc.paper);
                 Map<String,Bitmap> images=MediaFiles.page(source.getParentFile(),doc.strokes(i),2400);

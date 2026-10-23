@@ -1,39 +1,38 @@
-# Folha — Android e Windows
+# Folha - Android e Windows
 
-Cadernos e anotações em PDF, com foco em tablets Samsung/S Pen e continuidade no computador.
+Cadernos, S Pen e estudo de PDFs, com sincronização privada no Google Drive.
 
-**[Android: baixar APK](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk)** · **[Windows: baixar ZIP](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip)** · [ZIP para envio ao tablet](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip) · [Versões](https://github.com/GusDesign0/folha-android/releases)
+[Baixar Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk) | [Baixar Windows](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip) | [ZIP Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip)
 
-## Começar
+## Versão 0.7.0
 
-No tablet, abra o APK pelo **Meus Arquivos** e escolha **Atualizar** por cima da versão anterior. Não desinstale o app, para preservar sua biblioteca. Requer Android 10 ou superior, com alvo Android 16. É um APK independente, fora da Play Store.
+- Cinco papéis japoneses: colunas verticais, genko yoshi 200/400 caracteres, kanji com guias e kana. Prévia, modelo paisagem de 400 caracteres e PDF com o mesmo papel.
+- Busca no texto de PDFs e nas notas digitadas; sumário quando disponível e modo de leitura contínua. Toque em uma página para voltar a editar. A busca não realiza OCR.
+- Até seis canetas favoritas no tablet, com tipo, cor, espessura, pressão e suavização; modo foco nos dois aplicativos.
+- Biblioteca com estrelas, recentes, cinco cores de capa, seleção em lote para pasta/lixeira e estado de sincronização por arquivo.
+- Windows com leitura e texto: mover, redimensionar e alinhar caixas, além de desfazer/refazer. A escrita e as imagens do tablet são exibidas e preservadas.
+- Até 12 versões locais por caderno; recuperação como outra cópia, sem substituir a atual. Histórico local não sincronizado e fora do backup .folha.
 
-No Windows, extraia **todo o ZIP** para uma pasta e abra **Folha.exe**. Feche uma prévia anterior antes de abrir este pacote. Requer Windows 10/11 x64, .NET Framework 4.8 e Edge WebView2 Runtime.
+![Modelos de papel](docs/papeis-japoneses.png)
 
-No tablet, use **Conta e sincronização → Conectar Google**, com a mesma conta conectada no PC. Feche o caderno antes de usar **Sincronizar agora** e trocar de aparelho. A sincronização automática ocorre enquanto o app está aberto; o trabalho offline continua disponível.
+[Papéis japoneses e referência de escrita](docs/PAPEIS-JAPONESES.md) | [Validação](docs/VALIDACAO.md) | [Build](docs/BUILD.md) | [Sincronização](docs/SINCRONIZACAO.md) | [Formato](docs/FORMATO.md)
 
-**Prévia 0.6.1:** login habilitado para a conta de teste cadastrada no projeto Google. Edições simultâneas são preservadas em cópias de conflito. A sincronização real no tablet precisa da autorização do usuário e Google Play Services. [Como funciona, privacidade e limitações](docs/SINCRONIZACAO.md).
+## Instalação e atualização
 
-## O que há no app
+Tablet: Android 10 ou posterior (alvo API 36), Samsung/S Pen recomendado; abra o APK e escolha Atualizar sem desinstalar. É uma versão independente, fora da Play Store. Windows: 10/11 x64 com .NET Framework 4.8 e Edge WebView2; feche prévias anteriores e extraia o ZIP inteiro. Sua biblioteca fica no perfil do Windows, fora da pasta do programa. Atualize ambos para os novos papéis e campos.
 
-- Android: S Pen com pressão, rejeição de palma, três tipos de caneta, marca-texto, suavização, borracha parcial ou de traço inteiro, laço, texto e imagens.
-- Dois dedos para desfazer, formas ao segurar a ponta, régua móvel/giratória e rotação retrato/paisagem.
-- Miniaturas e marcadores; mover, duplicar e excluir páginas de cadernos. PDFs mantêm sua ordem original.
-- Biblioteca com pastas, salvamento local e backup editável `.folha`.
-- Exportação de PDF preservando o original e acrescentando escrita em caminhos.
-- Windows: leitura de PDFs, navegação, digitação/edição/exclusão de texto, desfazer/refazer, páginas, zoom, backups, exportação e sincronização. A escrita e as imagens vindas do tablet são exibidas e preservadas; desenhe pelo tablet.
-- Excluir arquivos da biblioteca com confirmação; Lixeira e Restaurar no Android e Windows. Atualize ambos para 0.6.1 para sincronizar exclusões. A lixeira mantém os arquivos armazenados e não tem remoção definitiva nesta versão.
+Conecte a mesma conta Google nos dois aparelhos. Feche o caderno e use Sincronizar agora antes de trocar de dispositivo. A escrita funciona offline; alterações simultâneas são preservadas em cópias de conflito. Login em prévia com a conta de teste cadastrada; o tablet requer Google Play Services. Conferência de conta/sincronização em dois aparelhos físicos ainda depende do usuário.
 
-O Android mantém **Atualizar app**, que busca a versão mais recente no GitHub, verifica tamanho/SHA-256/assinatura e abre a confirmação de instalação do sistema. A verificação só ocorre quando solicitada. O pacote Windows é atualizado baixando o novo ZIP; os cadernos ficam no perfil do Windows, fora da pasta do executável.
+## Limites práticos
 
-## Escrita e sincronização
+A leitura contínua é um modo de consulta; a escrita ocorre no editor por página. Busca retorna até 200 páginas e pode ser cancelada. OCR e reconhecimento automático de escrita não estão incluídos. Os papéis japoneses orientam a escrita manual; não compõem automaticamente texto digitado na vertical. O Windows exporta texto com Helvetica/WinAnsi; japonês digitado e outros caracteres fora dessa cobertura ainda precisam de suporte de fontes. A escrita à mão segue em caminhos PDF.
 
-A escrita e o salvamento funcionam localmente, sem aguardar o Google. PDF/imagens são enviados separadamente das revisões de anotações e reutilizados por SHA-256. Uma edição remota não substitui um caderno aberto. Guarde backups independentes dos arquivos importantes.
+Papéis reutilizam geometria, a leitura renderiza sob demanda (16 MiB no Android; até cinco páginas no Windows), e busca/histórico rodam fora da entrada da caneta. Resultados de CPU em emulador não medem a latência física da S Pen.
 
-Os testes incluem atualização sobre cadernos da 0.1.0, gestos, PDF com rotação/corte/links, desenho com pressão, conflitos e ida e volta do protocolo Java → C# → Java. [Validação e limites](docs/VALIDACAO.md).
+O Android tem Atualizar app via GitHub, com validação de tamanho, SHA-256, versão e assinatura. Windows é atualizado pelo ZIP. Guarde backups .folha independentes; a lixeira conserva os arquivos e ainda não oferece exclusão definitiva.
 
-## Código
+## Testes
 
-[Compilar Android e Windows](docs/BUILD.md) · [Formato `.folha`](docs/FORMATO.md) · [Protocolo de sincronização](docs/PROTOCOLO.md).
+Gradle e scripts Android executam cenários de escrita, gestos e geometria dos papéis. O teste no emulador inclui atualização sobre cadernos antigos, PDF, rotação, versões e ciclo de leitura. C# cobre texto imutável em relação à tinta/imagens, conflitos, lixeira, versões e interoperabilidade Java/C#. Os adaptadores JavaScript podem ser executados com `npm install` e `npm test` após baixar dependências do desktop pelo script próprio. São dependências só de desenvolvimento.
 
-Chaves de assinatura e autorizações pessoais não acompanham o código. Dependências e suas licenças estão descritas nos avisos incluídos em cada aplicativo. Esta versão Windows não é uma versão para macOS, Linux ou iPadOS.
+Chaves de assinatura e autorizações pessoais não acompanham o código. Esta versão não é um aplicativo para iPadOS, macOS ou Linux.

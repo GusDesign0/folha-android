@@ -40,3 +40,7 @@ A instalação local é recusada se o caderno estiver aberto, houver salvamentos
 ## Exclusão reversível (0.6.1)
 
 A lixeira é uma revisão do mesmo documento com `deleted: true`; usa a cadeia de revisões existente, sem apagar blobs. Restauração publica nova revisão sem a marca. Todos os documentos, inclusive os da lixeira, participam do cálculo de alterações. A interface filtra a marca, evitando reaparecimento após sincronizar. Atualize ambos os dispositivos para preservar a marca. Edições offline concorrentes seguem a política de cópias de conflito; não há limpeza automática nem remoção definitiva.
+
+## Recibos e recentes 0.7.0
+
+lastOpened é ignorado pelo fingerprint, como updated/revision/lastPage. O estado de cada arquivo compara o fingerprint salvo aos recibos do último sync; _localHash é cache apenas de metadados locais. Histórico local não participa do manifesto; a recuperação produz outro documento que pode ser sincronizado. Favorite/cover/paper/align são preservados nos aparelhos atualizados.

@@ -9,12 +9,8 @@ import java.util.Collections;
 final class PageArt {
     private static final Map<Ink.Stroke,Outline> outlines=new WeakHashMap<>();
     private static final class Outline {List<Ink.Point> samples;Path path;}
-    static void paper(Canvas c,float w,float h,String type) {
-        c.drawColor(Color.WHITE);Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setColor(Color.rgb(222,229,226));p.setStrokeWidth(0.65f);
-        if(type.equals("lines")){for(float y=66;y<h-24;y+=24)c.drawLine(34,y,w-34,y,p);}
-        else if(type.equals("grid")){for(float y=24;y<h;y+=20)c.drawLine(0,y,w,y,p);for(float x=24;x<w;x+=20)c.drawLine(x,0,x,h,p);}
-        else if(type.equals("dots")){for(float y=32;y<h;y+=18)for(float x=32;x<w;x+=18)c.drawCircle(x,y,0.7f,p);}
-    }
+    private static final android.util.LruCache<String,Path[]> papers=new android.util.LruCache<>(12);
+    static void paper(Canvas c,float w,float h,String type){c.drawColor(Color.WHITE);String key=w+":"+h+":"+type;Path[] paths=papers.get(key);if(paths==null){paths=new Path[]{new Path(),new Path()};for(float[] l:Paper.lines(w,h,type)){Path p=paths[(int)l[4]];p.moveTo(l[0],l[1]);p.lineTo(l[2],l[3]);}if(type.equals("dots"))for(float y=32;y<h;y+=18)for(float x=32;x<w;x+=18)paths[0].addCircle(x,y,.7f,Path.Direction.CW);papers.put(key,paths);}Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setColor(Paper.japanese(type)?0xFFAAC0AD:0xFFDEE5E2);p.setStrokeWidth(.65f);p.setStyle(type.equals("dots")?Paint.Style.FILL:Paint.Style.STROKE);c.drawPath(paths[0],p);p.setColor(0xFFE4E9E1);p.setStrokeWidth(.4f);p.setPathEffect(new DashPathEffect(new float[]{2,3},0));c.drawPath(paths[1],p);}
     static void ink(Canvas c,List<Ink.Stroke> strokes) {ink(c,strokes,Collections.emptyMap());}
     static void ink(Canvas c,List<Ink.Stroke> strokes,Map<String,Bitmap> images){for(Ink.Stroke s:strokes)stroke(c,s,images);}
     static void stroke(Canvas c,Ink.Stroke s) {
@@ -22,7 +18,7 @@ final class PageArt {
     }
     static void stroke(Canvas c,Ink.Stroke s,Map<String,Bitmap> images){
         if(s.kind.equals("text")){Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setColor(s.color);p.setTextSize(s.fontSize);p.setTypeface(Typeface.DEFAULT);int saved=c.save();c.clipRect(s.x,s.y,s.x+s.boxW,s.y+s.boxH);float baseline=s.y-p.ascent(),line=p.getFontSpacing()*1.1f;
-            for(String paragraph:s.text.split("\\n",-1)){String remaining=paragraph;if(remaining.isEmpty()){baseline+=line;continue;}while(!remaining.isEmpty()&&baseline<s.y+s.boxH){int n=p.breakText(remaining,true,Math.max(1,s.boxW),null);if(n==0)n=1;c.drawText(remaining.substring(0,n),s.x,baseline,p);remaining=remaining.substring(n);baseline+=line;}}
+            for(String paragraph:s.text.split("\\n",-1)){String remaining=paragraph;if(remaining.isEmpty()){baseline+=line;continue;}while(!remaining.isEmpty()&&baseline<s.y+s.boxH){int n=p.breakText(remaining,true,Math.max(1,s.boxW),null);if(n==0)n=1;String part=remaining.substring(0,n);float offset=s.align.equals("center")?(s.boxW-p.measureText(part))/2:s.align.equals("right")?s.boxW-p.measureText(part):0;c.drawText(part,s.x+Math.max(0,offset),baseline,p);remaining=remaining.substring(n);baseline+=line;}}
             c.restoreToCount(saved);return;
         }
         if(s.kind.equals("image")){Bitmap image=images.get(s.asset);Paint p=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.FILTER_BITMAP_FLAG);if(image!=null&&!image.isRecycled())c.drawBitmap(image,null,new RectF(s.x,s.y,s.x+s.boxW,s.y+s.boxH),p);else{p.setColor(0xFFE3EAE4);c.drawRect(s.x,s.y,s.x+s.boxW,s.y+s.boxH,p);}return;}

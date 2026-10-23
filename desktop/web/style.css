@@ -5,3 +5,13 @@
 .toolbar label{font-size:12px;color:#65766b}.toolbarHint{font-size:11px;color:#77857c;margin-left:10px}#textError{font-size:12px;color:#9b3c32}#deleteText{color:#9b3c32;margin-right:auto}@media(max-width:1150px){.toolbarHint{display:none}}
 
 .cardItem{min-width:0;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:white}.cardItem .card{border:0;border-radius:0;flex:1;width:100%}.cardItem .card:disabled{opacity:1}.cardAction{font-size:12px;border:0;border-top:1px solid var(--border);border-radius:0;color:#9b3c32}.danger{background:#9b3c32;color:white}#trashName{overflow-wrap:anywhere}
+
+#paperPreview{position:static;display:block;width:100%;height:150px;margin-top:14px}#paperHint{font-size:12px;line-height:1.5;color:#65766b}
+
+.syncState{font-size:11px;color:#326b56}.cover.blue{background:#dce6f2;border-color:#8daac8}.cover.rose{background:#f1dfe0;border-color:#c7949c}.cover.sand{background:#eee7d6;border-color:#c3ae7b}.cover.lavender{background:#e7e0ee;border-color:#aa92bd}
+
+.cardControls{display:flex;gap:6px;padding:8px;align-items:center}.cardControls button{padding:6px;font-size:12px}.cardControls input{width:20px;height:20px}.syncState{padding:0 4px}body.focusMode aside,body.focusMode .toolbar{display:none}#versionList{max-height:50vh;overflow:auto;display:grid;gap:8px;margin:16px 0}#versionsDialog p{font-size:12px;line-height:1.6}.editorHead{flex-wrap:wrap;height:auto;min-height:76px}
+
+#studyDialog{width:min(900px,92vw)}.studyActions{display:flex;gap:8px;flex-wrap:wrap}.studyActions input{flex:1;min-width:180px}#studyResults{max-height:48vh;overflow:auto;display:grid;gap:8px;margin:15px 0}#studyResults button{text-align:left;white-space:normal}#studyStatus{font-size:13px}#readerDialog{width:95vw;max-width:1100px;height:94vh;padding:16px}#readerList{height:calc(100% - 56px);overflow:auto;background:#e4e7e1;padding:20px;margin-top:12px}.readingTile{margin:0 auto 20px;position:relative;background:white;box-shadow:0 2px 8px #0001}.readingTile>button{display:block;width:100%;border-radius:0;padding:8px;font-size:12px}.readingCanvas{position:static;display:block}
+
+footer{overflow-x:auto;min-height:52px;flex-shrink:0}footer>*{flex-shrink:0;white-space:nowrap}

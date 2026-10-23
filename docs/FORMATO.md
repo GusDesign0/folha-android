@@ -27,3 +27,7 @@ Requisitos permanentes: não colocar operações de rede no caminho da caneta; n
 ## Lixeira (0.6.1)
 
 O campo opcional `deleted: true` mantém o caderno e seus arquivos na lixeira. Ausência do campo significa biblioteca ativa. A restauração remove o campo. Escrita e arquivos originais são preservados. `pdfPending: true` é usado apenas no Windows para importações ainda não abertas; estas não são enviadas ao Drive até a contagem de páginas ser validada.
+
+## Campos 0.7.0
+
+Papéis novos: tategaki, genko200, genko400, kanji e kana. Genko400 usa 842x595 pontos; demais, 595x842. Metadados opcionais: favorite, cover (sage/sand/blue/rose/lavender), lastOpened. Texto pode ter align (left/center/right). _localHash existe apenas no metadata.json local e não é sincronizado. Cada aparelho mantém até 12 snapshots JSON locais; recuperar cria outro id e preserva os arquivos originais.

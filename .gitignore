@@ -19,3 +19,7 @@
 /desktop/qa-build/
 /desktop/build/
 *.bin
+
+/node_modules/
+/desktop/release-070/
+/desktop/qa-070/

@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.graphics.pdf.PdfRenderer;
 import android.graphics.*;
 import android.os.*;
-import android.view.*;
+import android.view.*;import android.widget.*;
 import java.io.*;
 import java.util.*;
 
@@ -71,6 +71,7 @@ public class FolhaInstrumentation extends Instrumentation {
             featureChecks();
             newToolsChecks();
             rotationChecks();
+            studyChecks();
             trashChecks();
             updaterChecks();
             ui(()->{activity.leaveEditor();activity.home();});report.putString("stream","\nPASS: "+String.join("; ",results)+"\n");finish(-1,report);
@@ -118,6 +119,14 @@ public class FolhaInstrumentation extends Instrumentation {
             final PagePanel panel=activity.pagePanel;shell("settings put system user_rotation "+original);awaitOrientation(orientation);ui(()->{check(activity.pagePanel==panel&&panel.dialog.isShowing(),"Open thumbnails survive rotation");check(panel.grid.getNumColumns()==Math.max(2,Math.min(4,(activity.getResources().getConfiguration().screenWidthDp-80)/175)),"Thumbnail columns adapt to the new width");check(panel.dialog.getWindow().getDecorView().getWidth()<=activity.getResources().getDisplayMetrics().widthPixels,"Thumbnail dialog fits the rotated window");panel.dialog.dismiss();activity.canvas.fit();activity.saveCurrent();});
         }finally{if(activity.pagePanel!=null)ui(()->activity.pagePanel.dialog.dismiss());shell(rotation.matches("[0-3]")?"settings put system user_rotation "+rotation:"settings delete system user_rotation");shell(sensor.matches("[01]")?"settings put system accelerometer_rotation "+sensor:"settings delete system accelerometer_rotation");}
         results.add("Physical emulator rotation: portrait/landscape, same page and ink, undo/redo, zoom and responsive open thumbnails");
+    }
+    void studyChecks() throws Exception {
+        for(String type:new String[]{"tategaki","genko200","genko400","kanji","kana"}){Documents.Doc d=new Documents.Doc();d.name="Papel "+type;d.paper=type;Ink.Stroke mark=new Ink.Stroke(MainActivity.INK,2,false);mark.points.add(new Ink.Point(110,120,.4f));mark.points.add(new Ink.Point(110,200,1));d.strokes(0).add(mark);File exported=new File(activity.getCacheDir(),type+".pdf");try(OutputStream out=new FileOutputStream(exported)){PdfFiles.export(d,activity.store.pdf(d),out);}PdfFiles.Rendered r=PdfFiles.render(exported,0,800);check(r.width==Paper.width(type)&&r.height==Paper.height(type),"Japanese template export must preserve aspect ratio");r.bitmap.recycle();}
+        results.add("Japanese vertical, 200/400-character manuscript, kanji/kana papers export at matching dimensions");
+        final Documents.Doc d=new Documents.Doc();d.name="Versões japonesas";d.paper="genko400";d.favorite=true;d.cover="blue";Ink.Stroke mark=new Ink.Stroke(MainActivity.INK,2,false);mark.points.add(new Ink.Point(110,120,.4f));mark.points.add(new Ink.Point(110,200,1));d.strokes(0).add(mark);activity.store.write(d);activity.store.checkpoint(d,true);d.name="Revisado";activity.store.write(d);check(activity.store.versions(d.id).length>0,"History must be discoverable");Documents.Doc copy=activity.store.restoreVersion(d.id,activity.store.versions(d.id)[0]);check(!copy.id.equals(d.id)&&activity.store.read(d.id).name.equals("Revisado")&&copy.strokes(0).size()==1&&copy.paper.equals("genko400")&&copy.favorite&&copy.cover.equals("blue"),"Recovery must preserve Japanese paper and ink in a separate notebook");for(int i=0;i<14;i++)activity.store.checkpoint(d,true);check(activity.store.versions(d.id).length==12,"History must be bounded");Documents.Doc light=d.light();check(light.favorite&&light.cover.equals("blue"),"Library metadata must preserve favorites and covers");boolean found=false;for(Documents.Doc meta:activity.store.load())if(meta.id.equals(d.id)){found=meta.localHash.equals(DriveSync.fingerprint(activity.store.read(d.id).json()));}check(found,"Sync receipt must match current contents");results.add("Version recovery, 12-version bound, favorites/covers and sync fingerprints");
+        ui(()->{activity.library.add(d);activity.open(d);check(activity.canvas.pageW==842&&activity.canvas.pageH==595,"Landscape paper must size the editor");LinearLayout tools=activity.row();StudyTools.pens(activity,tools);check(tools.getChildCount()>=4,"Quick pen favorites must be available");tools.getChildAt(0).performClick();check(activity.canvas.pen.equals(activity.pen)&&activity.canvas.tool==0,"Favorite restores pen style");activity.toggleFocus();check(activity.editorToolbar.getVisibility()==View.GONE,"Focus hides toolbar");activity.toggleFocus();check(activity.editorToolbar.getVisibility()==View.VISIBLE,"Focus can be exited");});
+        final ReadingPanel[] reader={null};ui(()->{reader[0]=new ReadingPanel(activity);reader[0].show();});reader[0].worker.submit(()->{}).get();waitForIdleSync();ui(()->{check(reader[0].cache.size()<=16*1024*1024,"Continuous reader cache must be bounded");reader[0].dialog.dismiss();});ui(()->check(reader[0].closed,"Closing reader releases background work"));results.add("Favorite pens, focus exit and continuous reading cache lifecycle");
+        com.tom_roush.pdfbox.android.PDFBoxResourceLoader.init(activity);try(com.tom_roush.pdfbox.pdmodel.PDDocument pdf=new com.tom_roush.pdfbox.pdmodel.PDDocument()){com.tom_roush.pdfbox.pdmodel.PDPage page=new com.tom_roush.pdfbox.pdmodel.PDPage();pdf.addPage(page);com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem item=new com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem();item.setTitle("Capítulo de teste");item.setDestination(page);ArrayList<String> labels=new ArrayList<>();ArrayList<Integer> pages=new ArrayList<>();StudyTools.outlineItems(pdf,item,labels,pages,0,new HashSet<>());check(labels.size()==1&&pages.get(0)==0,"PDF outline destinations must resolve");}results.add("PDF outline resolves page destinations");
     }
     void trashChecks() throws Exception {
         final Documents.Doc light=activity.store.read(notebook.id).light();final int count=activity.store.read(notebook.id).strokes(0).size();

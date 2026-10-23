@@ -13,7 +13,7 @@ public final class Ink {
         }
     }
     public static final class Stroke {
-        public String id=UUID.randomUUID().toString(),kind="ink",pen="fountain",text="",asset="";
+        public String id=UUID.randomUUID().toString(),kind="ink",pen="fountain",text="",asset="",align="left";
         public float x,y,boxW=200,boxH=100,fontSize=24,smoothing=1,sensitivity=1;
         public final List<Point> points=new ArrayList<>();
         public int color;
@@ -44,7 +44,7 @@ public final class Ink {
             }
             return false;
         }
-        public Stroke copy(boolean newId){Stroke s=new Stroke(color,width,marker);s.id=newId?UUID.randomUUID().toString():id;s.kind=kind;s.pen=pen;s.text=text;s.asset=asset;s.x=x;s.y=y;s.boxW=boxW;s.boxH=boxH;s.fontSize=fontSize;s.smoothing=smoothing;s.sensitivity=sensitivity;s.points.addAll(points);return s;}
+        public Stroke copy(boolean newId){Stroke s=new Stroke(color,width,marker);s.id=newId?UUID.randomUUID().toString():id;s.kind=kind;s.pen=pen;s.text=text;s.asset=asset;s.align=align;s.x=x;s.y=y;s.boxW=boxW;s.boxH=boxH;s.fontSize=fontSize;s.smoothing=smoothing;s.sensitivity=sensitivity;s.points.addAll(points);return s;}
         public float[] bounds(){if(!kind.equals("ink"))return new float[]{x,y,x+boxW,y+boxH};samples();return new float[]{minX-width,minY-width,maxX+width,maxY+width};}
         public Stroke transform(float ox,float oy,float dx,float dy,float scale,boolean newId){Stroke s=copy(newId);s.points.clear();for(Point p:points)s.points.add(new Point(ox+(p.x-ox)*scale+dx,oy+(p.y-oy)*scale+dy,p.pressure));s.x=ox+(x-ox)*scale+dx;s.y=oy+(y-oy)*scale+dy;s.boxW=boxW*scale;s.boxH=boxH*scale;s.fontSize=fontSize*scale;s.width=width*scale;return s;}
     }
