@@ -23,3 +23,5 @@
 /node_modules/
 /desktop/release-070/
 /desktop/qa-070/
+
+desktop/tests/ui-output/

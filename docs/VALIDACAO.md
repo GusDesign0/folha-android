@@ -1,18 +1,18 @@
-# Validação 0.7.0
+# Validação 0.7.1
 
-Executada no workspace em 23/10/2026. Os documentos reais usados em leituras de regressão permanecem locais e não acompanham o código.
+Executada em 23/10/2026. Testes usam dados sintéticos ou PDFs locais apenas para leitura, sem publicar documentos do usuário.
 
-- Android: 21 cenários de tinta, 20 de gestos/formas/régua e 9 de papéis passaram. Assinatura do APK mantida; instalação sobre a versão anterior e cadernos antigos preservados no emulador API 36.
-- Integração Android: pressão, dedos, cancelamento de palma/traço, salvar/abrir, laço, imagens/texto, exportação, gestos, rotação, miniaturas, atualização e backup passaram.
-- Cinco papéis japoneses exportaram com as mesmas dimensões do editor. Genko 400 preservou 842 x 595 pontos; demais modelos, 595 x 842.
-- Versões: histórico localizado, limitado a 12 e recuperado como cópia com papel, capa, favorito, PDF/traços preservados. Salvamento assíncrono de metadados e lixeira preservaram a tinta.
-- Favoritos restauraram parâmetros da caneta; foco pôde ser ativado e desativado; leitura contínua encerrou seu worker/cache ao fechar. Sumário resolveu o destino da página.
-- CPU de desenho no emulador, página com 250 traços: mediana 2,7 ms, p95 3,3 ms na última execução (houve variação com a carga do host). Isso não mede latência real da S Pen e não garante o mesmo resultado em hardware físico.
-- C#: texto mantém tinta/imagens, tentativas de desenho são recusadas, histórico e recuperação não sobrescrevem originais, lixeira/restauração sincronizam e PDFs são reutilizados. Conflitos e proteção do documento aberto passaram.
-- Java -> C# -> Java: papel genko400, capa, favorito, metadados, pressão e PDF original preservados; abrir um arquivo não criou revisão remota apenas por recentes.
-- Editor JavaScript real em adaptador DOM/Canvas: texto, desfazer/refazer, retry, mover e cancelar arraste, salvamento ao fechar, lixeira/restaurar passaram.
-- Navegador de estudo: busca com espaços/caracteres japoneses e variantes de largura, notas digitadas, sumário com referências e destinos nomeados, cancelamento e limite de cinco telas em leitura contínua passaram em adaptador.
-- WebView2 instalado: PDFs locais de 111, 192 e 23 páginas abriram e renderizaram primeira/última página. Origem de dados privada segue separada da origem estática, preservando a correção de 0.6.1.
-- Paridade Java/JavaScript para os nove papéis verificada numericamente. O PDF dos cinco modelos contém caminhos, com páginas corretamente dimensionadas; renderizado com Poppler e conferido visualmente.
+- Android: build release/R8/lint e assinatura original verificados; 21 cenários de tinta, 20 de gestos/régua/formas e 9 de papéis passaram.
+- Integração em Android API 36: atualização sobre cadernos antigos, pressão, cancelamento de traço/palma, dedos, salvar/reabrir, PDF, backup, seleção, imagens/texto, rotação e miniaturas passaram.
+- Aparência clara/escura/sistema mantém a mesma instância de NotebookView, zoom, objetos e histórico de desfazer/refazer. Preferência salva localmente. Mudanças reais de modo noturno do emulador atualizam a interface sem recriar o editor. Capturas claras/escuras conferidas.
+- CPU de desenho em página com 250 traços foi 1,8 ms de mediana e 2,3 ms no p95 nesta execução em emulador. Não equivale à latência física da S Pen.
+- Editor JavaScript real: trocar tema não modifica pixels dos canvases nem emite operações de arquivo; texto, desfazer/refazer, retry, mover/cancelar, fechar e lixeira/restauração passaram.
+- Chromium/Edge em processo headless isolado: biblioteca/editor/diálogo claros e escuros, persistência após recarregar, troca de aparência do sistema, seleção em lote e menu por arquivo. Cabeçalho/rodapé cabem em 850 px; ajuste à largura acompanha a janela e preserva zoom manual.
+- C# mantém desenho/imagens imutáveis, salva e recupera versões como cópias, conserva PDF e propaga lixeira/restauração; conflitos, idempotência e proteção do documento aberto passaram.
+- WebView2 instalado: primeira e última páginas de PDFs de 111, 192 e 23 páginas renderizaram. Origem privada folha-data.local preservada.
+- Exportação PDF real: três páginas originais, rotação/crop/links e caminhos da tinta preservados. Busca/sumário e leitura sob demanda continuam com cancelamento e limite de telas.
 
-Limites: conta no tablet físico, latência física da caneta e sincronização em dois aparelhos físicos ainda precisam de conferência do usuário. Histórico é local; não há OCR nem composição vertical automática de texto digitado. Texto exportado no Windows usa Helvetica/WinAnsi. A leitura contínua volta ao editor por página para anotar. Novos campos/papéis exigem atualizar os dois aplicativos.
+Aparência não entra no documento/sync e não inverte PDFs, papéis ou cores exportadas. Nenhuma biblioteca de animação ou renderização foi adicionada ao app; Playwright é dependência apenas dos testes de desenvolvimento.
+
+Limites anteriores mantidos: teste de latência física da S Pen e de conta/sincronização em dois aparelhos físicos depende do usuário; histórico local, sem OCR, sem composição vertical automática de texto digitado. Exportação de texto no Windows usa Helvetica/WinAnsi.
+

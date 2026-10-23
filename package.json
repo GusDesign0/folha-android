@@ -1,11 +1,13 @@
 {
   "name": "folha-development-tests",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "scripts": {
-    "test": "node desktop/tests/editor.cjs && node desktop/tests/study.cjs && node desktop/tests/export.cjs"
+    "test": "node desktop/tests/editor.cjs && node desktop/tests/study.cjs && node desktop/tests/export.cjs && node desktop/tests/theme.cjs",
+    "test:ui": "node desktop/tests/ui.cjs"
   },
   "devDependencies": {
-    "@napi-rs/canvas": "0.1.100"
+    "@napi-rs/canvas": "0.1.100",
+    "playwright": "1.62.1"
   }
 }

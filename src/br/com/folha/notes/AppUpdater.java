@@ -27,8 +27,8 @@ final class AppUpdater {
         if(pending!=null&&UpdateProvider.apk(activity).isFile()){ready();return;}
         busy=true;session=new UpdateChecker.Session();final UpdateChecker.Session task=session;String version=activity.appVersion();
         progress("Verificando atualizações",false,task);
-        worker.execute(()->{try{UpdateChecker.Result r=UpdateChecker.check(version,task);main.post(()->{if(!active(task))return;busy=false;dismiss();if(!r.newer){dialog=new AlertDialog.Builder(activity).setTitle("Você está atualizado").setMessage("Sua versão: "+version+". Última publicada no GitHub: "+r.version+".").setPositiveButton("OK",null).show();return;}
-            dialog=new AlertDialog.Builder(activity).setTitle("Folha "+r.version+" disponível").setMessage("Baixar "+String.format(Locale.ROOT,"%.1f",r.size/1048576f)+" MB do GitHub?\n\nSeus cadernos continuam no tablet. Depois do download, o Android pedirá sua confirmação para atualizar.").setNegativeButton("Agora não",null).setPositiveButton("Baixar e atualizar",(d,w)->download(r)).show();});
+        worker.execute(()->{try{UpdateChecker.Result r=UpdateChecker.check(version,task);main.post(()->{if(!active(task))return;busy=false;dismiss();if(!r.newer){dialog=activity.dialog().setTitle("Você está atualizado").setMessage("Sua versão: "+version+". Última publicada no GitHub: "+r.version+".").setPositiveButton("OK",null).show();return;}
+            dialog=activity.dialog().setTitle("Folha "+r.version+" disponível").setMessage("Baixar "+String.format(Locale.ROOT,"%.1f",r.size/1048576f)+" MB do GitHub?\n\nSeus cadernos continuam no tablet. Depois do download, o Android pedirá sua confirmação para atualizar.").setNegativeButton("Agora não",null).setPositiveButton("Baixar e atualizar",(d,w)->download(r)).show();});
         }catch(Exception e){failed(task,e);}});
     }
     boolean active(UpdateChecker.Session task){return !closed&&session==task&&!task.canceled&&!activity.isDestroyed();}
@@ -36,7 +36,7 @@ final class AppUpdater {
         LinearLayout body=new LinearLayout(activity);body.setOrientation(LinearLayout.VERTICAL);int pad=activity.dp(24);body.setPadding(pad,pad,pad,pad);
         label=activity.text(determinate?"Preparando download…":"Consultando o GitHub…",15,MainActivity.INK,false);body.addView(label);
         bar=new ProgressBar(activity,null,android.R.attr.progressBarStyleHorizontal);bar.setIndeterminate(!determinate);bar.setMax(100);body.addView(bar,new LinearLayout.LayoutParams(-1,activity.dp(16)));
-        dialog=new AlertDialog.Builder(activity).setTitle(title).setView(body).setNegativeButton("Cancelar",(d,w)->{task.cancel();busy=false;}).create();dialog.setOnCancelListener(d->{task.cancel();busy=false;});dialog.setCanceledOnTouchOutside(false);dialog.show();
+        dialog=activity.dialog().setTitle(title).setView(body).setNegativeButton("Cancelar",(d,w)->{task.cancel();busy=false;}).create();dialog.setOnCancelListener(d->{task.cancel();busy=false;});dialog.setCanceledOnTouchOutside(false);dialog.show();
     }
     void download(UpdateChecker.Result r){
         if(busy||closed)return;busy=true;pending=null;session=new UpdateChecker.Session();final UpdateChecker.Session task=session;
@@ -45,7 +45,7 @@ final class AppUpdater {
             main.post(()->{if(!active(task))return;busy=false;dismiss();pending=r;ready();});
         }catch(Exception e){failed(task,e);}});
     }
-    void ready(){if(pending==null||closed)return;dialog=new AlertDialog.Builder(activity).setTitle("Atualização pronta").setMessage("O download foi verificado. Toque em Instalar para abrir a confirmação do Android.\n\nSe for a primeira atualização pelo Folha, permita instalar apps desta fonte na próxima tela e volte ao app.").setNegativeButton("Depois",null).setPositiveButton("Instalar",(d,w)->install()).show();}
+    void ready(){if(pending==null||closed)return;dialog=activity.dialog().setTitle("Atualização pronta").setMessage("O download foi verificado. Toque em Instalar para abrir a confirmação do Android.\n\nSe for a primeira atualização pelo Folha, permita instalar apps desta fonte na próxima tela e volte ao app.").setNegativeButton("Depois",null).setPositiveButton("Instalar",(d,w)->install()).show();}
     void install(){
         if(pending==null||closed)return;
         if(!activity.getPackageManager().canRequestPackageInstalls()){

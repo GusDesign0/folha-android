@@ -4,7 +4,13 @@ Cadernos, S Pen e estudo de PDFs, com sincronização privada no Google Drive.
 
 [Baixar Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.apk) | [Baixar Windows](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha-Windows.zip) | [ZIP Android](https://github.com/GusDesign0/folha-android/releases/latest/download/Folha.zip)
 
-## Versão 0.7.0
+## Versão 0.7.1
+
+- Aparência clara, escura ou seguindo o sistema, salva por aparelho. Troca em tempo real sem recriar a página, alterar papel/PDF/tinta ou limpar desfazer/refazer.
+- Biblioteca com ações principais separadas dos filtros, seleção em lote explícita e menu por arquivo. Ferramentas secundárias agrupadas; cabeçalho e rodapé do PC adaptados a janelas menores.
+- Ajuste à largura no PC acompanha redimensionamentos e o modo foco; zoom manual é mantido.
+
+### Recursos de estudo preservados
 
 - Cinco papéis japoneses: colunas verticais, genko yoshi 200/400 caracteres, kanji com guias e kana. Prévia, modelo paisagem de 400 caracteres e PDF com o mesmo papel.
 - Busca no texto de PDFs e nas notas digitadas; sumário quando disponível e modo de leitura contínua. Toque em uma página para voltar a editar. A busca não realiza OCR.
@@ -12,6 +18,10 @@ Cadernos, S Pen e estudo de PDFs, com sincronização privada no Google Drive.
 - Biblioteca com estrelas, recentes, cinco cores de capa, seleção em lote para pasta/lixeira e estado de sincronização por arquivo.
 - Windows com leitura e texto: mover, redimensionar e alinhar caixas, além de desfazer/refazer. A escrita e as imagens do tablet são exibidas e preservadas.
 - Até 12 versões locais por caderno; recuperação como outra cópia, sem substituir a atual. Histórico local não sincronizado e fora do backup .folha.
+
+![Interface escura](docs/interface-escura.png)
+
+Tablet: ícone de sol no alto. PC: seletor Aparência. A opção de sistema acompanha mudanças do dispositivo enquanto o app está aberto. O papel continua com suas cores originais; não há inversão visual dos PDFs. As ferramentas extras do tablet estão em + Ferramentas; organizar/excluir no PC usa o botão de três pontos do arquivo.
 
 ![Modelos de papel](docs/papeis-japoneses.png)
 

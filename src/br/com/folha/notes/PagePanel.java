@@ -39,13 +39,13 @@ final class PagePanel {
             }
         };grid.setAdapter(adapter);grid.setOnItemClickListener((p,v,pos,id)->{int index=visible.get(pos);dialog.dismiss();a.changePage(index-a.page);});grid.setOnItemLongClickListener((p,v,pos,id)->{menu(visible.get(pos));return true;});
         TextView empty=a.text("Nenhuma página marcada. Segure uma miniatura para marcar.",15,MainActivity.MUTED,false);empty.setGravity(Gravity.CENTER);body.addView(empty,new LinearLayout.LayoutParams(-1,0,1));grid.setEmptyView(empty);body.addView(grid,new LinearLayout.LayoutParams(-1,0,1));
-        dialog=new AlertDialog.Builder(a).setTitle("Páginas · "+doc.count).setView(body).setNegativeButton("Fechar",null).create();dialog.setOnDismissListener(d->close());filter(false);
+        dialog=a.dialog().setTitle("Páginas · "+doc.count).setView(body).setNegativeButton("Fechar",null).create();dialog.setOnDismissListener(d->close());filter(false);
     }
     void show(){dialog.show();resize();}
     void resize(){if(closed)return;int anchor=grid.getFirstVisiblePosition();grid.setNumColumns(Math.max(2,Math.min(4,(a.getResources().getConfiguration().screenWidthDp-80)/175)));body.setMinimumHeight((int)(a.getResources().getDisplayMetrics().heightPixels*0.88f)-a.dp(128));Window w=dialog.getWindow();if(w!=null)w.setLayout((int)(a.getResources().getDisplayMetrics().widthPixels*0.94f),(int)(a.getResources().getDisplayMetrics().heightPixels*0.88f));grid.post(()->{if(!closed)grid.setSelection(anchor);});}
-    void filter(boolean marked){markedOnly=marked;allFilter.setBackground(a.shape(marked?0xFFE8EDE7:MainActivity.GREEN,12));allFilter.setTextColor(marked?MainActivity.INK:Color.WHITE);markedFilter.setBackground(a.shape(marked?MainActivity.GREEN:0xFFE8EDE7,12));markedFilter.setTextColor(marked?Color.WHITE:MainActivity.INK);visible.clear();for(int i=0;i<doc.count;i++)if(!marked||doc.bookmarks.contains(i))visible.add(i);adapter.notifyDataSetChanged();}
+    void filter(boolean marked){markedOnly=marked;allFilter.setBackground(a.shape(marked?0xFFE8EDE7:MainActivity.GREEN,12));allFilter.setTextColor(marked?UiTheme.text(a,MainActivity.INK):Color.WHITE);markedFilter.setBackground(a.shape(marked?MainActivity.GREEN:0xFFE8EDE7,12));markedFilter.setTextColor(marked?Color.WHITE:UiTheme.text(a,MainActivity.INK));visible.clear();for(int i=0;i<doc.count;i++)if(!marked||doc.bookmarks.contains(i))visible.add(i);adapter.notifyDataSetChanged();}
     void menu(int index){String label=doc.bookmarks.contains(index)?"Remover marcador":"Marcar página";String[] actions=doc.pdf?new String[]{"Abrir página",label}:new String[]{"Abrir página",label,"Mover para…","Duplicar página","Excluir página"};
-        new AlertDialog.Builder(a).setTitle("Página "+(index+1)).setItems(actions,(d,which)->{
+        a.dialog().setTitle("Página "+(index+1)).setItems(actions,(d,which)->{
             if(which==0){dialog.dismiss();a.changePage(index-a.page);}if(which==1){if(!doc.bookmarks.remove(index))doc.bookmarks.add(index);a.saveCurrent();filter(markedOnly);}
             if(which>=2){dialog.dismiss();a.managePage(index,which-2);}
         }).show();

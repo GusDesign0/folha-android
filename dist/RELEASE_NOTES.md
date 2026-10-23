@@ -1,12 +1,13 @@
-Folha 0.7.0 - estudo e escrita japonesa
+Folha 0.7.1 - modo escuro e interface
 
-- Cinco papéis: colunas verticais, genko yoshi 200 e 400 caracteres (paisagem), kanji com guias e kana. Prévia e PDF com o mesmo papel.
-- Leitura contínua sob demanda, busca no texto existente/nota digitada, sumário do PDF e ir à página. Toque numa página para voltar a editar.
-- Até seis canetas favoritas no tablet e modo foco.
-- Favoritos, recentes, cores de capa, mover/excluir em lote e estado de sincronização por arquivo.
-- Texto no PC pode ser movido, redimensionado e alinhado. Escrita do tablet preservada.
-- Até 12 versões locais por caderno; recuperar cria uma cópia. Histórico não sincronizado.
+- Claro, Escuro ou Seguir o sistema no tablet e PC, com preferência salva por aparelho.
+- Troca de tema em tempo real sem recriar a página ou limpar tinta, zoom e desfazer/refazer. PDFs e papéis conservam suas cores, inclusive na exportação.
+- Biblioteca com criação/importação em destaque, filtros e seleção em lote separados e menu por arquivo para organizar/excluir.
+- Tablet com trilho principal de escrita e + Ferramentas para canetas favoritas, texto/imagem, seleção, régua e formas.
+- PC com opções secundárias agrupadas, cabeçalho/rodapé responsivos e ajuste à largura que acompanha a janela e o modo foco enquanto o zoom é automático.
 
-Atualize o tablet sem desinstalar. No PC, feche a versão antiga e extraia o ZIP inteiro. Atualize ambos para os novos papéis e metadados.
+Tablet: ícone de sol no alto da biblioteca/caderno. PC: Aparência na lateral ou no alto do caderno.
 
-Busca não faz OCR; escrita ocorre por página. Papéis japoneses não compõem automaticamente texto digitado na vertical; exportação de texto no PC ainda usa Helvetica/WinAnsi. Backup .folha continua recomendado. Testes físicos de conta/latência da S Pen dependem do usuário.
+Atualize o APK sem desinstalar. No PC, feche a versão anterior e extraia o ZIP inteiro. Bibliotecas locais preservadas.
+
+Verificações: Android release/lint/50 cenários e integração API 36; tema/sistema preservando editor e histórico; editor JS, Chromium headless claro/escuro em 850 px, C# e PDFs reais em WebView2. Latência física da S Pen e conta em dois dispositivos físicos continuam dependentes da conferência no tablet.
